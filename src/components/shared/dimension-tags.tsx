@@ -1,5 +1,7 @@
 import * as React from "react";
+
 import { cn } from "@/lib/utils";
+
 import type { ResearchDimensions } from "@/types";
 
 interface DimensionTagsProps {
@@ -12,7 +14,7 @@ export function DimensionTags({
   dimensions,
   className,
   compact = false,
-}: DimensionTagsProps) {
+}: DimensionTagsProps): React.JSX.Element {
   return (
     <div className={cn("flex flex-wrap gap-1.5", className)}>
       {dimensions.markets.map((market) => (

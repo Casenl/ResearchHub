@@ -1,26 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/use-auth";
-import { cn } from "@/lib/utils";
+
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
-export default function LoginPage() {
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
+
+export default function LoginPage(): React.JSX.Element | null {
   const router = useRouter();
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle, user, loading } =
+  const { signInWithEmail, signUpWithEmail, signInWithGoogle, user, isLoading } =
     useAuth();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if already logged in
-  if (!loading && user) {
+  if (!isLoading && user) {
     router.replace("/");
     return null;
   }
@@ -28,13 +30,13 @@ export default function LoginPage() {
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    setSubmitting(true);
+    setIsSubmitting(true);
 
     try {
       if (mode === "signup") {
         if (!displayName.trim()) {
           setError("Please enter your name.");
-          setSubmitting(false);
+          setIsSubmitting(false);
           return;
         }
         await signUpWithEmail(email, password, displayName.trim());
@@ -62,13 +64,13 @@ export default function LoginPage() {
         setError(message);
       }
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     setError(null);
-    setSubmitting(true);
+    setIsSubmitting(true);
     try {
       await signInWithGoogle();
       router.replace("/");
@@ -86,11 +88,11 @@ export default function LoginPage() {
         setError(message);
       }
     } finally {
-      setSubmitting(false);
+      setIsSubmitting(false);
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -156,7 +158,7 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            disabled={submitting}
+            disabled={isSubmitting}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-50"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
@@ -243,7 +245,7 @@ export default function LoginPage() {
               <div className="relative">
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={isPasswordVisible ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
@@ -256,11 +258,11 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   tabIndex={-1}
                 >
-                  {showPassword ? (
+                  {isPasswordVisible ? (
                     <EyeOff className="h-4 w-4" />
                   ) : (
                     <Eye className="h-4 w-4" />
@@ -271,13 +273,13 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={isSubmitting}
               className={cn(
                 "flex w-full items-center justify-center rounded-lg px-4 py-2.5 text-sm font-medium text-white transition-colors",
                 "bg-primary hover:bg-primary/90 disabled:opacity-50"
               )}
             >
-              {submitting ? (
+              {isSubmitting ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : mode === "signin" ? (
                 "Sign in"

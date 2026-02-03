@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
 import { Providers } from "./providers";
 import "./globals.css";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "ITQ Market Intelligence Portal",
@@ -12,7 +13,7 @@ export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}) {
+}): React.JSX.Element {
   return (
     <html lang="en">
       <body className="min-h-screen bg-background font-sans">

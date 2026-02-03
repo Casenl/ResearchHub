@@ -38,7 +38,7 @@ interface AuthContextValue {
   /** The raw Firebase user object. */
   firebaseUser: FirebaseUser | null;
   /** Whether the auth state is still loading. */
-  loading: boolean;
+  isLoading: boolean;
   /** Whether the current user has the admin role. */
   isAdmin: boolean;
   /** Whether the current user has the researcher role. */
@@ -101,14 +101,14 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 // Provider
 // -----------------------------------------------------------------------------
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
+export function AuthProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (fbUser) => {
       setFirebaseUser(fbUser);
-      setLoading(false);
+      setIsLoading(false);
     });
     return unsubscribe;
   }, []);
@@ -146,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const value: AuthContextValue = {
     user,
     firebaseUser,
-    loading,
+    isLoading,
     role,
     isAdmin: role === "admin",
     isResearcher: role === "researcher",

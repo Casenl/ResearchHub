@@ -2,8 +2,11 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/use-auth";
+
 import { Loader2 } from "lucide-react";
+
+import { useAuth } from "@/hooks/use-auth";
+
 import type { UserRole } from "@/types";
 
 interface ProtectedRouteProps {
@@ -18,17 +21,17 @@ const ROLE_HIERARCHY: Record<UserRole, number> = {
   admin: 2,
 };
 
-export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
-  const { user, loading } = useAuth();
+export function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps): React.JSX.Element | null {
+  const { user, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!isLoading && !user) {
       router.replace("/login");
     }
-  }, [user, loading, router]);
+  }, [user, isLoading, router]);
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />

@@ -1,5 +1,7 @@
 import React from "react";
+
 import type { LucideIcon } from "lucide-react";
+
 import { cn } from "@/lib/utils";
 
 interface EmptyStateProps {
@@ -16,7 +18,7 @@ export function EmptyState({
   description,
   action,
   className,
-}: EmptyStateProps) {
+}: EmptyStateProps): React.JSX.Element {
   return (
     <div
       className={cn(

@@ -16,8 +16,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/components/shared/protected-route";
+import { useAuth } from "@/hooks/use-auth";
 
 interface NavItem {
   label: string;
@@ -50,17 +50,17 @@ const navigation: NavSection[] = [
   },
 ];
 
-export function AppShell({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
+export function AppShell({ children }: { children: React.ReactNode }): React.JSX.Element {
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const pathname = usePathname();
-  const { user, loading, signOut, isAdmin } = useAuth();
+  const { user, isLoading, signOut, isAdmin } = useAuth();
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
     return pathname.startsWith(href);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -75,7 +75,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <aside
           className={cn(
             "flex flex-col border-r border-border bg-white transition-all duration-300",
-            collapsed ? "w-16" : "w-64"
+            isCollapsed ? "w-16" : "w-64"
           )}
         >
           {/* Logo Area */}
@@ -84,7 +84,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <span className="text-xl font-bold text-primary shrink-0">
                 ITQ
               </span>
-              {!collapsed && (
+              {!isCollapsed && (
                 <span className="text-xs text-muted-foreground truncate">
                   Market Intelligence
                 </span>
@@ -98,12 +98,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               if (section.adminOnly && !isAdmin) return null;
               return (
                 <div key={sectionIdx} className="mb-4">
-                  {section.title && !collapsed && (
+                  {section.title && !isCollapsed && (
                     <p className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                       {section.title}
                     </p>
                   )}
-                  {section.title && collapsed && (
+                  {section.title && isCollapsed && (
                     <div className="mb-2 mx-3 border-t border-border" />
                   )}
                   <ul className="space-y-1">
@@ -119,12 +119,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                               active
                                 ? "bg-primary/10 text-primary"
                                 : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                              collapsed && "justify-center px-2"
+                              isCollapsed && "justify-center px-2"
                             )}
-                            title={collapsed ? item.label : undefined}
+                            title={isCollapsed ? item.label : undefined}
                           >
                             <Icon className="h-5 w-5 shrink-0" />
-                            {!collapsed && (
+                            {!isCollapsed && (
                               <span className="truncate">{item.label}</span>
                             )}
                           </Link>
@@ -144,7 +144,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <div
                 className={cn(
                   "flex items-center gap-3 rounded-md px-3 py-2",
-                  collapsed && "justify-center px-2"
+                  isCollapsed && "justify-center px-2"
                 )}
               >
                 {user.photoURL ? (
@@ -160,7 +160,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                       .toUpperCase()}
                   </div>
                 )}
-                {!collapsed && (
+                {!isCollapsed && (
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">
                       {user.displayName ?? "User"}
@@ -178,21 +178,21 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               onClick={() => signOut()}
               className={cn(
                 "flex w-full items-center gap-3 rounded-md px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors",
-                collapsed && "justify-center px-2"
+                isCollapsed && "justify-center px-2"
               )}
-              title={collapsed ? "Sign out" : undefined}
+              title={isCollapsed ? "Sign out" : undefined}
             >
               <LogOut className="h-4 w-4 shrink-0" />
-              {!collapsed && <span>Sign out</span>}
+              {!isCollapsed && <span>Sign out</span>}
             </button>
 
             {/* Collapse Toggle */}
             <button
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={() => setIsCollapsed(!isCollapsed)}
               className="flex w-full items-center justify-center rounded-md p-2 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-              aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
             >
-              {collapsed ? (
+              {isCollapsed ? (
                 <ChevronRight className="h-5 w-5" />
               ) : (
                 <ChevronLeft className="h-5 w-5" />

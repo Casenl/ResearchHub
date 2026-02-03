@@ -3,8 +3,9 @@ import { twMerge } from "tailwind-merge";
 import { v4 as uuidv4 } from "uuid";
 import { format, formatDistanceToNow, isPast, differenceInDays } from "date-fns";
 
-import type { ResearchStatus } from "@/types";
 import { QUALITY_TIER_LABELS } from "@/lib/constants";
+
+import type { ResearchStatus } from "@/types";
 
 /**
  * Merge class names using clsx and tailwind-merge.

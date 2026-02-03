@@ -1,7 +1,14 @@
-import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
-import { getAuth, type Auth } from "firebase/auth";
-import { getFirestore, type Firestore } from "firebase/firestore";
-import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getAnalytics, isSupported } from "firebase/analytics";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+
+import type { FirebaseApp } from "firebase/app";
+import type { Auth } from "firebase/auth";
+import type { Analytics } from "firebase/analytics";
+import type { Firestore } from "firebase/firestore";
+import type { FirebaseStorage } from "firebase/storage";
 
 // -----------------------------------------------------------------------------
 // Configuration
@@ -14,6 +21,7 @@ export interface FirebaseConfig {
   storageBucket: string;
   messagingSenderId: string;
   appId: string;
+  measurementId: string;
 }
 
 function getFirebaseConfig(): FirebaseConfig {
@@ -25,6 +33,7 @@ function getFirebaseConfig(): FirebaseConfig {
     messagingSenderId:
       process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "",
+    measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? "",
   };
 }
 
@@ -34,6 +43,7 @@ function getFirebaseConfig(): FirebaseConfig {
 
 let _app: FirebaseApp | undefined;
 let _auth: Auth | undefined;
+let _analytics: Analytics | undefined;
 let _db: Firestore | undefined;
 let _storage: FirebaseStorage | undefined;
 
@@ -51,6 +61,19 @@ export function getFirebaseAuth(): Auth {
     _auth = getAuth(getFirebaseApp());
   }
   return _auth;
+}
+
+/**
+ * Firebase Analytics instance. Only call from client-side code.
+ * Returns null if analytics is not supported (e.g. during SSR or in
+ * environments without cookies/localStorage).
+ */
+export async function getFirebaseAnalytics(): Promise<Analytics | null> {
+  if (_analytics) return _analytics;
+  const isAnalyticsSupported = await isSupported();
+  if (!isAnalyticsSupported) return null;
+  _analytics = getAnalytics(getFirebaseApp());
+  return _analytics;
 }
 
 /** Firestore instance. Only call from client-side code. */

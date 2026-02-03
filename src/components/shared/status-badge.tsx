@@ -1,5 +1,7 @@
 import * as React from "react";
+
 import { cn } from "@/lib/utils";
+
 import type { ResearchStatus } from "@/types";
 
 const STATUS_CONFIG: Record<
@@ -33,7 +35,7 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
+export function StatusBadge({ status, className }: StatusBadgeProps): React.JSX.Element {
   const config = STATUS_CONFIG[status] ?? {
     label: status,
     className: "bg-gray-100 text-gray-700 border-gray-200",
