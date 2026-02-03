@@ -372,8 +372,7 @@ export default function ContextLibraryPage() {
                           <PrimaryIcon className="h-4 w-4 text-muted-foreground" />
                         </div>
                         <Badge
-                          size="sm"
-                          className={cn(CATEGORY_COLORS[doc.category])}
+                          className={cn("px-2 py-0.5 text-xs", CATEGORY_COLORS[doc.category])}
                         >
                           {CONTEXT_CATEGORY_LABELS[doc.category]}
                         </Badge>
@@ -409,8 +408,7 @@ export default function ContextLibraryPage() {
                       {domainNames.map((name) => (
                         <Badge
                           key={name}
-                          size="sm"
-                          className="bg-purple-50 text-purple-700"
+                          className="px-2 py-0.5 text-xs bg-purple-50 text-purple-700"
                         >
                           {name}
                         </Badge>
@@ -418,8 +416,7 @@ export default function ContextLibraryPage() {
                       {marketNames.map((name) => (
                         <Badge
                           key={name}
-                          size="sm"
-                          className="bg-blue-50 text-blue-700"
+                          className="px-2 py-0.5 text-xs bg-blue-50 text-blue-700"
                         >
                           {name}
                         </Badge>

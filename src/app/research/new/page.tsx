@@ -33,9 +33,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
-import { MARKETS } from "@/data/markets";
+import { MARKETS, type Market as MarketData } from "@/data/markets";
 import { DOMAINS } from "@/data/domains";
-import { SECTORS } from "@/data/sectors";
+import { SECTORS, type Sector as SectorData } from "@/data/sectors";
 
 import type {
   ResearchType,
@@ -383,13 +383,13 @@ function MarketHierarchy({
   selectedIds: string[];
   onToggle: (id: string) => void;
 }) {
-  const rootMarkets = MARKETS.filter((m) => m.parentId === null);
+  const rootMarkets = (MARKETS as MarketData[]).filter((m) => m.parentId === null);
 
   function renderMarket(marketId: string, depth: number) {
-    const market = MARKETS.find((m) => m.id === marketId);
+    const market = (MARKETS as MarketData[]).find((m) => m.id === marketId);
     if (!market) return null;
 
-    const children = MARKETS.filter((m) => m.parentId === marketId);
+    const children = (MARKETS as MarketData[]).filter((m) => m.parentId === marketId);
     const isSelected = selectedIds.includes(market.id);
 
     return (
@@ -510,7 +510,7 @@ export default function NewResearchPage() {
     const primaryDomain = domains[0]?.name ?? "Security";
     const primaryGeography = markets[0]?.name ?? "EU";
     const primarySector = sectors[0]?.name ?? "General";
-    const sectorRegulations = sectors[0]?.relevantRegulations ?? [];
+    const sectorRegulations = (sectors[0] as unknown as SectorData)?.relevantRegulations ?? [];
 
     return notebookTypes.map((type) => {
       const prompts = generatePrompts({
@@ -808,8 +808,7 @@ export default function NewResearchPage() {
                   <Badge
                     key={m.id}
                     variant="default"
-                    size="md"
-                    className="gap-1.5 cursor-pointer"
+                    className="px-2.5 py-0.5 text-sm gap-1.5 cursor-pointer"
                     onClick={() =>
                       toggleArrayItem("selectedMarketIds", m.id)
                     }
@@ -877,8 +876,7 @@ export default function NewResearchPage() {
                   <Badge
                     key={d.id}
                     variant="info"
-                    size="md"
-                    className="gap-1.5 cursor-pointer"
+                    className="px-2.5 py-0.5 text-sm gap-1.5 cursor-pointer"
                     onClick={() =>
                       toggleArrayItem("selectedDomainIds", d.id)
                     }
@@ -969,8 +967,7 @@ export default function NewResearchPage() {
                   <Badge
                     key={s.id}
                     variant="warning"
-                    size="md"
-                    className="gap-1.5 cursor-pointer"
+                    className="px-2.5 py-0.5 text-sm gap-1.5 cursor-pointer"
                     onClick={() =>
                       toggleArrayItem("selectedSectorIds", s.id)
                     }
@@ -1042,7 +1039,7 @@ export default function NewResearchPage() {
                         {doc.title}
                       </span>
                     </div>
-                    <Badge variant="secondary" size="sm">
+                    <Badge variant="secondary" className="px-2 py-0.5 text-xs">
                       {CONTEXT_CATEGORY_LABELS[doc.category]}
                     </Badge>
                   </button>
@@ -1160,7 +1157,7 @@ export default function NewResearchPage() {
                   <h3 className="text-base font-semibold text-gray-900">
                     {form.title || "Untitled Research"}
                   </h3>
-                  <Badge variant="default" size="md">
+                  <Badge variant="default" className="px-2.5 py-0.5 text-sm">
                     {RESEARCH_TYPE_LABELS[form.researchType]}
                   </Badge>
                 </div>
@@ -1244,7 +1241,7 @@ export default function NewResearchPage() {
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {selectedMarkets.length > 0 ? (
                         selectedMarkets.map((m) => (
-                          <Badge key={m.id} variant="default" size="sm">
+                          <Badge key={m.id} variant="default" className="px-2 py-0.5 text-xs">
                             {m.name}
                           </Badge>
                         ))
@@ -1262,7 +1259,7 @@ export default function NewResearchPage() {
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {selectedDomains.length > 0 ? (
                         selectedDomains.map((d) => (
-                          <Badge key={d.id} variant="info" size="sm">
+                          <Badge key={d.id} variant="info" className="px-2 py-0.5 text-xs">
                             {d.name}
                           </Badge>
                         ))
@@ -1279,12 +1276,12 @@ export default function NewResearchPage() {
                     </span>
                     <div className="flex flex-wrap gap-1.5 mt-1.5">
                       {form.allSectors ? (
-                        <Badge variant="warning" size="sm">
+                        <Badge variant="warning" className="px-2 py-0.5 text-xs">
                           All Sectors
                         </Badge>
                       ) : selectedSectors.length > 0 ? (
                         selectedSectors.map((s) => (
-                          <Badge key={s.id} variant="warning" size="sm">
+                          <Badge key={s.id} variant="warning" className="px-2 py-0.5 text-xs">
                             {s.name}
                           </Badge>
                         ))
@@ -1387,7 +1384,7 @@ export default function NewResearchPage() {
               <Card key={notebook.type}>
                 <CardHeader>
                   <div className="flex items-center gap-3">
-                    <Badge variant="info" size="md">
+                    <Badge variant="info" className="px-2.5 py-0.5 text-sm">
                       {notebook.label}
                     </Badge>
                   </div>

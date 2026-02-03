@@ -153,17 +153,17 @@ export default function ContextDocumentDetailPage() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Badge size="sm" className={cn(CATEGORY_COLORS[document.category])}>
+            <Badge className={cn("px-2 py-0.5 text-xs", CATEGORY_COLORS[document.category])}>
               {CONTEXT_CATEGORY_LABELS[document.category]}
             </Badge>
             {expired && (
-              <Badge size="sm" className="bg-red-100 text-red-700">
+              <Badge className="px-2 py-0.5 text-xs bg-red-100 text-red-700">
                 <AlertTriangle className="mr-1 h-3 w-3" />
                 Expired
               </Badge>
             )}
             {expiringSoon && (
-              <Badge size="sm" className="bg-amber-100 text-amber-700">
+              <Badge className="px-2 py-0.5 text-xs bg-amber-100 text-amber-700">
                 <AlertTriangle className="mr-1 h-3 w-3" />
                 Expiring soon
               </Badge>
@@ -221,8 +221,7 @@ export default function ContextDocumentDetailPage() {
                       domainNames.map((name) => (
                         <Badge
                           key={name}
-                          size="sm"
-                          className="bg-purple-100 text-purple-800"
+                          className="px-2 py-0.5 text-xs bg-purple-100 text-purple-800"
                         >
                           {name}
                         </Badge>
@@ -245,8 +244,7 @@ export default function ContextDocumentDetailPage() {
                       marketNames.map((name) => (
                         <Badge
                           key={name}
-                          size="sm"
-                          className="bg-blue-100 text-blue-800"
+                          className="px-2 py-0.5 text-xs bg-blue-100 text-blue-800"
                         >
                           {name}
                         </Badge>
@@ -269,8 +267,7 @@ export default function ContextDocumentDetailPage() {
                       sectorNames.map((name) => (
                         <Badge
                           key={name}
-                          size="sm"
-                          className="bg-emerald-100 text-emerald-800"
+                          className="px-2 py-0.5 text-xs bg-emerald-100 text-emerald-800"
                         >
                           {name}
                         </Badge>
@@ -308,8 +305,7 @@ export default function ContextDocumentDetailPage() {
                       </span>
                     </div>
                     <Badge
-                      size="sm"
-                      className={cn(STATUS_BADGE_COLORS[ref.status])}
+                      className={cn("px-2 py-0.5 text-xs", STATUS_BADGE_COLORS[ref.status])}
                     >
                       {ref.status.replace("_", " ")}
                     </Badge>
@@ -403,17 +399,17 @@ export default function ContextDocumentDetailPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">Status</span>
                   {expired ? (
-                    <Badge size="sm" className="bg-red-100 text-red-700">
+                    <Badge className="px-2 py-0.5 text-xs bg-red-100 text-red-700">
                       <AlertTriangle className="mr-1 h-3 w-3" />
                       Expired
                     </Badge>
                   ) : expiringSoon ? (
-                    <Badge size="sm" className="bg-amber-100 text-amber-700">
+                    <Badge className="px-2 py-0.5 text-xs bg-amber-100 text-amber-700">
                       <AlertTriangle className="mr-1 h-3 w-3" />
                       Expiring soon
                     </Badge>
                   ) : (
-                    <Badge size="sm" className="bg-green-100 text-green-700">
+                    <Badge className="px-2 py-0.5 text-xs bg-green-100 text-green-700">
                       Valid
                     </Badge>
                   )}
@@ -460,7 +456,7 @@ export default function ContextDocumentDetailPage() {
               {document.tag_ids.length > 0 ? (
                 <div className="flex flex-wrap gap-1.5">
                   {document.tag_ids.map((tagId) => (
-                    <Badge key={tagId} variant="outline" size="sm">
+                    <Badge key={tagId} variant="outline" className="px-2 py-0.5 text-xs">
                       {tagId}
                     </Badge>
                   ))}
