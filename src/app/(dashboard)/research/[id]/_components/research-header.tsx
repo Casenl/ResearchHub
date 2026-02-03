@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 
 import {
@@ -17,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { DimensionTags } from "@/components/shared/dimension-tags";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { MOCK_AUTHORS } from "@/data/mock-research";
+import { useUsers } from "@/hooks/use-users";
 
 import type { Research } from "@/types";
 
@@ -57,6 +59,8 @@ export function ResearchHeader({
   previousVersion,
   clonedFrom,
 }: ResearchHeaderProps): React.JSX.Element {
+  const { data: users } = useUsers();
+
   return (
     <>
       {/* Back button */}
@@ -138,7 +142,7 @@ export function ResearchHeader({
             </p>
             <p className="mt-1 flex items-center gap-1.5 text-sm font-medium">
               <User className="h-3.5 w-3.5 text-muted-foreground" />
-              {MOCK_AUTHORS[research.author_id] ?? "Unknown"}
+              {users.find((u) => u.id === research.author_id)?.name ?? "Unknown"}
             </p>
           </div>
           <div>

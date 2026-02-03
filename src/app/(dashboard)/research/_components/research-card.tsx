@@ -13,7 +13,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DimensionTags } from "@/components/shared/dimension-tags";
-import { MOCK_AUTHORS } from "@/data/mock-research";
+import { useUsers } from "@/hooks/use-users";
 import { formatDate } from "@/lib/utils";
 
 import { OUTPUT_FORMAT_DISPLAY } from "./constants";
@@ -33,6 +33,8 @@ interface ResearchCardProps {
 // ---------------------------------------------------------------------------
 
 export function ResearchCard({ research }: ResearchCardProps): React.JSX.Element {
+  const { data: users } = useUsers();
+
   return (
     <Link href={`/research/${research.id}`} className="group block">
       <Card className="h-full transition-shadow hover:shadow-md">
@@ -59,7 +61,7 @@ export function ResearchCard({ research }: ResearchCardProps): React.JSX.Element
               </span>
               <span className="inline-flex items-center gap-1">
                 <User className="h-3 w-3" />
-                {MOCK_AUTHORS[research.author_id] ?? "Unknown"}
+                {users.find((u) => u.id === research.author_id)?.name ?? "Unknown"}
               </span>
               <span className="inline-flex items-center gap-1">
                 <Calendar className="h-3 w-3" />

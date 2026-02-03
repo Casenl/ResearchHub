@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 
-import { AI_TOOL_PROFILES } from "@/data/ai-tool-profiles";
+import { useAIToolProfiles } from "@/hooks/use-admin-data";
 
 import { useToast } from "./use-toast";
 import { AIToolCard } from "./ai-tool-card";
@@ -14,21 +14,19 @@ import type { AIToolProfile } from "@/types";
 // =============================================================================
 
 export function AIToolsTab(): React.JSX.Element {
-  const [tools, setTools] = useState<AIToolProfile[]>([...AI_TOOL_PROFILES]);
+  const { data: tools, upsertTool } = useAIToolProfiles();
   const { show, Toast } = useToast();
 
-  const handleSave = (updated: AIToolProfile): void => {
-    setTools((prev) => {
-      // If updated tool is now the default, remove default from others
-      if (updated.is_default) {
-        return prev.map((t) =>
-          t.id === updated.id
-            ? updated
-            : { ...t, is_default: false }
-        );
+  const handleSave = async (updated: AIToolProfile): Promise<void> => {
+    // If updated tool is now the default, remove default from others
+    if (updated.is_default) {
+      for (const t of tools) {
+        if (t.id !== updated.id && t.is_default) {
+          await upsertTool({ ...t, is_default: false });
+        }
       }
-      return prev.map((t) => (t.id === updated.id ? updated : t));
-    });
+    }
+    await upsertTool(updated);
     show(`${updated.name} profile updated`);
   };
 

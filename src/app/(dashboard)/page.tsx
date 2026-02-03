@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import Link from "next/link";
 
 import { Library, Plus, ArrowRight } from "lucide-react";
@@ -18,22 +19,8 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DimensionTags } from "@/components/shared/dimension-tags";
 import { DashboardStats } from "@/components/shared/dashboard-stats";
-
-import { MOCK_RESEARCH, MOCK_AUTHORS } from "@/data/mock-research";
-
-// ---------------------------------------------------------------------------
-// Derived data
-// ---------------------------------------------------------------------------
-
-const recentPublished = MOCK_RESEARCH.filter(
-  (r) => r.status === "published"
-)
-  .sort(
-    (a, b) =>
-      new Date(b.published_at!).getTime() -
-      new Date(a.published_at!).getTime()
-  )
-  .slice(0, 5);
+import { useResearchList } from "@/hooks/use-research";
+import { useUsers } from "@/hooks/use-users";
 
 // ---------------------------------------------------------------------------
 // Output format labels
@@ -51,6 +38,22 @@ const OUTPUT_FORMAT_DISPLAY: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 export default function DashboardPage(): React.JSX.Element {
+  const { data: research } = useResearchList();
+  const { data: users } = useUsers();
+
+  const recentPublished = useMemo(
+    () =>
+      research
+        .filter((r) => r.status === "published")
+        .sort(
+          (a, b) =>
+            new Date(b.published_at!).getTime() -
+            new Date(a.published_at!).getTime()
+        )
+        .slice(0, 5),
+    [research]
+  );
+
   return (
     <div className="space-y-8">
       {/* Page header */}
@@ -138,7 +141,7 @@ export default function DashboardPage(): React.JSX.Element {
                           : ""}
                       </p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
-                        {MOCK_AUTHORS[research.author_id] ?? "Unknown"}
+                        {users.find((u) => u.id === research.author_id)?.name ?? "Unknown"}
                       </p>
                     </div>
                   </div>

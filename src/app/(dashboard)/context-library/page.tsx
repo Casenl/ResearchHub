@@ -2,12 +2,12 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { Upload, FolderOpen } from "lucide-react";
+import { Upload, FolderOpen, Loader2 } from "lucide-react";
 
 import { isExpired, isExpiringSoon } from "@/lib/utils";
-import { MOCK_CONTEXT_DOCUMENTS } from "@/data/mock-context-documents";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { useContextDocuments } from "@/hooks/use-context-documents";
 
 import { DocumentFilterBar } from "./_components/document-filter-bar";
 import { DocumentCard } from "./_components/document-card";
@@ -20,6 +20,7 @@ import type { ValidityFilter } from "./_components/document-filter-bar";
 // ---------------------------------------------------------------------------
 
 export default function ContextLibraryPage(): React.JSX.Element {
+  const { data: documents, isLoading } = useContextDocuments();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<
     ContextDocumentCategory[]
@@ -55,7 +56,7 @@ export default function ContextLibraryPage(): React.JSX.Element {
 
   // Filtered documents
   const filteredDocuments = useMemo(() => {
-    return MOCK_CONTEXT_DOCUMENTS.filter((doc) => {
+    return documents.filter((doc) => {
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
         const hasSearchMatch =
@@ -96,6 +97,7 @@ export default function ContextLibraryPage(): React.JSX.Element {
       return true;
     });
   }, [
+    documents,
     searchQuery,
     selectedCategories,
     selectedDomains,
@@ -127,8 +129,8 @@ export default function ContextLibraryPage(): React.JSX.Element {
             Context Library
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {MOCK_CONTEXT_DOCUMENTS.length} documents available
-            {filteredDocuments.length !== MOCK_CONTEXT_DOCUMENTS.length && (
+            {documents.length} documents available
+            {filteredDocuments.length !== documents.length && (
               <span>
                 {" "}
                 &middot; {filteredDocuments.length} shown
@@ -161,7 +163,11 @@ export default function ContextLibraryPage(): React.JSX.Element {
       />
 
       {/* Document Grid */}
-      {filteredDocuments.length > 0 ? (
+      {isLoading ? (
+        <div className="flex items-center justify-center py-16">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      ) : filteredDocuments.length > 0 ? (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredDocuments.map((doc) => (
             <DocumentCard key={doc.id} document={doc} />

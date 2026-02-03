@@ -1,12 +1,12 @@
+"use client";
+
 import React from "react";
 import { Check, FileText, Sparkles } from "lucide-react";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { MARKETS } from "@/data/markets";
-import { DOMAINS } from "@/data/domains";
-import { SECTORS } from "@/data/sectors";
+import { useMarkets, useDomains, useSectors } from "@/hooks/use-taxonomy";
 import {
   generatePrompts,
   getNotebookTypesForFormat,
@@ -23,7 +23,7 @@ import {
 } from "./wizard-types";
 
 import type { WizardStepProps, WizardFormState, SectorData } from "./wizard-types";
-import type { NotebookType } from "@/types";
+import type { Market, Domain, Sector, NotebookType } from "@/types";
 
 // =============================================================================
 // Props
@@ -38,7 +38,10 @@ interface StepReviewProps extends WizardStepProps {
 // =============================================================================
 
 function getGeneratedNotebooks(
-  form: WizardFormState
+  form: WizardFormState,
+  allDomains: Domain[],
+  allMarkets: Market[],
+  allSectors: Sector[]
 ): {
   type: NotebookType;
   label: string;
@@ -46,15 +49,15 @@ function getGeneratedNotebooks(
   analysis_prompts: string[];
 }[] {
   const notebookTypes = getNotebookTypesForFormat(form.outputFormat);
-  const domains = DOMAINS.filter((d) =>
+  const domains = allDomains.filter((d) =>
     form.selectedDomainIds.includes(d.id)
   );
-  const markets = MARKETS.filter((m) =>
+  const markets = allMarkets.filter((m) =>
     form.selectedMarketIds.includes(m.id)
   );
   const sectors = form.allSectors
-    ? SECTORS
-    : SECTORS.filter((s) => form.selectedSectorIds.includes(s.id));
+    ? allSectors
+    : allSectors.filter((s) => form.selectedSectorIds.includes(s.id));
 
   const primaryDomain = domains[0]?.name ?? "Security";
   const primaryGeography = markets[0]?.name ?? "EU";
@@ -87,19 +90,23 @@ export function StepReview({
   form,
   onGenerate,
 }: StepReviewProps): React.JSX.Element {
-  const selectedMarkets = MARKETS.filter((m) =>
+  const { data: allMarkets } = useMarkets();
+  const { data: allDomains } = useDomains();
+  const { data: allSectors } = useSectors();
+
+  const selectedMarkets = allMarkets.filter((m) =>
     form.selectedMarketIds.includes(m.id)
   );
-  const selectedDomains = DOMAINS.filter((d) =>
+  const selectedDomains = allDomains.filter((d) =>
     form.selectedDomainIds.includes(d.id)
   );
   const selectedSectors = form.allSectors
-    ? SECTORS
-    : SECTORS.filter((s) => form.selectedSectorIds.includes(s.id));
+    ? allSectors
+    : allSectors.filter((s) => form.selectedSectorIds.includes(s.id));
   const selectedDocs = MOCK_CONTEXT_DOCUMENTS.filter((d) =>
     form.selectedContextDocIds.includes(d.id)
   );
-  const generatedNotebooks = getGeneratedNotebooks(form);
+  const generatedNotebooks = getGeneratedNotebooks(form, allDomains, allMarkets, allSectors);
 
   return (
     <div className="space-y-6">

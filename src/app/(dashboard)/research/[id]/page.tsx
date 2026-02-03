@@ -11,10 +11,11 @@ import {
   FileText,
   History,
   Link as LinkIcon,
+  Loader2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { getResearchById } from "@/data/mock-research";
+import { useResearchById, useResearchList } from "@/hooks/use-research";
 
 import { ResearchHeader } from "./_components/research-header";
 import { OverviewTab } from "./_components/overview-tab";
@@ -36,7 +37,16 @@ export default function ResearchDetailPage({
   params: Promise<{ id: string }>;
 }): React.JSX.Element {
   const { id } = use(params);
-  const research = getResearchById(id);
+  const { data: research, isLoading } = useResearchById(id);
+  const { data: allResearch } = useResearchList();
+
+  if (isLoading && !research) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (!research) {
     return (
@@ -57,15 +67,15 @@ export default function ResearchDetailPage({
   }
 
   const previousVersion = research.previous_version_id
-    ? getResearchById(research.previous_version_id) ?? null
+    ? allResearch.find((r) => r.id === research.previous_version_id) ?? null
     : null;
 
   const clonedFrom = research.cloned_from_id
-    ? getResearchById(research.cloned_from_id) ?? null
+    ? allResearch.find((r) => r.id === research.cloned_from_id) ?? null
     : null;
 
   const allVersions = research.version_ids
-    .map((vid) => getResearchById(vid))
+    .map((vid) => allResearch.find((r) => r.id === vid))
     .filter((v): v is Research => v !== undefined);
 
   const allSources = research.notebooks.flatMap((nb) => nb.sources);

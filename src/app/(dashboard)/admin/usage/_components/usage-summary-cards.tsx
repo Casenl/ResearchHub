@@ -5,8 +5,8 @@ import { useMemo } from "react";
 import { DollarSign, Zap, BarChart3, TrendingUp } from "lucide-react";
 
 import { Card, CardHeader, CardDescription, CardContent } from "@/components/ui/card";
-import { MOCK_API_USAGE } from "@/data/mock-usage";
-import { AI_TOOL_PROFILES } from "@/data/ai-tool-profiles";
+import { useApiUsage } from "@/hooks/use-usage";
+import { useAIToolProfiles } from "@/hooks/use-admin-data";
 
 import { formatCurrency, formatNumber } from "./usage-formatters";
 
@@ -40,17 +40,20 @@ function StatCard({ icon: Icon, label, value, description, accentClass }: StatCa
 }
 
 export function UsageSummaryCards(): React.JSX.Element {
+  const { data: usageData } = useApiUsage();
+  const { data: toolProfiles } = useAIToolProfiles();
+
   const stats = useMemo(() => {
-    const totalCost = MOCK_API_USAGE.reduce((sum, e) => sum + e.estimated_cost, 0);
-    const totalTokens = MOCK_API_USAGE.reduce(
+    const totalCost = usageData.reduce((sum, e) => sum + e.estimated_cost, 0);
+    const totalTokens = usageData.reduce(
       (sum, e) => sum + e.input_tokens + e.output_tokens,
       0,
     );
-    const totalCalls = MOCK_API_USAGE.length;
+    const totalCalls = usageData.length;
 
     // Find most-used tool by call count
     const toolCounts = new Map<string, number>();
-    for (const entry of MOCK_API_USAGE) {
+    for (const entry of usageData) {
       toolCounts.set(entry.ai_tool_id, (toolCounts.get(entry.ai_tool_id) ?? 0) + 1);
     }
     let topToolId = "";
@@ -62,10 +65,10 @@ export function UsageSummaryCards(): React.JSX.Element {
       }
     }
     const topToolName =
-      AI_TOOL_PROFILES.find((t) => t.id === topToolId)?.name ?? topToolId;
+      toolProfiles.find((t) => t.id === topToolId)?.name ?? topToolId;
 
     return { totalCost, totalTokens, totalCalls, topToolName, topToolCount };
-  }, []);
+  }, [usageData, toolProfiles]);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

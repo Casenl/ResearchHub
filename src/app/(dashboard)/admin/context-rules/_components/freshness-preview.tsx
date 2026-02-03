@@ -8,7 +8,7 @@ import { differenceInDays } from "date-fns";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CONTEXT_CATEGORY_LABELS } from "@/lib/constants";
-import { MOCK_CONTEXT_DOCUMENTS } from "@/data/mock-context-documents";
+import { useContextDocuments } from "@/hooks/use-context-documents";
 
 import type { ContextRule } from "@/types";
 
@@ -27,6 +27,8 @@ interface FreshnessPreviewProps {
 export function FreshnessPreview({
   rules,
 }: FreshnessPreviewProps): React.JSX.Element {
+  const { data: contextDocuments } = useContextDocuments();
+
   const preview = useMemo(() => {
     const now = new Date();
     let staleCount = 0;
@@ -34,7 +36,7 @@ export function FreshnessPreview({
     let freshCount = 0;
     const staleByCategory: Record<string, number> = {};
 
-    for (const doc of MOCK_CONTEXT_DOCUMENTS) {
+    for (const doc of contextDocuments) {
       const rule = rules.find((r) => r.category === doc.category);
       if (!rule) {
         freshCount++;
@@ -56,7 +58,7 @@ export function FreshnessPreview({
     }
 
     return { staleCount, graceCount, freshCount, staleByCategory };
-  }, [rules]);
+  }, [rules, contextDocuments]);
 
   const stats = [
     {
@@ -88,7 +90,7 @@ export function FreshnessPreview({
           Stale Documents Preview
         </h2>
         <p className="mt-0.5 text-sm text-muted-foreground">
-          Impact of current policies on {MOCK_CONTEXT_DOCUMENTS.length} library
+          Impact of current policies on {contextDocuments.length} library
           documents
         </p>
       </div>

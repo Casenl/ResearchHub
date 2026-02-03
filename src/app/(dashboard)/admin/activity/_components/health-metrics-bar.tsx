@@ -6,7 +6,7 @@ import { differenceInDays } from "date-fns";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { MOCK_RESEARCH } from "@/data/mock-research";
+import { useResearchList } from "@/hooks/use-research";
 
 import type { ActivityLogEntry } from "@/types";
 
@@ -36,10 +36,12 @@ interface MetricCard {
 // ---------------------------------------------------------------------------
 
 export function HealthMetricsBar({ activityEntries }: HealthMetricsBarProps) {
+  const { data: researchList } = useResearchList();
+
   const metrics: MetricCard[] = useMemo(() => {
     // Active research: count of draft / in_progress / review / published
     const activeStatuses = new Set(["draft", "in_progress", "review", "published"]);
-    const activeResearchCount = MOCK_RESEARCH.filter((r) =>
+    const activeResearchCount = researchList.filter((r) =>
       activeStatuses.has(r.status)
     ).length;
 
@@ -84,7 +86,7 @@ export function HealthMetricsBar({ activityEntries }: HealthMetricsBarProps) {
         bgColor: "bg-purple-50",
       },
     ];
-  }, [activityEntries]);
+  }, [activityEntries, researchList]);
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">

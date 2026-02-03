@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { RESEARCH_STEP_LABELS } from "@/lib/constants";
-import { DOMAINS } from "@/data/domains";
+import { useDomains } from "@/hooks/use-taxonomy";
 
 import type { PromptTemplate, ResearchStep } from "@/types";
 
@@ -41,6 +41,7 @@ const SAMPLE_DATA: Record<string, string> = {
 // =============================================================================
 
 export function TemplateEditor({ template, onSave, onCancel }: TemplateEditorProps): React.JSX.Element {
+  const { data: domains } = useDomains();
   const [content, setContent] = useState(template?.content ?? "");
   const [domainValue, setDomainValue] = useState(template?.domain ?? "_default");
   const [step, setStep] = useState<ResearchStep>(template?.research_step ?? "discovery");
@@ -61,7 +62,7 @@ export function TemplateEditor({ template, onSave, onCancel }: TemplateEditorPro
 
   const domainLabel = domainValue === "_default"
     ? "Default"
-    : DOMAINS.find((d) => d.id === domainValue)?.name ?? domainValue;
+    : domains.find((d) => d.id === domainValue)?.name ?? domainValue;
 
   const handleSave = (): void => {
     if (!content.trim()) return;
@@ -102,7 +103,7 @@ export function TemplateEditor({ template, onSave, onCancel }: TemplateEditorPro
             className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <option value="_default">Default (all domains)</option>
-            {DOMAINS.map((d) => (
+            {domains.map((d) => (
               <option key={d.id} value={d.id}>{d.name}</option>
             ))}
           </select>

@@ -1,7 +1,5 @@
 import { useState, useMemo } from "react";
 
-import { MOCK_RESEARCH } from "@/data/mock-research";
-
 import type { ResearchStatus, OutputFormat, Research } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -38,7 +36,7 @@ export interface ResearchFiltersActions {
 // Hook
 // ---------------------------------------------------------------------------
 
-export function useResearchFilters(): ResearchFiltersState &
+export function useResearchFilters(research: Research[]): ResearchFiltersState &
   ResearchFiltersActions {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<ResearchStatus[]>(
@@ -115,7 +113,7 @@ export function useResearchFilters(): ResearchFiltersState &
     searchQuery.length > 0;
 
   const filteredResearch = useMemo(() => {
-    let results = [...MOCK_RESEARCH];
+    let results = [...research];
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
@@ -169,6 +167,7 @@ export function useResearchFilters(): ResearchFiltersState &
 
     return results;
   }, [
+    research,
     searchQuery,
     selectedStatuses,
     selectedDomains,
@@ -190,7 +189,7 @@ export function useResearchFilters(): ResearchFiltersState &
     isFilterPanelOpen,
     hasActiveFilters,
     filteredResearch,
-    totalCount: MOCK_RESEARCH.length,
+    totalCount: research.length,
     // Actions
     setSearchQuery,
     toggleStatus,

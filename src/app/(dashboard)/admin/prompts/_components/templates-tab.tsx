@@ -8,8 +8,8 @@ import { RESEARCH_STEP_LABELS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { DEFAULT_PROMPT_TEMPLATES } from "@/data/prompt-templates";
-import { DOMAINS } from "@/data/domains";
+import { usePromptTemplates } from "@/hooks/use-admin-data";
+import { useDomains } from "@/hooks/use-taxonomy";
 
 import { useToast } from "./use-toast";
 import { TemplateEditor } from "./template-editor";
@@ -21,7 +21,8 @@ import type { PromptTemplate, ResearchStep } from "@/types";
 // =============================================================================
 
 export function TemplatesTab(): React.JSX.Element {
-  const [templates, setTemplates] = useState<PromptTemplate[]>([...DEFAULT_PROMPT_TEMPLATES]);
+  const { data: templates, createTemplate, updateTemplate, deleteTemplate: deleteTemplateService } = usePromptTemplates();
+  const { data: domains } = useDomains();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -29,7 +30,7 @@ export function TemplatesTab(): React.JSX.Element {
 
   const domainLabel = (domainId: string): string => {
     if (domainId === "_default") return "Default";
-    return DOMAINS.find((d) => d.id === domainId)?.name ?? domainId;
+    return domains.find((d) => d.id === domainId)?.name ?? domainId;
   };
 
   const filteredTemplates = templates.filter((t) => {
@@ -46,24 +47,23 @@ export function TemplatesTab(): React.JSX.Element {
     ? templates.find((t) => t.id === selectedId) ?? null
     : null;
 
-  const handleSave = (updated: PromptTemplate): void => {
+  const handleSave = async (updated: PromptTemplate): Promise<void> => {
     if (isCreating) {
-      const newTemplate: PromptTemplate = { ...updated, id: generateId() };
-      setTemplates((prev) => [...prev, newTemplate]);
-      show(`Template for ${domainLabel(newTemplate.domain)} / ${RESEARCH_STEP_LABELS[newTemplate.research_step]} created`);
-    } else {
-      setTemplates((prev) =>
-        prev.map((t) => (t.id === selectedId ? { ...updated, id: t.id } : t))
-      );
+      const { id: _id, created_at: _ca, ...rest } = updated;
+      await createTemplate(rest);
+      show(`Template for ${domainLabel(updated.domain)} / ${RESEARCH_STEP_LABELS[updated.research_step]} created`);
+    } else if (selectedId) {
+      const { id: _id, ...rest } = updated;
+      await updateTemplate(selectedId, rest);
       show(`Template updated to v${updated.version}`);
     }
     setSelectedId(null);
     setIsCreating(false);
   };
 
-  const handleDelete = (id: string): void => {
+  const handleDelete = async (id: string): Promise<void> => {
     const tpl = templates.find((t) => t.id === id);
-    setTemplates((prev) => prev.filter((t) => t.id !== id));
+    await deleteTemplateService(id);
     if (selectedId === id) setSelectedId(null);
     show(`Template "${domainLabel(tpl?.domain ?? "")}" deleted`);
   };

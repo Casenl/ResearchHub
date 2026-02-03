@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { DOMAINS } from "@/data/domains";
+import { useDomains } from "@/hooks/use-taxonomy";
 
 import { useToast } from "./use-toast";
 
@@ -27,7 +27,7 @@ import type { Domain } from "@/types";
 // =============================================================================
 
 export function DomainsTab(): React.JSX.Element {
-  const [domains, setDomains] = useState<Domain[]>([...DOMAINS]);
+  const { data: domains, save } = useDomains();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export function DomainsTab(): React.JSX.Element {
     setEditingId(null);
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     if (!form.name.trim() || !form.code.trim()) return;
 
     const sources = form.default_sources
@@ -61,20 +61,19 @@ export function DomainsTab(): React.JSX.Element {
       .filter(Boolean);
 
     if (editingId) {
-      setDomains((prev) =>
-        prev.map((d) =>
-          d.id === editingId
-            ? {
-                ...d,
-                name: form.name,
-                code: form.code,
-                description: form.description,
-                default_sources: sources,
-                itq_service_catalogue_ref: form.itq_service_catalogue_ref,
-              }
-            : d
-        )
+      const updated = domains.map((d) =>
+        d.id === editingId
+          ? {
+              ...d,
+              name: form.name,
+              code: form.code,
+              description: form.description,
+              default_sources: sources,
+              itq_service_catalogue_ref: form.itq_service_catalogue_ref,
+            }
+          : d
       );
+      await save(updated);
       show(`Domain "${form.name}" updated successfully`);
     } else {
       const newDomain: Domain = {
@@ -85,7 +84,7 @@ export function DomainsTab(): React.JSX.Element {
         default_sources: sources,
         itq_service_catalogue_ref: form.itq_service_catalogue_ref,
       };
-      setDomains((prev) => [...prev, newDomain]);
+      await save([...domains, newDomain]);
       show(`Domain "${form.name}" added successfully`);
     }
     resetForm();
@@ -103,9 +102,9 @@ export function DomainsTab(): React.JSX.Element {
     setIsFormVisible(true);
   };
 
-  const handleDelete = (id: string): void => {
+  const handleDelete = async (id: string): Promise<void> => {
     const domain = domains.find((d) => d.id === id);
-    setDomains((prev) => prev.filter((d) => d.id !== id));
+    await save(domains.filter((d) => d.id !== id));
     show(`Domain "${domain?.name}" deleted`);
   };
 

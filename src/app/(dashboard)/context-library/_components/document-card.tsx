@@ -1,3 +1,5 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
 import {
@@ -13,8 +15,7 @@ import {
 
 import { cn, formatDate, isExpired, isExpiringSoon } from "@/lib/utils";
 import { CONTEXT_CATEGORY_LABELS } from "@/lib/constants";
-import { DOMAINS } from "@/data/domains";
-import { MARKETS } from "@/data/markets";
+import { useDomains, useMarkets } from "@/hooks/use-taxonomy";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -46,16 +47,19 @@ interface DocumentCardProps {
 // ---------------------------------------------------------------------------
 
 export function DocumentCard({ document: doc }: DocumentCardProps): React.JSX.Element {
+  const { data: domains } = useDomains();
+  const { data: markets } = useMarkets();
+
   const isDocExpired = isExpired(doc.valid_until);
   const isDocExpiringSoon = !isDocExpired && isExpiringSoon(doc.valid_until);
 
   // Resolve domain / market names
   const domainNames = doc.domain_ids.map((id) => {
-    const domain = DOMAINS.find((d) => d.id === id);
+    const domain = domains.find((d) => d.id === id);
     return domain?.name ?? id;
   });
   const marketNames = doc.market_ids.map((id) => {
-    const market = MARKETS.find((m) => m.id === id);
+    const market = markets.find((m) => m.id === id);
     return market?.name ?? id;
   });
 

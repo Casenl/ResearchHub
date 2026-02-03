@@ -7,7 +7,7 @@ import { cn, generateId } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { SECTORS } from "@/data/sectors";
+import { useSectors } from "@/hooks/use-taxonomy";
 
 import { useToast } from "./use-toast";
 
@@ -18,7 +18,7 @@ import type { Sector } from "@/types";
 // =============================================================================
 
 export function SectorsTab(): React.JSX.Element {
-  const [sectors, setSectors] = useState<Sector[]>([...SECTORS]);
+  const { data: sectors, save } = useSectors();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", code: "", regulations: "" });
@@ -46,22 +46,21 @@ export function SectorsTab(): React.JSX.Element {
     setRegTags((prev) => prev.filter((r) => r !== reg));
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     if (!form.name.trim() || !form.code.trim()) return;
 
     if (editingId) {
-      setSectors((prev) =>
-        prev.map((s) =>
-          s.id === editingId
-            ? {
-                ...s,
-                name: form.name,
-                code: form.code,
-                relevant_regulations: regTags,
-              }
-            : s
-        )
+      const updated = sectors.map((s) =>
+        s.id === editingId
+          ? {
+              ...s,
+              name: form.name,
+              code: form.code,
+              relevant_regulations: regTags,
+            }
+          : s
       );
+      await save(updated);
       show(`Sector "${form.name}" updated successfully`);
     } else {
       const newSector: Sector = {
@@ -70,7 +69,7 @@ export function SectorsTab(): React.JSX.Element {
         code: form.code.toUpperCase(),
         relevant_regulations: regTags,
       };
-      setSectors((prev) => [...prev, newSector]);
+      await save([...sectors, newSector]);
       show(`Sector "${form.name}" added successfully`);
     }
     resetForm();
@@ -87,9 +86,9 @@ export function SectorsTab(): React.JSX.Element {
     setIsFormVisible(true);
   };
 
-  const handleDelete = (id: string): void => {
+  const handleDelete = async (id: string): Promise<void> => {
     const sector = sectors.find((s) => s.id === id);
-    setSectors((prev) => prev.filter((s) => s.id !== id));
+    await save(sectors.filter((s) => s.id !== id));
     show(`Sector "${sector?.name}" deleted`);
   };
 

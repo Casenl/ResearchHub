@@ -403,15 +403,26 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
 NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
 ```
 
-See `.env.example` for the full list. Copy to `.env.local` and fill in values.
+Firebase project: `marketintelligence-hub`. Credentials are stored in `.env.local` (not committed).
+
+### Firebase Service Account Key
+
+The service account key for the Firebase MCP server is stored at the project root:
+
+```
+./marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json
+```
+
+This file is listed in `.gitignore` and must **never** be committed. It is referenced by `.mcp.json` for the Firebase MCP server.
 
 ## MCP Servers
 
 Configured in `.mcp.json`:
 - **Context7** — library documentation lookups for up-to-date API references
-- **Firebase MCP** — direct Firestore/Auth/Storage operations (requires service account key)
+- **Firebase MCP** — direct Firestore/Auth/Storage operations via the service account key at project root
 
 ## Research Process Reference
 

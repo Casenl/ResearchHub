@@ -1,9 +1,9 @@
+"use client";
+
 import React from "react";
 
 import { cn } from "@/lib/utils";
-import { DOMAINS } from "@/data/domains";
-import { MARKETS } from "@/data/markets";
-import { SECTORS } from "@/data/sectors";
+import { useDomains, useMarkets, useSectors } from "@/hooks/use-taxonomy";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 // ---------------------------------------------------------------------------
@@ -31,6 +31,10 @@ export function DimensionsSection({
   selectedSectors,
   onToggleSector,
 }: DimensionsSectionProps): React.JSX.Element {
+  const { data: domains } = useDomains();
+  const { data: markets } = useMarkets();
+  const { data: sectors } = useSectors();
+
   return (
     <Card>
       <CardHeader>
@@ -40,7 +44,7 @@ export function DimensionsSection({
         {/* Domains */}
         <DimensionCheckboxGroup
           label="Domains"
-          items={DOMAINS}
+          items={domains}
           selectedIds={selectedDomains}
           onToggle={onToggleDomain}
           activeColorClass="border-purple-300 bg-purple-50 text-purple-800"
@@ -49,7 +53,7 @@ export function DimensionsSection({
         {/* Markets */}
         <DimensionCheckboxGroup
           label="Markets"
-          items={MARKETS}
+          items={markets}
           selectedIds={selectedMarkets}
           onToggle={onToggleMarket}
           activeColorClass="border-blue-300 bg-blue-50 text-blue-800"
@@ -58,7 +62,7 @@ export function DimensionsSection({
         {/* Sectors */}
         <DimensionCheckboxGroup
           label="Sectors"
-          items={SECTORS}
+          items={sectors}
           selectedIds={selectedSectors}
           onToggle={onToggleSector}
           activeColorClass="border-emerald-300 bg-emerald-50 text-emerald-800"

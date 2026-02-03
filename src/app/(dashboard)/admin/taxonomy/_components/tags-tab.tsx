@@ -7,7 +7,7 @@ import { cn, generateId } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { SYSTEM_TAGS } from "@/data/tags";
+import { useTags } from "@/hooks/use-taxonomy";
 
 import { useToast } from "./use-toast";
 
@@ -18,7 +18,7 @@ import type { Tag, TagType } from "@/types";
 // =============================================================================
 
 export function TagsTab(): React.JSX.Element {
-  const [tags, setTags] = useState<Tag[]>([...SYSTEM_TAGS]);
+  const { data: tags, save } = useTags();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<{ name: string; type: TagType }>({
@@ -34,17 +34,16 @@ export function TagsTab(): React.JSX.Element {
     setEditingId(null);
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     if (!form.name.trim()) return;
 
     if (editingId) {
-      setTags((prev) =>
-        prev.map((t) =>
-          t.id === editingId
-            ? { ...t, name: form.name, type: form.type }
-            : t
-        )
+      const updated = tags.map((t) =>
+        t.id === editingId
+          ? { ...t, name: form.name, type: form.type }
+          : t
       );
+      await save(updated);
       show(`Tag "${form.name}" updated successfully`);
     } else {
       const newTag: Tag = {
@@ -52,7 +51,7 @@ export function TagsTab(): React.JSX.Element {
         name: form.name,
         type: form.type,
       };
-      setTags((prev) => [...prev, newTag]);
+      await save([...tags, newTag]);
       show(`Tag "${form.name}" added successfully`);
     }
     resetForm();
@@ -64,9 +63,9 @@ export function TagsTab(): React.JSX.Element {
     setIsFormVisible(true);
   };
 
-  const handleDelete = (id: string): void => {
+  const handleDelete = async (id: string): Promise<void> => {
     const tag = tags.find((t) => t.id === id);
-    setTags((prev) => prev.filter((t) => t.id !== id));
+    await save(tags.filter((t) => t.id !== id));
     show(`Tag "${tag?.name}" deleted`);
   };
 

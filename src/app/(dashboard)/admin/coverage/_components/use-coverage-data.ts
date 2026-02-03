@@ -2,13 +2,12 @@
 
 import { useMemo } from "react";
 
-import { MARKETS } from "@/data/markets";
-import { DOMAINS } from "@/data/domains";
-import { MOCK_RESEARCH } from "@/data/mock-research";
+import { useMarkets, useDomains } from "@/hooks/use-taxonomy";
+import { useResearchList } from "@/hooks/use-research";
 
 import { getCellKey } from "./coverage-grid";
 
-import type { Market, Research } from "@/types";
+import type { Market, Domain, Research } from "@/types";
 import type { CoverageCellData, MarketGroup } from "./coverage-grid";
 import type { CoverageCellStatus } from "./coverage-cell";
 
@@ -23,20 +22,20 @@ const STALE_THRESHOLD_DAYS = 180;
 // =============================================================================
 
 /** Markets that have no children are leaf-level. */
-function getLeafMarkets(): Market[] {
+function getLeafMarkets(allMarkets: Market[]): Market[] {
   const parentIds = new Set(
-    MARKETS.filter((m) => m.parent_id !== null).map((m) => m.parent_id)
+    allMarkets.filter((m) => m.parent_id !== null).map((m) => m.parent_id)
   );
-  return MARKETS.filter((m) => !parentIds.has(m.id));
+  return allMarkets.filter((m) => !parentIds.has(m.id));
 }
 
 /** Group leaf markets by their direct parent region. */
-function buildMarketGroups(leafMarkets: Market[]): MarketGroup[] {
+function buildMarketGroups(leafMarkets: Market[], allMarkets: Market[]): MarketGroup[] {
   const groupMap = new Map<string, MarketGroup>();
 
   for (const leaf of leafMarkets) {
     const region = leaf.parent_id
-      ? MARKETS.find((m) => m.id === leaf.parent_id)
+      ? allMarkets.find((m) => m.id === leaf.parent_id)
       : leaf;
     if (!region) continue;
 
@@ -52,12 +51,12 @@ function buildMarketGroups(leafMarkets: Market[]): MarketGroup[] {
 }
 
 /** Get all ancestor market IDs for a leaf, including itself. */
-function getAncestorIds(marketId: string): string[] {
+function getAncestorIds(marketId: string, allMarkets: Market[]): string[] {
   const ids: string[] = [marketId];
-  let current = MARKETS.find((m) => m.id === marketId);
+  let current = allMarkets.find((m) => m.id === marketId);
   while (current?.parent_id) {
     ids.push(current.parent_id);
-    current = MARKETS.find((m) => m.id === current!.parent_id);
+    current = allMarkets.find((m) => m.id === current!.parent_id);
   }
   return ids;
 }
@@ -67,8 +66,8 @@ function getAncestorIds(marketId: string): string[] {
 // =============================================================================
 
 /** True if research covers this leaf market (directly or via an ancestor). */
-function researchCoversMarket(research: Research, leafId: string): boolean {
-  const ancestors = getAncestorIds(leafId);
+function researchCoversMarket(research: Research, leafId: string, allMarkets: Market[]): boolean {
+  const ancestors = getAncestorIds(leafId, allMarkets);
   return research.dimensions.markets.some((m) => ancestors.includes(m.id));
 }
 
@@ -141,10 +140,14 @@ interface UseCoverageDataResult {
 export function useCoverageData(
   selectedSectorId: string | null
 ): UseCoverageDataResult {
-  const leafMarkets = useMemo(() => getLeafMarkets(), []);
+  const { data: allMarkets } = useMarkets();
+  const { data: allDomains } = useDomains();
+  const { data: researchData } = useResearchList();
+
+  const leafMarkets = useMemo(() => getLeafMarkets(allMarkets), [allMarkets]);
   const marketGroups = useMemo(
-    () => buildMarketGroups(leafMarkets),
-    [leafMarkets]
+    () => buildMarketGroups(leafMarkets, allMarkets),
+    [leafMarkets, allMarkets]
   );
 
   const cellData = useMemo(() => {
@@ -152,10 +155,10 @@ export function useCoverageData(
     const dataMap = new Map<string, CoverageCellData>();
 
     for (const leaf of leafMarkets) {
-      for (const domain of DOMAINS) {
-        const matching = MOCK_RESEARCH.filter(
+      for (const domain of allDomains) {
+        const matching = researchData.filter(
           (r) =>
-            researchCoversMarket(r, leaf.id) &&
+            researchCoversMarket(r, leaf.id, allMarkets) &&
             r.dimensions.domains.some((d) => d.id === domain.id) &&
             researchMatchesSector(r, selectedSectorId)
         );
@@ -177,7 +180,7 @@ export function useCoverageData(
     }
 
     return dataMap;
-  }, [leafMarkets, selectedSectorId]);
+  }, [leafMarkets, allDomains, researchData, allMarkets, selectedSectorId]);
 
   const allStatuses = useMemo(
     () => Array.from(cellData.values()).map((c) => c.status),

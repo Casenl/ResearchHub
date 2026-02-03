@@ -1,9 +1,7 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { DOMAINS } from "@/data/domains";
-import { MARKETS } from "@/data/markets";
-import { SECTORS } from "@/data/sectors";
+import { useMarkets, useDomains, useSectors } from "@/hooks/use-taxonomy";
 
 import {
   ALL_STATUSES,
@@ -80,6 +78,10 @@ export function ResearchFilterPanel({
   onToggleFormat,
   onDateFilterChange,
 }: ResearchFilterPanelProps): React.JSX.Element {
+  const { data: DOMAINS } = useDomains();
+  const { data: MARKETS } = useMarkets();
+  const { data: SECTORS } = useSectors();
+
   const filteredMarkets = MARKETS.filter((m) => !EXCLUDED_MARKET_IDS.has(m.id));
 
   return (

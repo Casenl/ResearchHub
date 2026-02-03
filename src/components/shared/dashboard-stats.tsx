@@ -1,3 +1,7 @@
+"use client";
+
+import { useMemo } from "react";
+
 import {
   FileText,
   AlertTriangle,
@@ -12,38 +16,38 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 
-import { MOCK_RESEARCH } from "@/data/mock-research";
-
-// ---------------------------------------------------------------------------
-// Derived statistics
-// ---------------------------------------------------------------------------
-
-const publishedCount = MOCK_RESEARCH.filter(
-  (r) => r.status === "published"
-).length;
-
-const expiringSoonCount = MOCK_RESEARCH.filter(
-  (r) =>
-    r.expires_at &&
-    new Date(r.expires_at) > new Date() &&
-    new Date(r.expires_at) <
-      new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
-).length;
-
-const inReviewCount = MOCK_RESEARCH.filter(
-  (r) => r.status === "review"
-).length;
-
-const contextDocCount = MOCK_RESEARCH.reduce(
-  (acc, r) => acc + r.context_documents.length,
-  0
-);
+import { useResearchList } from "@/hooks/use-research";
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export function DashboardStats(): React.JSX.Element {
+  const { data: research } = useResearchList();
+
+  const { publishedCount, expiringSoonCount, inReviewCount, contextDocCount } =
+    useMemo(() => {
+      const published = research.filter((r) => r.status === "published").length;
+      const expiring = research.filter(
+        (r) =>
+          r.expires_at &&
+          new Date(r.expires_at) > new Date() &&
+          new Date(r.expires_at) <
+            new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+      ).length;
+      const inReview = research.filter((r) => r.status === "review").length;
+      const contextDocs = research.reduce(
+        (acc, r) => acc + r.context_documents.length,
+        0
+      );
+      return {
+        publishedCount: published,
+        expiringSoonCount: expiring,
+        inReviewCount: inReview,
+        contextDocCount: contextDocs,
+      };
+    }, [research]);
+
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
       <Card>

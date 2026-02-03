@@ -1,76 +1,83 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 
 import { cn } from "@/lib/utils";
 import { RESEARCH_STEP_LABELS } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
-import { DOMAINS } from "@/data/domains";
-import { AI_TOOL_PROFILES } from "@/data/ai-tool-profiles";
+import { useDomains } from "@/hooks/use-taxonomy";
+import { useAIToolProfiles, usePromptAssignments } from "@/hooks/use-admin-data";
 
 import { useToast } from "./use-toast";
 
 import type { PromptAssignment, ResearchStep } from "@/types";
 
 // =============================================================================
-// Types
-// =============================================================================
-
-interface AssignmentKey {
-  domain: string;
-  step: ResearchStep;
-}
-
-// =============================================================================
-// Initial seed: build default assignments from AI_TOOL_PROFILES
+// Constants
 // =============================================================================
 
 const STEPS: ResearchStep[] = ["discovery", "analysis", "synthesis"];
-
-const ROW_DOMAINS = [
-  { id: "_default", name: "Default (fallback)" },
-  ...DOMAINS.map((d) => ({ id: d.id, name: d.name })),
-];
-
-function buildInitialAssignments(): Map<string, string> {
-  const map = new Map<string, string>();
-  const defaultTool = AI_TOOL_PROFILES.find((t) => t.is_default);
-  const defaultToolId = defaultTool?.id ?? AI_TOOL_PROFILES[0]?.id ?? "";
-
-  for (const domain of ROW_DOMAINS) {
-    for (const step of STEPS) {
-      const key = `${domain.id}::${step}`;
-      // Find the tool that recommends this step
-      const recommended = AI_TOOL_PROFILES.find(
-        (t) => t.status === "active" && t.recommended_steps.includes(step)
-      );
-      map.set(key, recommended?.id ?? defaultToolId);
-    }
-  }
-  return map;
-}
 
 // =============================================================================
 // AssignmentsTab
 // =============================================================================
 
 export function AssignmentsTab(): React.JSX.Element {
-  const [assignments, setAssignments] = useState<Map<string, string>>(buildInitialAssignments);
+  const { data: domains } = useDomains();
+  const { data: toolProfiles } = useAIToolProfiles();
+  const { data: savedAssignments, upsertAssignment } = usePromptAssignments();
   const { show, Toast } = useToast();
 
-  const activeTools = useMemo(
-    () => AI_TOOL_PROFILES.filter((t) => t.status === "active"),
-    []
+  const ROW_DOMAINS = useMemo(
+    () => [
+      { id: "_default", name: "Default (fallback)" },
+      ...domains.map((d) => ({ id: d.id, name: d.name })),
+    ],
+    [domains]
   );
 
-  const handleChange = (domain: string, step: ResearchStep, toolId: string): void => {
-    const key = `${domain}::${step}`;
-    setAssignments((prev) => {
-      const next = new Map(prev);
-      next.set(key, toolId);
-      return next;
+  const activeTools = useMemo(
+    () => toolProfiles.filter((t) => t.status === "active"),
+    [toolProfiles]
+  );
+
+  // Build assignment map from saved assignments, falling back to recommended tools
+  const assignments = useMemo(() => {
+    const map = new Map<string, string>();
+    const defaultTool = toolProfiles.find((t) => t.is_default);
+    const defaultToolId = defaultTool?.id ?? toolProfiles[0]?.id ?? "";
+
+    for (const domain of ROW_DOMAINS) {
+      for (const step of STEPS) {
+        const key = `${domain.id}::${step}`;
+        // Check saved assignments first
+        const saved = savedAssignments.find(
+          (a) => a.domain === domain.id && a.research_step === step
+        );
+        if (saved) {
+          map.set(key, saved.ai_tool_id);
+        } else {
+          const recommended = toolProfiles.find(
+            (t) => t.status === "active" && t.recommended_steps.includes(step)
+          );
+          map.set(key, recommended?.id ?? defaultToolId);
+        }
+      }
+    }
+    return map;
+  }, [ROW_DOMAINS, toolProfiles, savedAssignments]);
+
+  const handleChange = async (domain: string, step: ResearchStep, toolId: string): Promise<void> => {
+    await upsertAssignment({
+      id: `${domain}::${step}`,
+      domain,
+      research_step: step,
+      ai_tool_id: toolId,
+      override_template_id: null,
+      updated_by: "admin",
+      updated_at: new Date().toISOString(),
     });
-    const toolName = AI_TOOL_PROFILES.find((t) => t.id === toolId)?.name ?? toolId;
+    const toolName = toolProfiles.find((t) => t.id === toolId)?.name ?? toolId;
     const domainName = ROW_DOMAINS.find((d) => d.id === domain)?.name ?? domain;
     show(`${domainName} / ${RESEARCH_STEP_LABELS[step]} assigned to ${toolName}`);
   };

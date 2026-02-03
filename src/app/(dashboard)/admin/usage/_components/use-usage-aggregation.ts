@@ -2,9 +2,10 @@
 
 import { useMemo } from "react";
 
-import { MOCK_API_USAGE } from "@/data/mock-usage";
-import { AI_TOOL_PROFILES } from "@/data/ai-tool-profiles";
+import { useApiUsage } from "@/hooks/use-usage";
+import { useAIToolProfiles } from "@/hooks/use-admin-data";
 
+import type { ApiUsageEntry, AIToolProfile } from "@/types";
 import type { UsageView } from "./usage-view-toggle";
 
 // ---------------------------------------------------------------------------
@@ -24,9 +25,9 @@ export interface AggregatedRow {
 // Aggregation functions
 // ---------------------------------------------------------------------------
 
-function aggregateByBU(): AggregatedRow[] {
+function aggregateByBU(entries: ApiUsageEntry[]): AggregatedRow[] {
   const map = new Map<string, AggregatedRow>();
-  for (const entry of MOCK_API_USAGE) {
+  for (const entry of entries) {
     const existing = map.get(entry.business_unit);
     if (existing) {
       existing.tokens += entry.input_tokens + entry.output_tokens;
@@ -45,12 +46,12 @@ function aggregateByBU(): AggregatedRow[] {
   return [...map.values()].sort((a, b) => b.cost - a.cost);
 }
 
-function aggregateByTool(): AggregatedRow[] {
+function aggregateByTool(entries: ApiUsageEntry[], toolProfiles: AIToolProfile[]): AggregatedRow[] {
   const map = new Map<string, AggregatedRow>();
-  for (const entry of MOCK_API_USAGE) {
+  for (const entry of entries) {
     const existing = map.get(entry.ai_tool_id);
     const toolName =
-      AI_TOOL_PROFILES.find((t) => t.id === entry.ai_tool_id)?.name ?? entry.ai_tool_id;
+      toolProfiles.find((t) => t.id === entry.ai_tool_id)?.name ?? entry.ai_tool_id;
     if (existing) {
       existing.tokens += entry.input_tokens + entry.output_tokens;
       existing.cost += entry.estimated_cost;
@@ -68,9 +69,9 @@ function aggregateByTool(): AggregatedRow[] {
   return [...map.values()].sort((a, b) => b.cost - a.cost);
 }
 
-function aggregateByUser(): AggregatedRow[] {
+function aggregateByUser(entries: ApiUsageEntry[]): AggregatedRow[] {
   const map = new Map<string, AggregatedRow>();
-  for (const entry of MOCK_API_USAGE) {
+  for (const entry of entries) {
     const existing = map.get(entry.user_id);
     if (existing) {
       existing.tokens += entry.input_tokens + entry.output_tokens;
@@ -95,14 +96,17 @@ function aggregateByUser(): AggregatedRow[] {
 // ---------------------------------------------------------------------------
 
 export function useUsageAggregation(view: UsageView): AggregatedRow[] {
+  const { data: usageData } = useApiUsage();
+  const { data: toolProfiles } = useAIToolProfiles();
+
   return useMemo(() => {
     switch (view) {
       case "by-bu":
-        return aggregateByBU();
+        return aggregateByBU(usageData);
       case "by-tool":
-        return aggregateByTool();
+        return aggregateByTool(usageData, toolProfiles);
       case "by-user":
-        return aggregateByUser();
+        return aggregateByUser(usageData);
     }
-  }, [view]);
+  }, [view, usageData, toolProfiles]);
 }

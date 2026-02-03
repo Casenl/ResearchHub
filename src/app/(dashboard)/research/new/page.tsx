@@ -2,10 +2,14 @@
 
 import React, { useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useCreateResearch } from "@/hooks/use-research";
+import { useAuth } from "@/hooks/use-auth";
+import { useMarkets, useDomains, useSectors } from "@/hooks/use-taxonomy";
 
 import { StepIndicator } from "./_components/step-indicator";
 import { StepDefine } from "./_components/step-define";
@@ -48,6 +52,12 @@ const TOTAL_STEPS = 4;
 // =============================================================================
 
 export default function NewResearchPage(): React.JSX.Element {
+  const router = useRouter();
+  const { user } = useAuth();
+  const { createResearch } = useCreateResearch();
+  const { data: allMarkets } = useMarkets();
+  const { data: allDomains } = useDomains();
+  const { data: allSectors } = useSectors();
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState<WizardFormState>(initialFormState);
 
@@ -91,12 +101,45 @@ export default function NewResearchPage(): React.JSX.Element {
   // Generation logic
   // ---------------------------------------------------------------------------
 
-  const handleGenerate = useCallback(() => {
+  const handleGenerate = useCallback(async () => {
     updateForm({ isGenerating: true });
-    setTimeout(() => {
+    try {
+      const newId = await createResearch({
+        title: form.title,
+        description: form.description || form.coreQuestion,
+        type: form.researchType,
+        previous_version_id: form.researchType === "refresh" ? form.referenceResearchId || null : null,
+        cloned_from_id: form.researchType === "clone" ? form.referenceResearchId || null : null,
+        cloned_changed_dimension: form.clonedChangedDimension,
+        status: "draft",
+        output_format: form.outputFormat,
+        published_at: null,
+        expires_at: null,
+        refresh_schedule: form.refreshSchedule,
+        next_refresh_date: null,
+        author_id: user?.uid ?? "",
+        reviewer_id: null,
+        dimensions: {
+          markets: allMarkets.filter((m) => form.selectedMarketIds.includes(m.id)),
+          domains: allDomains.filter((d) => form.selectedDomainIds.includes(d.id)),
+          sectors: allSectors.filter((s) => form.selectedSectorIds.includes(s.id)),
+        },
+        tags: [],
+        context_documents: [],
+        notebooks: [],
+        synthesis: "",
+        change_log: "",
+        assumptions: [],
+        related_research_ids: [],
+        version_ids: [],
+      });
       updateForm({ isGenerating: false, isGenerated: true });
-    }, 1200);
-  }, [updateForm]);
+      router.push(`/research/${newId}`);
+    } catch (error) {
+      console.error("Failed to create research:", error);
+      updateForm({ isGenerating: false });
+    }
+  }, [updateForm, createResearch, form, user, router, allMarkets, allDomains, allSectors]);
 
   // ---------------------------------------------------------------------------
   // Render

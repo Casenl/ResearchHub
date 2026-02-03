@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 
-import { DOMAINS } from "@/data/domains";
-import { SECTORS } from "@/data/sectors";
+import { useDomains, useSectors } from "@/hooks/use-taxonomy";
 
 import { CoverageFilterBar } from "./_components/coverage-filter-bar";
 import { CoverageGrid } from "./_components/coverage-grid";
@@ -15,6 +14,8 @@ import { useCoverageData } from "./_components/use-coverage-data";
 // =============================================================================
 
 export default function CoveragePage() {
+  const { data: domains } = useDomains();
+  const { data: sectors } = useSectors();
   const [selectedSectorId, setSelectedSectorId] = useState<string | null>(null);
   const { marketGroups, cellData, allStatuses } =
     useCoverageData(selectedSectorId);
@@ -38,7 +39,7 @@ export default function CoveragePage() {
 
       {/* Filter Bar */}
       <CoverageFilterBar
-        sectors={SECTORS}
+        sectors={sectors}
         selectedSectorId={selectedSectorId}
         onFilterChange={handleFilterChange}
       />
@@ -46,7 +47,7 @@ export default function CoveragePage() {
       {/* Heatmap Grid */}
       <CoverageGrid
         marketGroups={marketGroups}
-        domains={DOMAINS}
+        domains={domains}
         cellData={cellData}
       />
 

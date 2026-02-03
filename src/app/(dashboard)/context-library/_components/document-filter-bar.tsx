@@ -5,8 +5,7 @@ import { Search } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { CONTEXT_CATEGORY_LABELS } from "@/lib/constants";
-import { DOMAINS } from "@/data/domains";
-import { MARKETS } from "@/data/markets";
+import { useDomains, useMarkets } from "@/hooks/use-taxonomy";
 import { Input } from "@/components/ui/input";
 
 import { CATEGORY_COLORS } from "./category-colors";
@@ -63,6 +62,9 @@ export function DocumentFilterBar({
   hasActiveFilters,
   onClearFilters,
 }: DocumentFilterBarProps): React.JSX.Element {
+  const { data: DOMAINS } = useDomains();
+  const { data: MARKETS } = useMarkets();
+
   return (
     <>
       {/* Search Bar */}

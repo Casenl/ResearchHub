@@ -38,3 +38,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Firebase
+marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json

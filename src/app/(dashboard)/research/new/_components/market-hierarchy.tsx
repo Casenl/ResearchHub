@@ -1,7 +1,9 @@
+"use client";
+
 import { Check, Globe } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { MARKETS } from "@/data/markets";
+import { useMarkets } from "@/hooks/use-taxonomy";
 
 import type { Market } from "@/types";
 
@@ -16,16 +18,17 @@ export function MarketHierarchy({
   selectedIds: string[];
   onToggle: (id: string) => void;
 }): React.JSX.Element {
-  const rootMarkets = MARKETS.filter((m) => m.parent_id === null);
+  const { data: markets } = useMarkets();
+  const rootMarkets = markets.filter((m) => m.parent_id === null);
 
   function renderMarket(
     marketId: string,
     depth: number
   ): React.JSX.Element | null {
-    const market = MARKETS.find((m) => m.id === marketId);
+    const market = markets.find((m) => m.id === marketId);
     if (!market) return null;
 
-    const children = MARKETS.filter((m) => m.parent_id === marketId);
+    const children = markets.filter((m) => m.parent_id === marketId);
     const isSelected = selectedIds.includes(market.id);
 
     return (

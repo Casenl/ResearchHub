@@ -2,16 +2,16 @@
 
 import React, { useState } from "react";
 
-import { UserPlus } from "lucide-react";
+import { Loader2, UserPlus } from "lucide-react";
 
 import { generateId } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useUsers, useUpsertUser, useUpdateUser } from "@/hooks/use-users";
 
 import { useToast } from "./_components/use-toast";
 import { UserInviteForm } from "./_components/user-invite-form";
 import { UserStatsGrid } from "./_components/user-stats-grid";
 import { UsersTable } from "./_components/users-table";
-import { INITIAL_USERS } from "./_components/user-constants";
 
 import type { User, UserRole } from "@/types";
 
@@ -20,7 +20,9 @@ import type { User, UserRole } from "@/types";
 // =============================================================================
 
 export default function UsersPage(): React.JSX.Element {
-  const [users, setUsers] = useState<User[]>([...INITIAL_USERS]);
+  const { data: users, isLoading } = useUsers();
+  const { upsertUser } = useUpsertUser();
+  const { updateUser } = useUpdateUser();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const { show, ToastNode } = useToast();
@@ -29,29 +31,31 @@ export default function UsersPage(): React.JSX.Element {
   // Handlers
   // ---------------------------------------------------------------------------
 
-  const handleInvite = (data: Omit<User, "id">) => {
-    if (editingUser) {
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === editingUser.id ? { ...u, ...data } : u,
-        ),
-      );
-      show(`User "${data.name}" updated successfully`);
-      setEditingUser(null);
-    } else {
-      const newUser: User = { id: generateId(), ...data };
-      setUsers((prev) => [...prev, newUser]);
-      show(`Invitation sent to ${data.email}`);
+  const handleInvite = async (data: Omit<User, "id">) => {
+    try {
+      if (editingUser) {
+        await upsertUser({ ...editingUser, ...data });
+        show(`User "${data.name}" updated successfully`);
+        setEditingUser(null);
+      } else {
+        const newUser: User = { id: generateId(), ...data };
+        await upsertUser(newUser);
+        show(`Invitation sent to ${data.email}`);
+      }
+      setIsFormVisible(false);
+    } catch (err) {
+      console.error("Error saving user:", err);
     }
-    setIsFormVisible(false);
   };
 
-  const handleChangeRole = (userId: string, newRole: UserRole) => {
-    setUsers((prev) =>
-      prev.map((u) => (u.id === userId ? { ...u, role: newRole } : u)),
-    );
-    const user = users.find((u) => u.id === userId);
-    show(`${user?.name}'s role changed to ${newRole}`);
+  const handleChangeRole = async (userId: string, newRole: UserRole) => {
+    try {
+      await updateUser(userId, { role: newRole });
+      const user = users.find((u) => u.id === userId);
+      show(`${user?.name}'s role changed to ${newRole}`);
+    } catch (err) {
+      console.error("Error changing role:", err);
+    }
   };
 
   const handleEdit = (user: User) => {
@@ -90,6 +94,13 @@ export default function UsersPage(): React.JSX.Element {
           Invite User
         </Button>
       </div>
+
+      {/* Loading */}
+      {isLoading && users.length === 0 && (
+        <div className="flex justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      )}
 
       {/* Summary Stats */}
       <UserStatsGrid users={users} />

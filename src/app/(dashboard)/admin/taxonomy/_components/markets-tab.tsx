@@ -7,7 +7,7 @@ import { cn, generateId } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { MARKETS } from "@/data/markets";
+import { useMarkets } from "@/hooks/use-taxonomy";
 
 import { useToast } from "./use-toast";
 
@@ -40,7 +40,7 @@ function getIndentLevel(market: Market, markets: Market[]): number {
 // =============================================================================
 
 export function MarketsTab(): React.JSX.Element {
-  const [markets, setMarkets] = useState<Market[]>([...MARKETS]);
+  const { data: markets, save } = useMarkets();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({ name: "", code: "", parent_id: "" });
@@ -52,17 +52,16 @@ export function MarketsTab(): React.JSX.Element {
     setEditingId(null);
   };
 
-  const handleSave = (): void => {
+  const handleSave = async (): Promise<void> => {
     if (!form.name.trim() || !form.code.trim()) return;
 
     if (editingId) {
-      setMarkets((prev) =>
-        prev.map((m) =>
-          m.id === editingId
-            ? { ...m, name: form.name, code: form.code, parent_id: form.parent_id || null }
-            : m
-        )
+      const updated = markets.map((m) =>
+        m.id === editingId
+          ? { ...m, name: form.name, code: form.code, parent_id: form.parent_id || null }
+          : m
       );
+      await save(updated);
       show(`Market "${form.name}" updated successfully`);
     } else {
       const newMarket: Market = {
@@ -71,7 +70,7 @@ export function MarketsTab(): React.JSX.Element {
         code: form.code.toUpperCase(),
         parent_id: form.parent_id || null,
       };
-      setMarkets((prev) => [...prev, newMarket]);
+      await save([...markets, newMarket]);
       show(`Market "${form.name}" added successfully`);
     }
     resetForm();
@@ -87,9 +86,9 @@ export function MarketsTab(): React.JSX.Element {
     setIsFormVisible(true);
   };
 
-  const handleDelete = (id: string): void => {
+  const handleDelete = async (id: string): Promise<void> => {
     const market = markets.find((m) => m.id === id);
-    setMarkets((prev) => prev.filter((m) => m.id !== id));
+    await save(markets.filter((m) => m.id !== id));
     show(`Market "${market?.name}" deleted`);
   };
 

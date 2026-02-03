@@ -1,12 +1,12 @@
+"use client";
+
 import React from "react";
 import { Check, X, Shield, Building2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MARKETS } from "@/data/markets";
-import { DOMAINS } from "@/data/domains";
-import { SECTORS } from "@/data/sectors";
+import { useMarkets, useDomains, useSectors } from "@/hooks/use-taxonomy";
 
 import { MarketHierarchy } from "./market-hierarchy";
 import { DOMAIN_ICONS, SECTOR_ICONS } from "./wizard-types";
@@ -22,6 +22,10 @@ export function StepDimensions({
   onUpdate,
   onToggleArrayItem,
 }: WizardStepProps): React.JSX.Element {
+  const { data: MARKETS } = useMarkets();
+  const { data: DOMAINS } = useDomains();
+  const { data: SECTORS } = useSectors();
+
   const selectedMarkets = MARKETS.filter((m) =>
     form.selectedMarketIds.includes(m.id)
   );

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { FileText } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useResearchList } from "@/hooks/use-research";
 
 import { useResearchFilters } from "./_components/use-research-filters";
 import { ResearchSearchBar } from "./_components/research-search-bar";
@@ -16,6 +17,7 @@ import { ResearchEmptyState } from "./_components/research-empty-state";
 // ---------------------------------------------------------------------------
 
 export default function ResearchLibraryPage(): React.JSX.Element {
+  const { data: research, isLoading } = useResearchList();
   const {
     searchQuery,
     selectedStatuses,
@@ -37,7 +39,15 @@ export default function ResearchLibraryPage(): React.JSX.Element {
     setDateFilter,
     setIsFilterPanelOpen,
     clearAllFilters,
-  } = useResearchFilters();
+  } = useResearchFilters(research);
+
+  if (isLoading && research.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 
-import { MOCK_ACTIVITY_LOG } from "@/data/mock-activity";
+import { useActivityLog } from "@/hooks/use-activity";
 
 import { HealthMetricsBar } from "./_components/health-metrics-bar";
 import { ActivityFilterBar } from "./_components/activity-filter-bar";
@@ -15,6 +15,7 @@ import type { ActivityCategory } from "@/types";
 // =============================================================================
 
 export default function ActivityPage(): React.JSX.Element {
+  const { data: activityLog } = useActivityLog();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<
     ActivityCategory | "all"
@@ -27,7 +28,7 @@ export default function ActivityPage(): React.JSX.Element {
   const filteredEntries = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
 
-    return MOCK_ACTIVITY_LOG.filter((entry) => {
+    return activityLog.filter((entry) => {
       // Category filter
       if (selectedCategory !== "all" && entry.category !== selectedCategory) {
         return false;
@@ -46,7 +47,7 @@ export default function ActivityPage(): React.JSX.Element {
 
       return true;
     });
-  }, [searchQuery, selectedCategory]);
+  }, [activityLog, searchQuery, selectedCategory]);
 
   // ---------------------------------------------------------------------------
   // Render
@@ -64,7 +65,7 @@ export default function ActivityPage(): React.JSX.Element {
       </div>
 
       {/* Health metrics summary */}
-      <HealthMetricsBar activityEntries={MOCK_ACTIVITY_LOG} />
+      <HealthMetricsBar activityEntries={activityLog} />
 
       {/* Filters */}
       <ActivityFilterBar

@@ -3,10 +3,13 @@
 import React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { FileText } from "lucide-react";
+import { FileText, Loader2 } from "lucide-react";
 
-import { MOCK_CONTEXT_DOCUMENTS } from "@/data/mock-context-documents";
 import { Button } from "@/components/ui/button";
+import {
+  useContextDocumentById,
+  useDeleteContextDocument,
+} from "@/hooks/use-context-documents";
 
 import { BackToLibraryLink } from "../_components/back-to-library-link";
 import { DocumentHeader } from "../_components/document-header";
@@ -22,7 +25,16 @@ export default function ContextDocumentDetailPage(): React.JSX.Element {
   const router = useRouter();
   const id = params.id as string;
 
-  const document = MOCK_CONTEXT_DOCUMENTS.find((doc) => doc.id === id);
+  const { data: document, isLoading } = useContextDocumentById(id);
+  const { deleteContextDocument } = useDeleteContextDocument();
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   if (!document) {
     return (
@@ -46,14 +58,18 @@ export default function ContextDocumentDetailPage(): React.JSX.Element {
     );
   }
 
-  const handleDelete = (): void => {
+  const handleDelete = async (): Promise<void> => {
     if (
       window.confirm(
         `Are you sure you want to delete "${document.title}"? This action cannot be undone.`
       )
     ) {
-      alert("Document deleted (mock). Redirecting to library.");
-      router.push("/context-library");
+      try {
+        await deleteContextDocument(id);
+        router.push("/context-library");
+      } catch (error) {
+        console.error("Failed to delete context document:", error);
+      }
     }
   };
 

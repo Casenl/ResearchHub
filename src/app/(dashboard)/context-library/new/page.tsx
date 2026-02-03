@@ -3,9 +3,10 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Upload } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { useCreateContextDocument } from "@/hooks/use-context-documents";
 
 import { BackToLibraryLink } from "../_components/back-to-library-link";
 import { BasicInfoSection } from "../_components/basic-info-section";
@@ -23,6 +24,7 @@ import type { UploadMode } from "../_components/file-source-section";
 
 export default function UploadContextDocumentPage(): React.JSX.Element {
   const router = useRouter();
+  const { createContextDocument, isCreating } = useCreateContextDocument();
 
   // Form state
   const [title, setTitle] = useState("");
@@ -62,7 +64,7 @@ export default function UploadContextDocumentPage(): React.JSX.Element {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent): void => {
+  const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
     if (!title.trim()) {
@@ -75,10 +77,26 @@ export default function UploadContextDocumentPage(): React.JSX.Element {
       return;
     }
 
-    alert(
-      `Document "${title}" uploaded successfully (mock). Redirecting to Context Library.`
-    );
-    router.push("/context-library");
+    try {
+      await createContextDocument({
+        title: title.trim(),
+        description: description.trim(),
+        category,
+        file_url: externalUrl || "",
+        file_type: "pdf",
+        domain_ids: selectedDomains,
+        market_ids: selectedMarkets,
+        sector_ids: selectedSectors,
+        valid_from: validFrom || new Date().toISOString().split("T")[0],
+        valid_until: validUntil || "",
+        uploaded_by: "",
+        version: 1,
+        tag_ids: tags,
+      });
+      router.push("/context-library");
+    } catch (error) {
+      console.error("Failed to create context document:", error);
+    }
   };
 
   return (
@@ -139,9 +157,13 @@ export default function UploadContextDocumentPage(): React.JSX.Element {
               Cancel
             </Button>
           </Link>
-          <Button type="submit">
-            <Upload className="mr-2 h-4 w-4" />
-            Upload Document
+          <Button type="submit" disabled={isCreating}>
+            {isCreating ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Upload className="mr-2 h-4 w-4" />
+            )}
+            {isCreating ? "Uploading..." : "Upload Document"}
           </Button>
         </div>
       </form>

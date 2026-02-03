@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 
-import { DEFAULT_CONTEXT_RULES } from "@/data/context-rules";
+import { useContextRules } from "@/hooks/use-admin-data";
 
 import { ClassificationSection } from "./_components/classification-section";
 import { FreshnessSection } from "./_components/freshness-section";
@@ -16,7 +16,7 @@ import type { ContextRule } from "@/types";
 // =============================================================================
 
 export default function ContextRulesPage(): React.JSX.Element {
-  const [rules, setRules] = useState<ContextRule[]>([...DEFAULT_CONTEXT_RULES]);
+  const { data: rules, upsertRule } = useContextRules();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const { show, ToastNode } = useToast();
@@ -41,10 +41,8 @@ export default function ContextRulesPage(): React.JSX.Element {
     setEditingId(null);
   };
 
-  const handleSaveRule = (updated: ContextRule) => {
-    setRules((prev) =>
-      prev.map((r) => (r.id === updated.id ? { ...updated, updated_at: new Date().toISOString() } : r)),
-    );
+  const handleSaveRule = async (updated: ContextRule) => {
+    await upsertRule({ ...updated, updated_at: new Date().toISOString() });
     setEditingId(null);
     show("Rule saved successfully");
   };

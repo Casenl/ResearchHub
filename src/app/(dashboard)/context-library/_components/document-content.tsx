@@ -1,15 +1,15 @@
+"use client";
+
 import React from "react";
 import { FileText, Download, Link as LinkIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
-import { DOMAINS } from "@/data/domains";
-import { MARKETS } from "@/data/markets";
-import { SECTORS } from "@/data/sectors";
+import { useDomains, useMarkets, useSectors } from "@/hooks/use-taxonomy";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import type { ContextDocument } from "@/types";
+import type { ContextDocument, Domain, Market, Sector } from "@/types";
 
 // ---------------------------------------------------------------------------
 // Mock research references (placeholder)
@@ -48,22 +48,25 @@ const STATUS_BADGE_COLORS: Record<string, string> = {
 function resolveDimensionNames(
   domainIds: string[],
   marketIds: string[],
-  sectorIds: string[]
+  sectorIds: string[],
+  allDomains: Domain[],
+  allMarkets: Market[],
+  allSectors: Sector[]
 ): {
   domainNames: string[];
   marketNames: string[];
   sectorNames: string[];
 } {
   const domainNames = domainIds.map((id) => {
-    const domain = DOMAINS.find((d) => d.id === id);
+    const domain = allDomains.find((d) => d.id === id);
     return domain?.name ?? id;
   });
   const marketNames = marketIds.map((id) => {
-    const market = MARKETS.find((m) => m.id === id);
+    const market = allMarkets.find((m) => m.id === id);
     return market?.name ?? id;
   });
   const sectorNames = sectorIds.map((id) => {
-    const sector = SECTORS.find((s) => s.id === id);
+    const sector = allSectors.find((s) => s.id === id);
     return sector?.name ?? id;
   });
   return { domainNames, marketNames, sectorNames };
@@ -84,10 +87,17 @@ interface DocumentContentProps {
 export function DocumentContent({
   document,
 }: DocumentContentProps): React.JSX.Element {
+  const { data: allDomains } = useDomains();
+  const { data: allMarkets } = useMarkets();
+  const { data: allSectors } = useSectors();
+
   const { domainNames, marketNames, sectorNames } = resolveDimensionNames(
     document.domain_ids,
     document.market_ids,
-    document.sector_ids
+    document.sector_ids,
+    allDomains,
+    allMarkets,
+    allSectors
   );
 
   return (
