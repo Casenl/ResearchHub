@@ -4,6 +4,13 @@ import type {
   NotebookType,
   RefreshSchedule,
   ContextDocumentCategory,
+  ResearchStep,
+  AIToolStatus,
+  FreshnessStatus,
+  FreshnessAction,
+  ActivityAction,
+  ActivityCategory,
+  ActivityTargetType,
 } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -180,3 +187,79 @@ export const TIME_ESTIMATES: Record<OutputFormat, TimeEstimate> = {
     estimatedHours: 16,
   },
 };
+
+// ---------------------------------------------------------------------------
+// Admin — Research step labels
+// ---------------------------------------------------------------------------
+
+export const RESEARCH_STEP_LABELS: Record<ResearchStep, string> = {
+  discovery: "Discovery",
+  analysis: "Analysis",
+  synthesis: "Synthesis",
+};
+
+// ---------------------------------------------------------------------------
+// Admin — AI tool status labels
+// ---------------------------------------------------------------------------
+
+export const AI_TOOL_STATUS_LABELS: Record<AIToolStatus, string> = {
+  active: "Active",
+  inactive: "Inactive",
+};
+
+// ---------------------------------------------------------------------------
+// Admin — Freshness labels
+// ---------------------------------------------------------------------------
+
+export const FRESHNESS_STATUS_LABELS: Record<FreshnessStatus, string> = {
+  fresh: "Fresh",
+  stale: "Stale",
+  archived: "Archived",
+};
+
+export const FRESHNESS_ACTION_LABELS: Record<FreshnessAction, string> = {
+  flag: "Flag Only",
+  archive: "Auto-Archive",
+  notify: "Notify",
+};
+
+// ---------------------------------------------------------------------------
+// Admin — Activity labels
+// ---------------------------------------------------------------------------
+
+export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
+  created: "Created",
+  updated: "Updated",
+  deleted: "Deleted",
+  published: "Published",
+  archived: "Archived",
+  login: "Login",
+  role_changed: "Role Changed",
+};
+
+export const ACTIVITY_CATEGORY_LABELS: Record<ActivityCategory, string> = {
+  research: "Research",
+  admin: "Admin",
+  auth: "Authentication",
+  system: "System",
+};
+
+export const ACTIVITY_TARGET_TYPE_LABELS: Record<ActivityTargetType, string> = {
+  research: "Research",
+  context_document: "Context Document",
+  prompt_template: "Prompt Template",
+  ai_tool_profile: "AI Tool",
+  user: "User",
+  taxonomy: "Taxonomy",
+};
+
+// ---------------------------------------------------------------------------
+// Admin — Business unit options
+// ---------------------------------------------------------------------------
+
+export const BUSINESS_UNITS: string[] = [
+  "Security BU",
+  "Cloud BU",
+  "Digital Workspace BU",
+  "AI BU",
+];

@@ -46,6 +46,35 @@ export type TagType = 'system' | 'free';
 
 export type ClonedChangedDimension = 'market' | 'domain' | 'sector';
 
+export type ResearchStep = 'discovery' | 'analysis' | 'synthesis';
+
+export type AIToolStatus = 'active' | 'inactive';
+
+export type FreshnessStatus = 'fresh' | 'stale' | 'archived';
+
+export type FreshnessAction = 'flag' | 'archive' | 'notify';
+
+export type FreshnessNotifyTarget = 'uploader' | 'admins';
+
+export type ActivityAction =
+  | 'created'
+  | 'updated'
+  | 'deleted'
+  | 'published'
+  | 'archived'
+  | 'login'
+  | 'role_changed';
+
+export type ActivityTargetType =
+  | 'research'
+  | 'context_document'
+  | 'prompt_template'
+  | 'ai_tool_profile'
+  | 'user'
+  | 'taxonomy';
+
+export type ActivityCategory = 'research' | 'admin' | 'auth' | 'system';
+
 // -----------------------------------------------------------------------------
 // Core Entities
 // -----------------------------------------------------------------------------
@@ -94,6 +123,10 @@ export interface User {
   role: UserRole;
   /** Domains this user is associated with. */
   domain_ids: string[];
+  /** Business unit for cost attribution. */
+  business_unit?: string;
+  /** Optional monthly token budget (soft limit). */
+  monthly_token_budget?: number;
 }
 
 // -----------------------------------------------------------------------------
@@ -239,4 +272,115 @@ export interface ResearchBrief {
   /** ISO 8601 date string. */
   deadline: string;
   context_document_ids: string[];
+}
+
+// -----------------------------------------------------------------------------
+// Admin — Prompt Template System
+// -----------------------------------------------------------------------------
+
+/** A versioned prompt template for a research step + domain combination. */
+export interface PromptTemplate {
+  id: string;
+  /** Domain ID or "_default" for the base template. */
+  domain: string;
+  research_step: ResearchStep;
+  /** AI tool ID for tool-specific override, or null for the base template. */
+  ai_tool: string | null;
+  version: number;
+  content: string;
+  variables: string[];
+  is_active: boolean;
+  created_by: string;
+  created_at: string;
+  previous_version_id: string | null;
+}
+
+/** An AI tool profile with wrapper templates and pricing config. */
+export interface AIToolProfile {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  status: AIToolStatus;
+  wrapper_prefix: string;
+  wrapper_suffix: string;
+  pricing_config: {
+    input_cost_per_1k_tokens: number;
+    output_cost_per_1k_tokens: number;
+    currency: string;
+  };
+  recommended_steps: ResearchStep[];
+  is_default: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+/** Maps a domain + research step to a specific AI tool. */
+export interface PromptAssignment {
+  id: string;
+  domain: string;
+  research_step: ResearchStep;
+  ai_tool_id: string;
+  override_template_id: string | null;
+  updated_by: string;
+  updated_at: string;
+}
+
+// -----------------------------------------------------------------------------
+// Admin — Context Library Governance
+// -----------------------------------------------------------------------------
+
+/** Classification and freshness rules for a context document category. */
+export interface ContextRule {
+  id: string;
+  category: string;
+  required_fields: string[];
+  suggested_tags: string[];
+  allowed_file_types: string[];
+  max_file_size_mb: number;
+  freshness_policy: {
+    max_age_days: number;
+    grace_period_days: number;
+    action: FreshnessAction;
+    notify_targets: FreshnessNotifyTarget[];
+  };
+  created_at: string;
+  updated_at: string;
+}
+
+// -----------------------------------------------------------------------------
+// Admin — Activity & Usage Logging
+// -----------------------------------------------------------------------------
+
+/** An audit trail entry for a system event. */
+export interface ActivityLogEntry {
+  id: string;
+  timestamp: string;
+  actor: {
+    user_id: string;
+    display_name: string;
+  };
+  action: ActivityAction;
+  target_type: ActivityTargetType;
+  target_id: string;
+  target_name: string;
+  details: Record<string, unknown>;
+  category: ActivityCategory;
+}
+
+/** A single API usage record for cost tracking. */
+export interface ApiUsageEntry {
+  id: string;
+  timestamp: string;
+  user_id: string;
+  user_display_name: string;
+  business_unit: string;
+  ai_tool_id: string;
+  research_id: string | null;
+  research_step: ResearchStep;
+  input_tokens: number;
+  output_tokens: number;
+  estimated_cost: number;
+  currency: string;
+  metadata: Record<string, unknown>;
 }

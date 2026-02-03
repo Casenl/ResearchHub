@@ -14,6 +14,11 @@ import {
   ChevronRight,
   LogOut,
   Loader2,
+  Grid3x3,
+  FileText,
+  ShieldCheck,
+  Activity,
+  BarChart3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProtectedRoute } from "@/components/shared/protected-route";
@@ -41,11 +46,28 @@ const navigation: NavSection[] = [
     ],
   },
   {
-    title: "Admin",
+    title: "Configuration",
     adminOnly: true,
     items: [
+      { label: "Prompts", href: "/admin/prompts", icon: FileText },
       { label: "Taxonomy", href: "/admin/taxonomy", icon: Tags },
+    ],
+  },
+  {
+    title: "Governance",
+    adminOnly: true,
+    items: [
+      { label: "Context Rules", href: "/admin/context-rules", icon: ShieldCheck },
       { label: "Users", href: "/admin/users", icon: Users },
+    ],
+  },
+  {
+    title: "Oversight",
+    adminOnly: true,
+    items: [
+      { label: "Coverage", href: "/admin/coverage", icon: Grid3x3 },
+      { label: "Activity", href: "/admin/activity", icon: Activity },
+      { label: "Usage & Cost", href: "/admin/usage", icon: BarChart3 },
     ],
   },
 ];
