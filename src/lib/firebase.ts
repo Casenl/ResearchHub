@@ -1,27 +1,12 @@
-// =============================================================================
-// ITQ Market Intelligence Portal — Firebase Configuration (Placeholder)
-// =============================================================================
-//
-// This module will initialise and export the Firebase services used by the
-// portal (Firestore, Storage, Auth). For the MVP everything is local-state
-// only; the functions below are stubs that will be replaced once the Firebase
-// project is provisioned.
-//
-// Required environment variables (.env.local):
-// ─────────────────────────────────────────────
-//   NEXT_PUBLIC_FIREBASE_API_KEY=<your-api-key>
-//   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=<project>.firebaseapp.com
-//   NEXT_PUBLIC_FIREBASE_PROJECT_ID=<project-id>
-//   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=<project>.appspot.com
-//   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=<sender-id>
-//   NEXT_PUBLIC_FIREBASE_APP_ID=<app-id>
-// =============================================================================
+import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
+import { getStorage, type FirebaseStorage } from "firebase/storage";
 
 // -----------------------------------------------------------------------------
-// Types
+// Configuration
 // -----------------------------------------------------------------------------
 
-/** Shape of the Firebase configuration object. */
 export interface FirebaseConfig {
   apiKey: string;
   authDomain: string;
@@ -31,59 +16,55 @@ export interface FirebaseConfig {
   appId: string;
 }
 
+function getFirebaseConfig(): FirebaseConfig {
+  return {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
+    messagingSenderId:
+      process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "",
+  };
+}
+
 // -----------------------------------------------------------------------------
-// Placeholder functions
+// Lazy singleton instances — only initialize on the client
 // -----------------------------------------------------------------------------
 
-/**
- * Initialise the Firebase app.
- *
- * TODO: Import `initializeApp` from "firebase/app", read env vars, and return
- * the initialised `FirebaseApp` instance.
- */
-export function initFirebase(): null {
-  // TODO: Implement Firebase initialisation
-  // const config: FirebaseConfig = {
-  //   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
-  //   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
-  //   projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
-  //   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET!,
-  //   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID!,
-  //   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
-  // };
-  // return initializeApp(config);
-  return null;
+let _app: FirebaseApp | undefined;
+let _auth: Auth | undefined;
+let _db: Firestore | undefined;
+let _storage: FirebaseStorage | undefined;
+
+function getFirebaseApp(): FirebaseApp {
+  if (!_app) {
+    _app =
+      getApps().length > 0 ? getApp() : initializeApp(getFirebaseConfig());
+  }
+  return _app;
 }
 
-/**
- * Get a Firestore database instance.
- *
- * TODO: Import `getFirestore` from "firebase/firestore" and return
- * the `Firestore` instance.
- */
-export function getFirestoreDb(): null {
-  // TODO: return getFirestore(initFirebase()!);
-  return null;
+/** Firebase Auth instance. Only call from client-side code. */
+export function getFirebaseAuth(): Auth {
+  if (!_auth) {
+    _auth = getAuth(getFirebaseApp());
+  }
+  return _auth;
 }
 
-/**
- * Get a Firebase Storage instance.
- *
- * TODO: Import `getStorage` from "firebase/storage" and return
- * the `FirebaseStorage` instance.
- */
-export function getFirebaseStorage(): null {
-  // TODO: return getStorage(initFirebase()!);
-  return null;
+/** Firestore instance. Only call from client-side code. */
+export function getFirestoreDb(): Firestore {
+  if (!_db) {
+    _db = getFirestore(getFirebaseApp());
+  }
+  return _db;
 }
 
-/**
- * Get a Firebase Auth instance.
- *
- * TODO: Import `getAuth` from "firebase/auth" and return
- * the `Auth` instance.
- */
-export function getFirebaseAuth(): null {
-  // TODO: return getAuth(initFirebase()!);
-  return null;
+/** Firebase Storage instance. Only call from client-side code. */
+export function getFirebaseStorage(): FirebaseStorage {
+  if (!_storage) {
+    _storage = getStorage(getFirebaseApp());
+  }
+  return _storage;
 }
