@@ -443,8 +443,7 @@ export default function UploadContextDocumentPage() {
                   <Badge
                     key={tag}
                     variant="secondary"
-                    size="sm"
-                    className="gap-1"
+                    className="px-2 py-0.5 text-xs gap-1"
                   >
                     {tag}
                     <button

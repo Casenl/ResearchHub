@@ -33,9 +33,25 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 
-import { MARKETS, type Market as MarketData } from "@/data/markets";
+import { MARKETS } from "@/data/markets";
 import { DOMAINS } from "@/data/domains";
-import { SECTORS, type Sector as SectorData } from "@/data/sectors";
+import { SECTORS } from "@/data/sectors";
+
+/** Local type matching the actual runtime shape from @/data/markets. */
+interface MarketData {
+  id: string;
+  name: string;
+  code: string;
+  parentId: string | null;
+}
+
+/** Local type matching the actual runtime shape from @/data/sectors. */
+interface SectorData {
+  id: string;
+  name: string;
+  code: string;
+  relevantRegulations: string[];
+}
 
 import type {
   ResearchType,
@@ -383,13 +399,13 @@ function MarketHierarchy({
   selectedIds: string[];
   onToggle: (id: string) => void;
 }) {
-  const rootMarkets = (MARKETS as MarketData[]).filter((m) => m.parentId === null);
+  const rootMarkets = (MARKETS as unknown as MarketData[]).filter((m) => m.parentId === null);
 
   function renderMarket(marketId: string, depth: number) {
-    const market = (MARKETS as MarketData[]).find((m) => m.id === marketId);
+    const market = (MARKETS as unknown as MarketData[]).find((m) => m.id === marketId);
     if (!market) return null;
 
-    const children = (MARKETS as MarketData[]).filter((m) => m.parentId === marketId);
+    const children = (MARKETS as unknown as MarketData[]).filter((m) => m.parentId === marketId);
     const isSelected = selectedIds.includes(market.id);
 
     return (
