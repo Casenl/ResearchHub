@@ -2,21 +2,17 @@
  * Seed script: populates Firestore with all seed/mock data.
  *
  * Usage:
- *   npx tsx scripts/seed-firestore.ts
+ *   npm run seed
  *
  * Requires:
- *   - NEXT_PUBLIC_FIREBASE_* env vars set (via .env.local or shell)
- *   - firebase package installed
+ *   - Service account key JSON at project root
+ *   - firebase-admin package installed (devDependency)
  */
 
-import { initializeApp, getApps, getApp } from "firebase/app";
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  collection,
-  writeBatch,
-} from "firebase/firestore";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { initializeApp, cert } from "firebase-admin/app";
+import { getFirestore } from "firebase-admin/firestore";
 
 // ---------------------------------------------------------------------------
 // Seed data imports
@@ -35,22 +31,34 @@ import { MOCK_ACTIVITY_LOG } from "../src/data/mock-activity";
 import { MOCK_API_USAGE } from "../src/data/mock-usage";
 
 // ---------------------------------------------------------------------------
-// Firebase init (reuse .env.local variables)
+// Firebase Admin init (bypasses security rules)
 // ---------------------------------------------------------------------------
 
-function getConfig() {
-  return {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? "",
-    messagingSenderId:
-      process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID ?? "",
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "",
-  };
+function findServiceAccountKey(): string {
+  const cwd = process.cwd();
+  const candidates = [
+    resolve(cwd, "marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json"),
+    resolve(import.meta.dirname ?? ".", "..", "marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json"),
+  ];
+  for (const p of candidates) {
+    try {
+      readFileSync(p, "utf-8"); // test if readable
+      return p;
+    } catch {
+      // try next
+    }
+  }
+  throw new Error(
+    "Service account key not found. Expected at project root:\n" +
+    "  marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json"
+  );
 }
 
-const app = getApps().length > 0 ? getApp() : initializeApp(getConfig());
+const keyPath = findServiceAccountKey();
+console.log(`Using service account key: ${keyPath}`);
+
+const serviceAccount = JSON.parse(readFileSync(keyPath, "utf-8"));
+const app = initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore(app);
 
 // ---------------------------------------------------------------------------
@@ -110,10 +118,10 @@ const MOCK_USERS = [
 
 async function seedTaxonomy() {
   console.log("Seeding taxonomy...");
-  await setDoc(doc(db, "taxonomy", "markets"), { items: MARKETS });
-  await setDoc(doc(db, "taxonomy", "domains"), { items: DOMAINS });
-  await setDoc(doc(db, "taxonomy", "sectors"), { items: SECTORS });
-  await setDoc(doc(db, "taxonomy", "tags"), { items: SYSTEM_TAGS });
+  await db.doc("taxonomy/markets").set({ items: MARKETS });
+  await db.doc("taxonomy/domains").set({ items: DOMAINS });
+  await db.doc("taxonomy/sectors").set({ items: SECTORS });
+  await db.doc("taxonomy/tags").set({ items: SYSTEM_TAGS });
   console.log("  ✓ Taxonomy seeded (markets, domains, sectors, tags)");
 }
 
@@ -121,7 +129,7 @@ async function seedUsers() {
   console.log("Seeding users...");
   for (const user of MOCK_USERS) {
     const { id, ...data } = user;
-    await setDoc(doc(db, "users", id), data);
+    await db.doc(`users/${id}`).set(data);
   }
   console.log(`  ✓ ${MOCK_USERS.length} users seeded`);
 }
@@ -130,7 +138,7 @@ async function seedResearch() {
   console.log("Seeding research...");
   for (const research of MOCK_RESEARCH) {
     const { id, ...data } = research;
-    await setDoc(doc(db, "research", id), data);
+    await db.doc(`research/${id}`).set(data);
   }
   console.log(`  ✓ ${MOCK_RESEARCH.length} research items seeded`);
 }
@@ -139,7 +147,7 @@ async function seedContextDocuments() {
   console.log("Seeding context documents...");
   for (const ctxDoc of MOCK_CONTEXT_DOCUMENTS) {
     const { id, ...data } = ctxDoc;
-    await setDoc(doc(db, "context-documents", id), data);
+    await db.doc(`context-documents/${id}`).set(data);
   }
   console.log(`  ✓ ${MOCK_CONTEXT_DOCUMENTS.length} context documents seeded`);
 }
@@ -148,7 +156,7 @@ async function seedAIToolProfiles() {
   console.log("Seeding AI tool profiles...");
   for (const tool of AI_TOOL_PROFILES) {
     const { id, ...data } = tool;
-    await setDoc(doc(db, "ai-tool-profiles", id), data);
+    await db.doc(`ai-tool-profiles/${id}`).set(data);
   }
   console.log(`  ✓ ${AI_TOOL_PROFILES.length} AI tool profiles seeded`);
 }
@@ -157,7 +165,7 @@ async function seedPromptTemplates() {
   console.log("Seeding prompt templates...");
   for (const template of DEFAULT_PROMPT_TEMPLATES) {
     const { id, ...data } = template;
-    await setDoc(doc(db, "prompt-templates", id), data);
+    await db.doc(`prompt-templates/${id}`).set(data);
   }
   console.log(`  ✓ ${DEFAULT_PROMPT_TEMPLATES.length} prompt templates seeded`);
 }
@@ -166,17 +174,17 @@ async function seedContextRules() {
   console.log("Seeding context rules...");
   for (const rule of DEFAULT_CONTEXT_RULES) {
     const { id, ...data } = rule;
-    await setDoc(doc(db, "context-rules", id), data);
+    await db.doc(`context-rules/${id}`).set(data);
   }
   console.log(`  ✓ ${DEFAULT_CONTEXT_RULES.length} context rules seeded`);
 }
 
 async function seedActivityLog() {
   console.log("Seeding activity log...");
-  const batch = writeBatch(db);
+  const batch = db.batch();
   for (const entry of MOCK_ACTIVITY_LOG) {
     const { id, ...data } = entry;
-    batch.set(doc(collection(db, "activity-log"), id), data);
+    batch.set(db.collection("activity-log").doc(id), data);
   }
   await batch.commit();
   console.log(`  ✓ ${MOCK_ACTIVITY_LOG.length} activity log entries seeded`);
@@ -184,10 +192,10 @@ async function seedActivityLog() {
 
 async function seedApiUsage() {
   console.log("Seeding API usage...");
-  const batch = writeBatch(db);
+  const batch = db.batch();
   for (const entry of MOCK_API_USAGE) {
     const { id, ...data } = entry;
-    batch.set(doc(collection(db, "api-usage"), id), data);
+    batch.set(db.collection("api-usage").doc(id), data);
   }
   await batch.commit();
   console.log(`  ✓ ${MOCK_API_USAGE.length} API usage entries seeded`);
@@ -199,7 +207,7 @@ async function seedApiUsage() {
 
 async function main() {
   console.log("\n🌱 Seeding Firestore...\n");
-  console.log(`Project: ${getConfig().projectId}`);
+  console.log(`Project: ${serviceAccount.project_id}`);
   console.log("");
 
   await seedTaxonomy();
