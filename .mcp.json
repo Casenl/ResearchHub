@@ -1,15 +1,22 @@
 {
   "mcpServers": {
     "context7": {
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"]
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@upstash/context7-mcp"]
     },
     "firebase-mcp": {
-      "command": "npx",
-      "args": ["-y", "@gannonh/firebase-mcp"],
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "@gannonh/firebase-mcp"],
       "env": {
-        "SERVICE_ACCOUNT_KEY_PATH": "/path/to/your/serviceAccountKey.json",
-        "FIREBASE_STORAGE_BUCKET": "your-project-id.firebasestorage.app"
+        "SERVICE_ACCOUNT_KEY_PATH": "./marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json",
+        "FIREBASE_STORAGE_BUCKET": "marketintelligence-hub.firebasestorage.app"
+      }
+    },
+    "researchhub": {
+      "command": "cmd",
+      "args": ["/c", "npx", "tsx", "src/mcp/server.ts"],
+      "env": {
+        "FIREBASE_ADMIN_SDK_PATH": "./marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json"
       }
     }
   }
