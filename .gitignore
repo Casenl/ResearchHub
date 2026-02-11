@@ -45,5 +45,6 @@ next-env.d.ts
 
 # Firebase
 marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json
+apphosting.yaml
 functions/lib/
 functions/node_modules/
