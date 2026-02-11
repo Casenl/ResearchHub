@@ -18,7 +18,7 @@ export class ResearchDetailPage {
 
   async goto(id: string): Promise<void> {
     await this.page.goto(`/research/${id}`);
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async expectLoaded(): Promise<void> {

@@ -19,7 +19,7 @@ setup("authenticate as user", async ({ page }) => {
   }
 
   await page.goto("/login");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
 
   // Fill sign-in form
   await page.getByLabel("Email").fill(email);
@@ -50,7 +50,7 @@ setup("authenticate as admin", async ({ page }) => {
   }
 
   await page.goto("/login");
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
 
   // Fill sign-in form
   await page.getByLabel("Email").fill(email);

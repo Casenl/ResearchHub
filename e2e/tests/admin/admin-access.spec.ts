@@ -14,7 +14,7 @@ test.describe("Admin Access Control (non-admin user)", () => {
 
   test("Configuration section title is not visible", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // The "Configuration" section header should not be visible
     await expect(page.locator("aside").getByText("Configuration")).not.toBeVisible();
@@ -22,21 +22,21 @@ test.describe("Admin Access Control (non-admin user)", () => {
 
   test("Governance section title is not visible", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     await expect(page.locator("aside").getByText("Governance")).not.toBeVisible();
   });
 
   test("Oversight section title is not visible", async ({ page }) => {
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     await expect(page.locator("aside").getByText("Oversight")).not.toBeVisible();
   });
 
   test("direct navigation to /admin/taxonomy shows access denied or redirects", async ({ page }) => {
     await page.goto("/admin/taxonomy");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Should either redirect away, show an access denied message,
     // or the admin-only content simply won't render
@@ -60,7 +60,7 @@ test.describe("Admin Access Control (non-admin user)", () => {
 
   test("direct navigation to /admin/users shows access denied or redirects", async ({ page }) => {
     await page.goto("/admin/users");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     const isOnAdminPage = page.url().includes("/admin/users");
 

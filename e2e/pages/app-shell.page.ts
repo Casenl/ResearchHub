@@ -38,7 +38,7 @@ export class AppShellPage {
 
   async navigateTo(label: string): Promise<void> {
     await this.sidebarLink(label).click();
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async expectActiveLink(label: string): Promise<void> {

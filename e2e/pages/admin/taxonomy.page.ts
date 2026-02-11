@@ -22,7 +22,7 @@ export class TaxonomyPage {
 
   async goto(): Promise<void> {
     await this.page.goto("/admin/taxonomy");
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async expectLoaded(): Promise<void> {

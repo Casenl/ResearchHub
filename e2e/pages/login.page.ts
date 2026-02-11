@@ -17,22 +17,22 @@ export class LoginPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.heading = page.getByRole("heading", { level: 2 }).first();
+    this.heading = page.getByRole("heading", { name: /Sign in|Create account/ });
     this.emailInput = page.getByLabel("Email");
     this.passwordInput = page.getByLabel("Password");
     this.displayNameInput = page.getByLabel("Full name");
-    this.submitButton = page.getByRole("button", { name: /Sign in|Create account/ });
+    this.submitButton = page.locator("button[type='submit']");
     this.googleButton = page.getByRole("button", { name: "Continue with Google" });
     this.toggleModeButton = page.getByRole("button", { name: /Create one|Sign in/ }).last();
     this.passwordToggle = page.locator("button[tabindex='-1']");
-    this.errorBanner = page.locator("[class*='bg-red-50']");
+    this.errorBanner = page.locator("[class*='bg-destructive']");
     this.brandingPanel = page.locator(".lg\\:flex.lg\\:w-1\\/2");
     this.mobileLogo = page.locator(".lg\\:hidden");
   }
 
   async goto(): Promise<void> {
     await this.page.goto("/login");
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async expectLoaded(): Promise<void> {

@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
+import { getAuth, initializeAuth, browserLocalPersistence } from "firebase/auth";
 import { getAnalytics, isSupported } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { getStorage } from "firebase/storage";
@@ -55,10 +55,19 @@ function getFirebaseApp(): FirebaseApp {
   return _app;
 }
 
-/** Firebase Auth instance. Only call from client-side code. */
+/** Firebase Auth instance. Only call from client-side code.
+ *  Uses localStorage persistence so Playwright E2E tests can capture auth state
+ *  via storageState (IndexedDB — the default — is not captured). */
 export function getFirebaseAuth(): Auth {
   if (!_auth) {
-    _auth = getAuth(getFirebaseApp());
+    try {
+      _auth = initializeAuth(getFirebaseApp(), {
+        persistence: browserLocalPersistence,
+      });
+    } catch {
+      // Already initialized elsewhere — fall back to existing instance
+      _auth = getAuth(getFirebaseApp());
+    }
   }
   return _auth;
 }

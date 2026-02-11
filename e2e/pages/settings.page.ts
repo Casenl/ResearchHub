@@ -26,7 +26,7 @@ export class SettingsPage {
 
   async goto(): Promise<void> {
     await this.page.goto("/settings");
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async expectLoaded(): Promise<void> {

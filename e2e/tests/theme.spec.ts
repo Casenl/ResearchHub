@@ -59,7 +59,7 @@ test.describe("Theme", () => {
 
     // Reload
     await settingsPage.page.reload();
-    await settingsPage.page.waitForLoadState("networkidle");
+    await settingsPage.page.waitForLoadState("domcontentloaded");
 
     // Theme should still be dark
     const isDark = await hasDarkClass(settingsPage.page);
@@ -99,12 +99,12 @@ test.describe("Theme", () => {
   test("login page respects theme from localStorage", async ({ page }) => {
     // Set dark theme in localStorage before navigating to login
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
     await setThemeViaStorage(page, "dark");
 
     // Now navigate to a page that will show the theme
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     const isDark = await hasDarkClass(page);
     expect(isDark).toBe(true);
@@ -117,11 +117,11 @@ test.describe("Theme", () => {
 test.describe("Theme - Dark Mode Color Audit", () => {
   test("no hardcoded bg-white elements in dark mode", async ({ page }) => {
     await page.goto("/settings");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
     await setThemeViaStorage(page, "dark");
 
     await page.goto("/");
-    await page.waitForLoadState("networkidle");
+    await page.waitForLoadState("domcontentloaded");
 
     // Check that the page background isn't white in dark mode
     const bgColor = await page.evaluate(() => {

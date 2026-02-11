@@ -16,7 +16,7 @@ export class ContextLibraryPage {
 
   async goto(): Promise<void> {
     await this.page.goto("/context-library");
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async expectLoaded(): Promise<void> {

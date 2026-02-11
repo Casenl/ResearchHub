@@ -20,7 +20,7 @@ export class UsersPage {
 
   async goto(): Promise<void> {
     await this.page.goto("/admin/users");
-    await this.page.waitForLoadState("networkidle");
+    await this.page.waitForLoadState("domcontentloaded");
   }
 
   async expectLoaded(): Promise<void> {

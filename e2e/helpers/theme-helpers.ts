@@ -76,5 +76,5 @@ export async function setThemeViaStorage(
 ): Promise<void> {
   await page.evaluate((t) => localStorage.setItem("itq-theme", t), theme);
   await page.reload();
-  await page.waitForLoadState("networkidle");
+  await page.waitForLoadState("domcontentloaded");
 }
