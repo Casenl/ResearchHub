@@ -34,7 +34,7 @@ test.describe("Research Library", () => {
     await researchLibraryPage.toggleFilters();
 
     // The filter panel should now be visible (status badges, domain badges, etc.)
-    await expect(researchLibraryPage.page.getByText(/status/i)).toBeVisible();
+    await expect(researchLibraryPage.page.locator("main").getByRole("heading", { name: "Status" })).toBeVisible();
   });
 
   test("search filters research cards", async ({ researchLibraryPage }) => {

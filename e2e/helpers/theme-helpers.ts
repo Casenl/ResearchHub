@@ -43,6 +43,18 @@ export async function getCssVariable(
 }
 
 /**
+ * Normalize hex colors to 6-digit lowercase form.
+ * e.g. "#fff" → "#ffffff", "#FFF" → "#ffffff"
+ */
+function normalizeHex(hex: string): string {
+  const h = hex.trim().toLowerCase();
+  if (/^#[0-9a-f]{3}$/.test(h)) {
+    return `#${h[1]}${h[1]}${h[2]}${h[2]}${h[3]}${h[3]}`;
+  }
+  return h;
+}
+
+/**
  * Assert the current theme matches the expected color values.
  */
 export async function expectThemeColors(
@@ -53,9 +65,9 @@ export async function expectThemeColors(
   const fg = await getCssVariable(page, "--color-foreground");
   const primary = await getCssVariable(page, "--color-primary");
 
-  expect(bg).toBe(expected.background);
-  expect(fg).toBe(expected.foreground);
-  expect(primary).toBe(expected.primary);
+  expect(normalizeHex(bg)).toBe(normalizeHex(expected.background));
+  expect(normalizeHex(fg)).toBe(normalizeHex(expected.foreground));
+  expect(normalizeHex(primary)).toBe(normalizeHex(expected.primary));
 }
 
 /**

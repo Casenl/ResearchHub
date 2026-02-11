@@ -19,15 +19,30 @@ setup("authenticate as user", async ({ page }) => {
   }
 
   await page.goto("/login");
-  await page.waitForLoadState("domcontentloaded");
+
+  // Wait for the login form to be interactive (past the loading spinner)
+  const emailInput = page.getByLabel("Email");
+  await emailInput.waitFor({ state: "visible", timeout: 10_000 });
 
   // Fill sign-in form
-  await page.getByLabel("Email").fill(email);
+  await emailInput.fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
 
-  // Wait for redirect to dashboard
-  await expect(page).toHaveURL("/", { timeout: 15_000 });
+  // Wait for redirect — if login fails, capture the UI error for diagnostics
+  try {
+    await expect(page).toHaveURL("/", { timeout: 15_000 });
+  } catch {
+    const errorBanner = page.locator("[class*='destructive']");
+    if (await errorBanner.isVisible()) {
+      const errorText = await errorBanner.textContent();
+      throw new Error(`Login failed for ${email}: ${errorText}`);
+    }
+    throw new Error(
+      `Login failed for ${email}: page stayed at ${page.url()} with no visible error`
+    );
+  }
+
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible({
     timeout: 10_000,
   });
@@ -50,15 +65,30 @@ setup("authenticate as admin", async ({ page }) => {
   }
 
   await page.goto("/login");
-  await page.waitForLoadState("domcontentloaded");
+
+  // Wait for the login form to be interactive (past the loading spinner)
+  const emailInput = page.getByLabel("Email");
+  await emailInput.waitFor({ state: "visible", timeout: 10_000 });
 
   // Fill sign-in form
-  await page.getByLabel("Email").fill(email);
+  await emailInput.fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Sign in" }).click();
 
-  // Wait for redirect to dashboard
-  await expect(page).toHaveURL("/", { timeout: 15_000 });
+  // Wait for redirect — if login fails, capture the UI error for diagnostics
+  try {
+    await expect(page).toHaveURL("/", { timeout: 15_000 });
+  } catch {
+    const errorBanner = page.locator("[class*='destructive']");
+    if (await errorBanner.isVisible()) {
+      const errorText = await errorBanner.textContent();
+      throw new Error(`Login failed for ${email}: ${errorText}`);
+    }
+    throw new Error(
+      `Login failed for ${email}: page stayed at ${page.url()} with no visible error`
+    );
+  }
+
   await expect(page.getByRole("heading", { name: "Dashboard" })).toBeVisible({
     timeout: 10_000,
   });

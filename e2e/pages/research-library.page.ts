@@ -20,7 +20,7 @@ export class ResearchLibraryPage {
     this.searchInput = page.getByPlaceholder(/search/i);
     this.filterToggle = page.getByRole("button", { name: /filter/i });
     this.clearFiltersButton = page.getByRole("button", { name: /clear/i });
-    this.newResearchButton = page.getByRole("link", { name: "New Research" });
+    this.newResearchButton = page.locator("main").getByRole("link", { name: "New Research" });
     this.researchCards = page.locator("[class*='grid'] > a, [class*='grid'] > div").filter({ has: page.locator("h3") });
     this.emptyState = page.getByText(/no research found|no results/i);
     this.filterPanel = page.locator("[class*='filter']");

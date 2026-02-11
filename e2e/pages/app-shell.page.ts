@@ -52,28 +52,37 @@ export class AppShellPage {
 
   async collapseSidebar(): Promise<void> {
     const isCollapsed = await this.sidebar.evaluate(
-      (el) => el.classList.contains("w-16")
+      (el) => el.className.includes("w-16")
     );
     if (!isCollapsed) {
-      await this.collapseButton.click();
+      await this.collapseButton.scrollIntoViewIfNeeded();
+      // JS click bypasses Next.js dev overlay intercepting pointer events
+      await this.collapseButton.evaluate((el) =>
+        (el as HTMLButtonElement).click()
+      );
+      await this.page.waitForTimeout(400);
     }
   }
 
   async expandSidebar(): Promise<void> {
     const isCollapsed = await this.sidebar.evaluate(
-      (el) => el.classList.contains("w-16")
+      (el) => el.className.includes("w-16")
     );
     if (isCollapsed) {
-      await this.collapseButton.click();
+      await this.collapseButton.scrollIntoViewIfNeeded();
+      await this.collapseButton.evaluate((el) =>
+        (el as HTMLButtonElement).click()
+      );
+      await this.page.waitForTimeout(400);
     }
   }
 
   async expectSidebarCollapsed(): Promise<void> {
-    await expect(this.sidebar).toHaveClass(/w-16/);
+    await expect(this.sidebar).toHaveAttribute("class", /w-16/);
   }
 
   async expectSidebarExpanded(): Promise<void> {
-    await expect(this.sidebar).toHaveClass(/w-64/);
+    await expect(this.sidebar).toHaveAttribute("class", /w-64/);
   }
 
   async signOut(): Promise<void> {

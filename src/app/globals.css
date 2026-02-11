@@ -29,4 +29,24 @@
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+
+  .dark {
+    --color-background: #0c0c0e;
+    --color-foreground: #e5e5e5;
+    --color-muted: #1a1a1f;
+    --color-muted-foreground: #a3a3a3;
+    --color-border: #2a2a30;
+    --color-ring: #e5e5e5;
+    --color-primary: #3b82f6;
+    --color-primary-foreground: #ffffff;
+    --color-secondary: #1a1a1f;
+    --color-secondary-foreground: #e5e5e5;
+    --color-accent: #1a1a1f;
+    --color-accent-foreground: #e5e5e5;
+    --color-destructive: #ef4444;
+    --color-destructive-foreground: #ffffff;
+    --color-success: #22c55e;
+    --color-warning: #f59e0b;
+    --color-info: #3b82f6;
+  }
 }

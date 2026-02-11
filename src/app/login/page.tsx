@@ -261,7 +261,7 @@ export default function LoginPage(): React.JSX.Element | null {
                   placeholder="••••••••"
                   required
                   minLength={6}
-                  className="w-full rounded-lg border border-border bg-white px-3 py-2 pr-10 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 pr-10 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                   autoComplete={
                     mode === "signin" ? "current-password" : "new-password"
                   }

@@ -21,6 +21,7 @@ import {
   BarChart3,
   KeyRound,
   ClipboardCheck,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProtectedRoute } from "@/components/shared/protected-route";
@@ -45,6 +46,7 @@ const navigation: NavSection[] = [
       { label: "Research Library", href: "/research", icon: Library },
       { label: "New Research", href: "/research/new", icon: Plus },
       { label: "Context Library", href: "/context-library", icon: FolderOpen },
+      { label: "Settings", href: "/settings", icon: Settings },
     ],
   },
   {
@@ -100,7 +102,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.JSX
         {/* Sidebar */}
         <aside
           className={cn(
-            "flex flex-col border-r border-border bg-white transition-all duration-300",
+            "flex flex-col border-r border-border bg-background transition-all duration-300",
             isCollapsed ? "w-16" : "w-64"
           )}
         >
@@ -230,7 +232,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.JSX
         {/* Main Content Area */}
         <div className="flex flex-1 flex-col overflow-hidden">
           {/* Top Header Bar */}
-          <header className="flex h-16 items-center justify-between border-b border-border bg-white px-6">
+          <header className="flex h-16 items-center justify-between border-b border-border bg-background px-6">
             {/* Breadcrumbs */}
             <div className="flex items-center text-sm text-muted-foreground">
               <Link
