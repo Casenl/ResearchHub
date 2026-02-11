@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/use-auth";
 
 export default function LoginPage(): React.JSX.Element | null {
   const router = useRouter();
-  const { signInWithEmail, signUpWithEmail, signInWithGoogle, user, isLoading } =
+  const { signInWithEmail, signUpWithEmail, signInWithGoogle, user, isLoading, authError } =
     useAuth();
 
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -18,8 +18,13 @@ export default function LoginPage(): React.JSX.Element | null {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(authError);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Surface authError from provider (e.g. registration blocked)
+  useEffect(() => {
+    if (authError) setError(authError);
+  }, [authError]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -131,7 +136,7 @@ export default function LoginPage(): React.JSX.Element | null {
       </div>
 
       {/* Right panel — auth form */}
-      <div className="flex flex-1 items-center justify-center p-8">
+      <div className="flex flex-1 items-center justify-center bg-background p-8">
         <div className="w-full max-w-sm space-y-8">
           {/* Mobile logo */}
           <div className="lg:hidden text-center">
@@ -153,7 +158,7 @@ export default function LoginPage(): React.JSX.Element | null {
 
           {/* Error banner */}
           {error && (
-            <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <div className="flex items-start gap-3 rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>{error}</span>
             </div>
@@ -164,7 +169,7 @@ export default function LoginPage(): React.JSX.Element | null {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={isSubmitting}
-            className="flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium shadow-sm transition-colors hover:bg-gray-50 disabled:opacity-50"
+            className="flex w-full items-center justify-center gap-3 rounded-lg border border-border bg-background px-4 py-2.5 text-sm font-medium shadow-sm transition-colors hover:bg-accent disabled:opacity-50"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24">
               <path
@@ -193,7 +198,7 @@ export default function LoginPage(): React.JSX.Element | null {
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground">
+              <span className="bg-background px-2 text-muted-foreground">
                 Or continue with email
               </span>
             </div>
@@ -215,7 +220,7 @@ export default function LoginPage(): React.JSX.Element | null {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Jan de Vries"
-                  className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                   autoComplete="name"
                 />
               </div>
@@ -233,9 +238,9 @@ export default function LoginPage(): React.JSX.Element | null {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@itq.nl"
+                placeholder="you@itq.eu"
                 required
-                className="w-full rounded-lg border border-border bg-white px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                 autoComplete="email"
               />
             </div>

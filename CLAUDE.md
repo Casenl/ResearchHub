@@ -14,6 +14,54 @@ npm run dev       # Start dev server (http://localhost:3000)
 npm run build     # Production build
 npm run start     # Start production server
 npm run lint      # Run ESLint
+
+# Testing
+npm run test          # Run unit tests (Vitest)
+npm run test:e2e      # Run E2E tests (Playwright, requires dev server)
+npm run test:e2e:ui   # Open Playwright UI mode (interactive)
+npm run test:e2e:headed  # Run with visible browser
+```
+
+## E2E Testing
+
+Playwright E2E tests live in `e2e/` and cover authentication, navigation, dashboard, research library, settings, theme consistency, and admin pages.
+
+### Architecture
+
+- **Page Object Model (POM)** — all page interactions are encapsulated in `e2e/pages/`. Tests import page objects rather than using raw selectors.
+- **Auth strategy** — `e2e/fixtures/auth.setup.ts` signs in as both a regular user and admin, saving `storageState` to `e2e/.auth/`. Tests reuse this state via Playwright projects:
+  - `chromium` — user auth (researcher role)
+  - `chromium-admin` — admin auth
+  - `chromium-noauth` — no auth (login page tests)
+- **Theme helpers** — `e2e/helpers/theme-helpers.ts` provides CSS variable validation for light/dark mode assertions.
+
+### Directory Structure
+
+```
+e2e/
+├── .auth/           # Git-ignored saved auth state
+├── fixtures/        # Auth setup + custom test function with POM fixtures
+├── helpers/         # Theme color assertions, shared utilities
+├── pages/           # Page Object Models (one per page/feature)
+│   └── admin/       # Admin-specific POMs
+└── tests/           # Test suites
+    └── admin/       # Admin test suites
+```
+
+### Conventions
+
+- Import `test` and `expect` from `e2e/fixtures/test-fixtures.ts` (not from `@playwright/test` directly)
+- Use POM fixtures: `async ({ dashboardPage, appShell, page }) => { ... }`
+- Tests that require admin auth go in `e2e/tests/admin/` (except `admin-access.spec.ts` which tests non-admin access)
+- Clean up theme state at end of tests that change theme/density
+
+### Environment Variables
+
+E2E tests require these in `.env.local`:
+```
+E2E_USER_EMAIL=m.jilderda+e2euser@gmail.com
+E2E_ADMIN_EMAIL=m.jilderda+e2eadmin@gmail.com
+E2E_TEST_PASSWORD=<shared-password>
 ```
 
 ## Architecture
@@ -114,7 +162,7 @@ The portal's data model is defined in `src/types/index.ts`. The three core dimen
 ### Authentication
 
 - Firebase Auth with lazy initialization (SSR-safe — no module-level `getAuth()`)
-- Role derivation: `@itq.nl` emails → admin, others → researcher (MVP)
+- Role derivation: `@itq.eu` emails → admin, others → researcher (MVP)
 - Protected routes via `<ProtectedRoute>` component
 - Admin routes check `isAdmin` before rendering nav items and page content
 
