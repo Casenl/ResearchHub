@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
@@ -22,8 +22,13 @@ export default function LoginPage(): React.JSX.Element | null {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Redirect if already logged in
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.replace("/");
+    }
+  }, [isLoading, user, router]);
+
   if (!isLoading && user) {
-    router.replace("/");
     return null;
   }
 
