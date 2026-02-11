@@ -19,6 +19,8 @@ import {
   ShieldCheck,
   Activity,
   BarChart3,
+  KeyRound,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ProtectedRoute } from "@/components/shared/protected-route";
@@ -59,12 +61,14 @@ const navigation: NavSection[] = [
     items: [
       { label: "Context Rules", href: "/admin/context-rules", icon: ShieldCheck },
       { label: "Users", href: "/admin/users", icon: Users },
+      { label: "API Keys", href: "/admin/api-keys", icon: KeyRound },
     ],
   },
   {
     title: "Oversight",
     adminOnly: true,
     items: [
+      { label: "Review Queue", href: "/admin/review-queue", icon: ClipboardCheck },
       { label: "Coverage", href: "/admin/coverage", icon: Grid3x3 },
       { label: "Activity", href: "/admin/activity", icon: Activity },
       { label: "Usage & Cost", href: "/admin/usage", icon: BarChart3 },
