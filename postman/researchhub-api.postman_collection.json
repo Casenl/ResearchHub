@@ -1,0 +1,1206 @@
+{
+  "info": {
+    "_postman_id": "researchhub-api-collection",
+    "name": "ResearchHub API",
+    "description": "ITQ Market Intelligence Portal — Agent-Driven Research Platform REST API.\n\nAll endpoints (except /health) require Bearer token authentication via API key.\n\nBase URL is a Cloud Functions v2 endpoint deployed in europe-west1.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{api_key}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. Health",
+      "description": "Health check endpoint. No authentication required.",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Returns service health status. No authentication required."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has status ok\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"status\", \"ok\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has timestamp\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"timestamp\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "2. Auth Keys",
+      "description": "API key management endpoints. All require admin permission.",
+      "item": [
+        {
+          "name": "Create API Key",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Agent Key\",\n  \"permissions\": \"read_write\",\n  \"agent_identity\": {\n    \"agent_id\": \"test-agent\",\n    \"agent_name\": \"Test Agent\",\n    \"agent_version\": \"1.0.0\",\n    \"run_id\": \"manual-test\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/keys",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "keys"]
+            },
+            "description": "Create a new API key. Returns the plaintext key exactly once — store it securely. Requires admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has key_id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"key_id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has plaintext_key\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"plaintext_key\");",
+                  "    pm.expect(json.plaintext_key).to.match(/^rh_/);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has name and permissions\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"name\");",
+                  "    pm.expect(json).to.have.property(\"permissions\");",
+                  "});",
+                  "",
+                  "// Chain: store key_id for subsequent requests",
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"api_key_id\", json.key_id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List API Keys",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/keys",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "keys"]
+            },
+            "description": "List all API keys with metadata. The key_hash is never included in responses. Requires admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is an array\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Items do not expose key_hash\", function() {",
+                  "    var json = pm.response.json();",
+                  "    if (json.length > 0) {",
+                  "        pm.expect(json[0]).to.not.have.property(\"key_hash\");",
+                  "    }",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Revoke API Key",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/keys/{{api_key_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "keys", "{{api_key_id}}"]
+            },
+            "description": "Revoke an API key by setting is_active to false. Revocation is immediate. Requires admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms revocation\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"message\", \"Key revoked\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "3. Research",
+      "description": "Research CRUD endpoints. Create, read, query, update, and archive research entries.",
+      "item": [
+        {
+          "name": "Create Research",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Research - Postman\",\n  \"description\": \"Created via Postman for testing\",\n  \"output_format\": \"report\",\n  \"origin\": \"agent\",\n  \"agent_identity\": {\n    \"agent_id\": \"postman-test\",\n    \"agent_name\": \"Postman Test\",\n    \"agent_version\": \"1.0.0\",\n    \"run_id\": \"manual\"\n  },\n  \"dimensions\": {\n    \"market_ids\": [\"NL\"],\n    \"domain_ids\": [\"managed_services\"],\n    \"sector_ids\": []\n  },\n  \"synthesis\": \"\",\n  \"assumptions\": [\"Test assumption\"],\n  \"refresh_schedule\": \"ad_hoc\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research",
+              "host": ["{{base_url}}"],
+              "path": ["research"]
+            },
+            "description": "Create a new research entry. Auto-sets origin to 'agent', review_status to 'pending', and status to 'draft'. Requires read_write or admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Status is draft\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"status\", \"draft\");",
+                  "});",
+                  "",
+                  "pm.test(\"Review status is pending\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"review_status\", \"pending\");",
+                  "});",
+                  "",
+                  "// Chain: store research_id for subsequent requests",
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"research_id\", json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Research by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}"]
+            },
+            "description": "Fetch a single research entry by ID with full detail including notebooks, sources, and file attachment URLs."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\", pm.environment.get(\"research_id\"));",
+                  "});",
+                  "",
+                  "pm.test(\"Response has title\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"title\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Query Research",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research?origin=agent&limit=5",
+              "host": ["{{base_url}}"],
+              "path": ["research"],
+              "query": [
+                {
+                  "key": "origin",
+                  "value": "agent"
+                },
+                {
+                  "key": "limit",
+                  "value": "5"
+                }
+              ]
+            },
+            "description": "Query research with filters: region, domain, sector, origin, min_trust_tier, status, fresher_than. Paginated with limit and offset."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has total\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has results array\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"results\");",
+                  "    pm.expect(json.results).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Research",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"synthesis\": \"Updated synthesis via Postman\",\n  \"status\": \"in_progress\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}"]
+            },
+            "description": "Update research fields. Every update auto-creates an audit log entry and sets updated_at. Requires read_write or admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms update\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"message\", \"Research updated\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Archive Research (Delete)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}"]
+            },
+            "description": "Soft delete (archive) a research entry. Sets status to 'archived'. Requires admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms archival\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"message\", \"Research archived\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "4. Sources",
+      "description": "Source management endpoints. Sources live inside research notebooks.\n\nNOTE: Before adding sources, the research entry must have at least one notebook in its notebooks array. The UpdateResearchSchema does not include a 'notebooks' field, so notebooks must be seeded via Firestore directly (Admin SDK, Firebase Console, or during research creation). The prerequisite request in this folder may not work if the API strips the notebooks field.",
+      "item": [
+        {
+          "name": "[Prerequisite] Seed Notebook via PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notebooks\": [\n    {\n      \"id\": \"nb-test-1\",\n      \"type\": \"competitive\",\n      \"sources\": [],\n      \"findings\": \"\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}"]
+            },
+            "description": "Prerequisite: Seed a notebook into the research entry so sources can be added.\n\nIMPORTANT: The UpdateResearchSchema only allows specific fields (title, description, status, findings, synthesis, assumptions, review_status, change_log). The 'notebooks' field is NOT in the update schema and will be stripped by Zod validation. You may need to seed the notebook directly via:\n- Firebase Console\n- Firebase Admin SDK\n- The seed script\n\nThis request is included for documentation purposes. If it returns 200 but the notebooks field wasn't actually written, seed the notebook through another method."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "// Note: Even if this returns 200, the notebooks field may have been",
+                  "// stripped by Zod validation. Verify via GET /research/{{research_id}}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Source",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notebook_id\": \"nb-test-1\",\n  \"title\": \"Test Source\",\n  \"url\": \"https://example.com/test\",\n  \"publisher\": \"Test Publisher\",\n  \"publication_date\": \"2026-01-15\",\n  \"quality_tier\": 6,\n  \"discovered_by\": \"perplexity\",\n  \"notes\": \"Added via Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}/sources",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}", "sources"]
+            },
+            "description": "Add a source to a research notebook. The notebook_id must reference an existing notebook in the research entry. The source automatically gets validation_status 'unverified'."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Validation status is unverified\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"validation_status\", \"unverified\");",
+                  "});",
+                  "",
+                  "// Chain: store source_id for subsequent requests",
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"source_id\", json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Validate Source",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"validation_status\": \"corroborated\",\n  \"validation_notes\": \"Confirmed via secondary source\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}/sources/{{source_id}}/validate",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}", "sources", "{{source_id}}", "validate"]
+            },
+            "description": "Record a validation event on a source. Validation status can be: unverified, corroborated, human_verified, disputed. Trust tier is automatically adjusted:\n- corroborated: tier - 2 (min 1)\n- human_verified: tier - 3 (min 1)\n- disputed: tier + 2 (max 8)"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"New tier is lower than original (6)\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"new_tier\");",
+                  "    pm.expect(json.new_tier).to.be.below(6);",
+                  "});",
+                  "",
+                  "pm.test(\"New status is corroborated\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"new_status\", \"corroborated\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "5. Files",
+      "description": "File upload and listing endpoints. Files are stored in Firebase Storage and linked to research entries via the file-attachments Firestore collection.",
+      "item": [
+        {
+          "name": "Upload File",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file_name\": \"test-doc.txt\",\n  \"file_type\": \"text/plain\",\n  \"file_data\": \"VGhpcyBpcyBhIHRlc3QgZmlsZQ==\",\n  \"source_id\": null\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}/files",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}", "files"]
+            },
+            "description": "Upload a file attachment as base64-encoded data. Maximum 50MB. File types validated by magic bytes for PDF and DOCX; text-based types skip byte validation.\n\nAllowed MIME types: application/pdf, text/markdown, text/plain, application/vnd.openxmlformats-officedocument.wordprocessingml.document, text/csv, application/json"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has download_url\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"download_url\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has id and file metadata\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "    pm.expect(json).to.have.property(\"file_name\", \"test-doc.txt\");",
+                  "    pm.expect(json).to.have.property(\"file_type\", \"text/plain\");",
+                  "    pm.expect(json).to.have.property(\"size_bytes\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}/files",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}", "files"]
+            },
+            "description": "List all file attachments for a research entry, ordered by uploaded_at descending."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response is an array\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "6. Intelligence",
+      "description": "Intelligence query shortcut endpoints. These provide structured competitive intelligence queries that abstract away Firestore internals.\n\nAll endpoints require the 'region' query parameter.",
+      "item": [
+        {
+          "name": "Get Competitors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/intelligence/competitors?region=NL",
+              "host": ["{{base_url}}"],
+              "path": ["intelligence", "competitors"],
+              "query": [
+                {
+                  "key": "region",
+                  "value": "NL"
+                }
+              ]
+            },
+            "description": "Get structured competitor list for a region. Optional filters: domain, sector."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has competitors array\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"competitors\");",
+                  "    pm.expect(json.competitors).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has total count\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"total\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Landscape",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/intelligence/landscape?region=NL",
+              "host": ["{{base_url}}"],
+              "path": ["intelligence", "landscape"],
+              "query": [
+                {
+                  "key": "region",
+                  "value": "NL"
+                }
+              ]
+            },
+            "description": "Get full region x domain competitive matrix. Shows research count, average trust tier, and latest update per domain."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has landscape array\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"landscape\");",
+                  "    pm.expect(json.landscape).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has total count\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"total\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/intelligence/summary?region=NL",
+              "host": ["{{base_url}}"],
+              "path": ["intelligence", "summary"],
+              "query": [
+                {
+                  "key": "region",
+                  "value": "NL"
+                }
+              ]
+            },
+            "description": "Get a markdown research brief for a region. Optional: domain, format (narrative|structured). Defaults to narrative markdown format."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has content\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"content\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has metadata\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"metadata\");",
+                  "    pm.expect(json.metadata).to.have.property(\"region\");",
+                  "    pm.expect(json.metadata).to.have.property(\"generated_at\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Landscape - Missing Region (400)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/intelligence/landscape",
+              "host": ["{{base_url}}"],
+              "path": ["intelligence", "landscape"]
+            },
+            "description": "Negative test: calling /intelligence/landscape without the required 'region' query parameter should return 400."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function() {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Error mentions region\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"error\");",
+                  "    pm.expect(json.error.toLowerCase()).to.include(\"region\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "7. Negative Tests",
+      "description": "Error handling and edge case tests. These requests are expected to fail with specific error codes.",
+      "item": [
+        {
+          "name": "Get Non-Existent Research (404)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research/nonexistent-id",
+              "host": ["{{base_url}}"],
+              "path": ["research", "nonexistent-id"]
+            },
+            "description": "Attempting to fetch a research entry that does not exist should return 404."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 404\", function() {",
+                  "    pm.response.to.have.status(404);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has error message\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"error\", \"Research not found\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Research - Empty Body (400)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research",
+              "host": ["{{base_url}}"],
+              "path": ["research"]
+            },
+            "description": "Attempting to create research with an empty body should fail Zod validation and return 400 with issues array."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 400\", function() {",
+                  "    pm.response.to.have.status(400);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has validation issues\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"issues\");",
+                  "    pm.expect(json.issues).to.be.an(\"array\");",
+                  "    pm.expect(json.issues.length).to.be.above(0);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Query Research - No Auth (401)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research",
+              "host": ["{{base_url}}"],
+              "path": ["research"]
+            },
+            "description": "Attempting to query research without an Authorization header should return 401."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Returns 401 without auth\", function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has error message\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"error\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Lifecycle (Ordered Workflow)",
+      "description": "End-to-end lifecycle test. Run this folder sequentially via Postman Collection Runner to exercise the full create -> source -> validate -> query -> archive workflow.\n\nEach request chains to the next via environment variables.",
+      "item": [
+        {
+          "name": "1. Create Research",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Lifecycle Test - Postman\",\n  \"description\": \"End-to-end lifecycle test created via Postman Collection Runner\",\n  \"output_format\": \"competitive\",\n  \"origin\": \"agent\",\n  \"agent_identity\": {\n    \"agent_id\": \"postman-lifecycle\",\n    \"agent_name\": \"Postman Lifecycle\",\n    \"agent_version\": \"1.0.0\",\n    \"run_id\": \"lifecycle-run\"\n  },\n  \"dimensions\": {\n    \"market_ids\": [\"NL\"],\n    \"domain_ids\": [\"managed_services\"],\n    \"sector_ids\": []\n  },\n  \"synthesis\": \"\",\n  \"assumptions\": [\"Lifecycle test assumption\"],\n  \"refresh_schedule\": \"ad_hoc\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research",
+              "host": ["{{base_url}}"],
+              "path": ["research"]
+            },
+            "description": "Step 1: Create a new research entry for the lifecycle test."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Status is draft\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.status).to.equal(\"draft\");",
+                  "});",
+                  "",
+                  "// Chain to next request",
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"research_id\", json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Add Source",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notebook_id\": \"nb-test-1\",\n  \"title\": \"Lifecycle Test Source\",\n  \"url\": \"https://example.com/lifecycle-test\",\n  \"publisher\": \"Test Publisher\",\n  \"publication_date\": \"2026-01-15\",\n  \"quality_tier\": 6,\n  \"discovered_by\": \"perplexity\",\n  \"notes\": \"Added during lifecycle test\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}/sources",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}", "sources"]
+            },
+            "description": "Step 2: Add a source to the research entry. Requires a notebook with id 'nb-test-1' to exist in the research entry (see Sources folder note about notebook seeding)."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Validation status is unverified\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.validation_status).to.equal(\"unverified\");",
+                  "});",
+                  "",
+                  "// Chain to next request",
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"source_id\", json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "3. Validate Source",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"validation_status\": \"corroborated\",\n  \"validation_notes\": \"Confirmed via secondary source during lifecycle test\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}/sources/{{source_id}}/validate",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}", "sources", "{{source_id}}", "validate"]
+            },
+            "description": "Step 3: Validate the source as corroborated. Trust tier should drop from 6 to 4."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"New tier is adjusted\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"new_tier\");",
+                  "    pm.expect(json.new_tier).to.be.below(6);",
+                  "});",
+                  "",
+                  "pm.test(\"New status is corroborated\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.new_status).to.equal(\"corroborated\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "4. Get Research by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}"]
+            },
+            "description": "Step 4: Verify the research entry exists and has the expected data."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.id).to.equal(pm.environment.get(\"research_id\"));",
+                  "});",
+                  "",
+                  "pm.test(\"Research has title\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.title).to.include(\"Lifecycle Test\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "5. Query Research",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research?origin=agent&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["research"],
+              "query": [
+                {
+                  "key": "origin",
+                  "value": "agent"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Step 5: Query research to verify the lifecycle entry appears in results."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has results\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"results\");",
+                  "    pm.expect(json.results).to.be.an(\"array\");",
+                  "});",
+                  "",
+                  "pm.test(\"Total is at least 1\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.total).to.be.at.least(1);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. Archive Research (Cleanup)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/research/{{research_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["research", "{{research_id}}"]
+            },
+            "description": "Step 6: Archive the research entry to clean up after the lifecycle test."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Research is archived\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"message\", \"Research archived\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+# =============================================================================
+# CI — Tests, Types & Build
+# =============================================================================
+#
+# Runs on every push and pull request. Three parallel jobs:
+#   1. unit-tests    — Vitest unit test suite
+#   2. build-check   — TypeScript type-check + Next.js production build
+#   3. functions-build — Firebase Cloud Functions TypeScript compilation
+#
+# All jobs use Node.js 20 with npm caching for fast installs.
+# =============================================================================
+
+name: "CI — Tests, Types & Build"
+
+on:
+  push:
+  pull_request:
+
+# Restrict permissions to the minimum required
+permissions:
+  contents: read
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job: unit-tests
+  # Runs the Vitest unit test suite
+  # ---------------------------------------------------------------------------
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js 20 with npm cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Clean install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Run unit tests
+      - name: Run unit tests
+        run: npx vitest run
+
+  # ---------------------------------------------------------------------------
+  # Job: build-check
+  # Validates TypeScript types and ensures the Next.js production build succeeds
+  # ---------------------------------------------------------------------------
+  build-check:
+    name: Type Check & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js 20 with npm cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Clean install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. TypeScript type-check (no emit, just validate)
+      - name: Type-check
+        run: npx tsc --noEmit
+
+      # 5. Next.js production build
+      #    Firebase env vars are set to dummy values — the build only needs them
+      #    to be present, not valid, since no runtime Firebase calls occur at
+      #    build time.
+      - name: Production build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: "test"
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "test"
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: "test"
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "test"
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "test"
+          NEXT_PUBLIC_FIREBASE_APP_ID: "test"
+          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: "test"
+        run: npx next build
+
+  # ---------------------------------------------------------------------------
+  # Job: functions-build
+  # Compiles Firebase Cloud Functions TypeScript to verify correctness
+  # ---------------------------------------------------------------------------
+  functions-build:
+    name: Functions Build
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js 20 with npm cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Install functions dependencies
+      - name: Install functions dependencies
+        run: npm ci --prefix functions
+
+      # 4. Compile TypeScript
+      - name: Build functions
+        run: npm run build --prefix functions
