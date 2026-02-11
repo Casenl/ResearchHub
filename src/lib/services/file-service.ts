@@ -1,4 +1,4 @@
-import { getAdminFirestore, getAdminStorage } from '@/lib/firebase';
+import { getAdminFirestore, getAdminStorage } from '@/lib/firebase-admin';
 import { UploadFileSchema } from '@/lib/validations';
 import type { FileAttachment, ResearchOrigin } from '@/types';
 

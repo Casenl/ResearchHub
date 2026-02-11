@@ -1,4 +1,4 @@
-import { getAdminFirestore } from '@/lib/firebase';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { ActivityAction, ActivityCategory, ActivityTargetType } from '@/types';
 
 interface AuditLogParams {

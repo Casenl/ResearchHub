@@ -1,4 +1,4 @@
-import { getAdminFirestore } from '@/lib/firebase';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 import { CreateResearchSchema, UpdateResearchSchema } from '@/lib/validations';
 import { createAuditLog } from './audit-service';
 import type { Research, ResearchOrigin, AgentIdentity } from '@/types';

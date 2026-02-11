@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from 'crypto';
-import { getAdminFirestore } from '@/lib/firebase';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 import type { ApiKey, ApiKeyPermission, AgentIdentity } from '@/types';
 
 /** Hash an API key using SHA-256. */

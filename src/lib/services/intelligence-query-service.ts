@@ -1,4 +1,4 @@
-import { getAdminFirestore } from '@/lib/firebase';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 import { QueryResearchSchema } from '@/lib/validations';
 import type { Research, QualityTier } from '@/types';
 

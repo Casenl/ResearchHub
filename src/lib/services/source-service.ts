@@ -1,4 +1,4 @@
-import { getAdminFirestore } from '@/lib/firebase';
+import { getAdminFirestore } from '@/lib/firebase-admin';
 import { CreateSourceSchema, ValidateSourceSchema } from '@/lib/validations';
 import { getDefaultTierForTool, calculateTierAdjustment } from '@/lib/trust-tiers';
 import type { Source, QualityTier, ValidationStatus } from '@/types';
