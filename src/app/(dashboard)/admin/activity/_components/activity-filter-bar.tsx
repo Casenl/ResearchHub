@@ -19,6 +19,7 @@ function getCategoryIcon(category: ActivityCategory): React.ElementType {
     case "admin": return Shield;
     case "auth": return Users;
     case "system": return Activity;
+    default: return Activity;
   }
 }
 

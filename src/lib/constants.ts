@@ -11,6 +11,10 @@ import type {
   ActivityAction,
   ActivityCategory,
   ActivityTargetType,
+  ValidationStatus,
+  ReviewStatus,
+  ResearchOrigin,
+  ApiKeyPermission,
 } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -235,6 +239,12 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   archived: "Archived",
   login: "Login",
   role_changed: "Role Changed",
+  api_access: "API Access",
+  source_validated: "Source Validated",
+  trust_tier_changed: "Trust Tier Changed",
+  file_uploaded: "File Uploaded",
+  api_key_created: "API Key Created",
+  api_key_revoked: "API Key Revoked",
 };
 
 export const ACTIVITY_CATEGORY_LABELS: Record<ActivityCategory, string> = {
@@ -242,6 +252,7 @@ export const ACTIVITY_CATEGORY_LABELS: Record<ActivityCategory, string> = {
   admin: "Admin",
   auth: "Authentication",
   system: "System",
+  api: "API",
 };
 
 export const ACTIVITY_TARGET_TYPE_LABELS: Record<ActivityTargetType, string> = {
@@ -251,6 +262,48 @@ export const ACTIVITY_TARGET_TYPE_LABELS: Record<ActivityTargetType, string> = {
   ai_tool_profile: "AI Tool",
   user: "User",
   taxonomy: "Taxonomy",
+};
+
+// ---------------------------------------------------------------------------
+// Agent API — Validation status labels
+// ---------------------------------------------------------------------------
+
+export const VALIDATION_STATUS_LABELS: Record<ValidationStatus, string> = {
+  unverified: 'Unverified',
+  corroborated: 'Corroborated',
+  human_verified: 'Human Verified',
+  disputed: 'Disputed',
+};
+
+// ---------------------------------------------------------------------------
+// Agent API — Review status labels
+// ---------------------------------------------------------------------------
+
+export const REVIEW_STATUS_LABELS: Record<ReviewStatus, string> = {
+  none: 'No Review',
+  pending: 'Pending Review',
+  approved: 'Approved',
+  rejected: 'Rejected',
+};
+
+// ---------------------------------------------------------------------------
+// Agent API — Research origin labels
+// ---------------------------------------------------------------------------
+
+export const RESEARCH_ORIGIN_LABELS: Record<ResearchOrigin, string> = {
+  human: 'Human',
+  agent: 'Agent',
+  hybrid: 'Hybrid',
+};
+
+// ---------------------------------------------------------------------------
+// Agent API — API key permission labels
+// ---------------------------------------------------------------------------
+
+export const API_KEY_PERMISSION_LABELS: Record<ApiKeyPermission, string> = {
+  read: 'Read Only',
+  read_write: 'Read & Write',
+  admin: 'Admin',
 };
 
 // ---------------------------------------------------------------------------

@@ -207,6 +207,10 @@ export const MOCK_RESEARCH: Research[] = [
             discovered_by: "notebooklm",
             notes:
               "Primary EU-level reference for MSS market sizing and trends",
+            validation_status: "unverified",
+            validated_by: null,
+            validated_at: null,
+            validation_notes: "",
           },
           {
             id: "src-1-2",
@@ -218,6 +222,10 @@ export const MOCK_RESEARCH: Research[] = [
             discovered_by: "notebooklm",
             notes:
               "National threat landscape context for MSS demand drivers",
+            validation_status: "unverified",
+            validated_by: null,
+            validated_at: null,
+            validation_notes: "",
           },
           {
             id: "src-1-3",
@@ -228,6 +236,10 @@ export const MOCK_RESEARCH: Research[] = [
             quality_tier: 3,
             discovered_by: "claude",
             notes: "Global MDR vendor landscape with European coverage",
+            validation_status: "unverified",
+            validated_by: null,
+            validated_at: null,
+            validation_notes: "",
           },
         ],
         findings:
@@ -253,6 +265,10 @@ export const MOCK_RESEARCH: Research[] = [
             quality_tier: 5,
             discovered_by: "perplexity",
             notes: "Dutch IT trade press annual vendor ranking",
+            validation_status: "unverified",
+            validated_by: null,
+            validated_at: null,
+            validation_notes: "",
           },
         ],
         findings:
@@ -269,6 +285,10 @@ export const MOCK_RESEARCH: Research[] = [
     ],
     related_research_ids: ["research-2"],
     version_ids: ["research-1"],
+    origin: "human",
+    agent_identity: null,
+    input_context: [],
+    review_status: "none",
   },
 
   // ---- 2. Published — Security, EU, Financial Services ----
@@ -322,6 +342,10 @@ export const MOCK_RESEARCH: Research[] = [
             quality_tier: 1,
             discovered_by: "manual",
             notes: "Primary legislative text",
+            validation_status: "unverified",
+            validated_by: null,
+            validated_at: null,
+            validation_notes: "",
           },
         ],
         findings:
@@ -337,6 +361,10 @@ export const MOCK_RESEARCH: Research[] = [
     ],
     related_research_ids: ["research-1"],
     version_ids: ["research-2"],
+    origin: "human",
+    agent_identity: null,
+    input_context: [],
+    review_status: "none",
   },
 
   // ---- 3. In Progress — Hybrid Cloud, Benelux ----
@@ -390,6 +418,10 @@ export const MOCK_RESEARCH: Research[] = [
     ],
     related_research_ids: [],
     version_ids: ["research-3"],
+    origin: "human",
+    agent_identity: null,
+    input_context: [],
+    review_status: "none",
   },
 
   // ---- 4. Review — Digital Workspace, Netherlands, Education ----
@@ -448,6 +480,10 @@ export const MOCK_RESEARCH: Research[] = [
     ],
     related_research_ids: [],
     version_ids: ["research-4"],
+    origin: "human",
+    agent_identity: null,
+    input_context: [],
+    review_status: "none",
   },
 
   // ---- 5. Draft — AI Services, Benelux, Financial Services ----
@@ -489,6 +525,10 @@ export const MOCK_RESEARCH: Research[] = [
     ],
     related_research_ids: [],
     version_ids: ["research-5"],
+    origin: "human",
+    agent_identity: null,
+    input_context: [],
+    review_status: "none",
   },
 
   // ---- 6. Published Refresh — Security, Netherlands (refresh of research-1) ----
@@ -542,6 +582,10 @@ export const MOCK_RESEARCH: Research[] = [
             quality_tier: 1,
             discovered_by: "manual",
             notes: "Official Dutch government NIS2 transposition status update",
+            validation_status: "unverified",
+            validated_by: null,
+            validated_at: null,
+            validation_notes: "",
           },
         ],
         findings:
@@ -558,6 +602,10 @@ export const MOCK_RESEARCH: Research[] = [
     ],
     related_research_ids: ["research-1", "research-2"],
     version_ids: ["research-1", "research-6"],
+    origin: "human",
+    agent_identity: null,
+    input_context: [],
+    review_status: "none",
   },
 
   // ---- 7. Clone — Security, Belgium (cloned from research-1, changed market) ----
@@ -598,6 +646,10 @@ export const MOCK_RESEARCH: Research[] = [
     ],
     related_research_ids: ["research-1"],
     version_ids: ["research-7"],
+    origin: "human",
+    agent_identity: null,
+    input_context: [],
+    review_status: "none",
   },
 
   // ---- 8. Archived — Hybrid Cloud, Government, Netherlands ----
@@ -636,6 +688,10 @@ export const MOCK_RESEARCH: Research[] = [
     assumptions: [],
     related_research_ids: [],
     version_ids: ["research-8"],
+    origin: "human",
+    agent_identity: null,
+    input_context: [],
+    review_status: "none",
   },
 ];
 

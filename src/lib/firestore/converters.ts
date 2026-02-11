@@ -123,6 +123,10 @@ export const researchConverter: FirestoreDataConverter<Research> =
     assumptions: data.assumptions ?? [],
     related_research_ids: data.related_research_ids ?? [],
     version_ids: data.version_ids ?? [],
+    origin: data.origin ?? "human",
+    agent_identity: data.agent_identity ?? null,
+    input_context: data.input_context ?? [],
+    review_status: data.review_status ?? "none",
   }));
 
 // -----------------------------------------------------------------------------

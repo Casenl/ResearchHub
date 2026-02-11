@@ -63,7 +63,13 @@ export type ActivityAction =
   | 'published'
   | 'archived'
   | 'login'
-  | 'role_changed';
+  | 'role_changed'
+  | 'api_access'
+  | 'source_validated'
+  | 'trust_tier_changed'
+  | 'file_uploaded'
+  | 'api_key_created'
+  | 'api_key_revoked';
 
 export type ActivityTargetType =
   | 'research'
@@ -73,7 +79,34 @@ export type ActivityTargetType =
   | 'user'
   | 'taxonomy';
 
-export type ActivityCategory = 'research' | 'admin' | 'auth' | 'system';
+export type ActivityCategory = 'research' | 'admin' | 'auth' | 'system' | 'api';
+
+export type ResearchOrigin = 'human' | 'agent' | 'hybrid';
+
+export type ReviewStatus = 'none' | 'pending' | 'approved' | 'rejected';
+
+export type ValidationStatus = 'unverified' | 'corroborated' | 'human_verified' | 'disputed';
+
+export type ApiKeyPermission = 'read' | 'read_write' | 'admin';
+
+/** Trust tier classification label for display. */
+export type TrustTierClassification =
+  | 'authoritative'
+  | 'established'
+  | 'standard'
+  | 'unverified';
+
+// -----------------------------------------------------------------------------
+// Agent & API Identity
+// -----------------------------------------------------------------------------
+
+/** Identity metadata for an AI agent interacting with the platform. */
+export interface AgentIdentity {
+  agent_id: string;
+  agent_name: string;
+  agent_version: string;
+  run_id: string;
+}
 
 // -----------------------------------------------------------------------------
 // Core Entities
@@ -172,6 +205,14 @@ export interface Source {
   quality_tier: QualityTier;
   discovered_by: ResearchTool;
   notes: string;
+  /** Validation lifecycle — starts as 'unverified', progresses via review. */
+  validation_status: ValidationStatus;
+  /** User ID or agent ID that performed the validation. */
+  validated_by: string | null;
+  /** ISO 8601 date-time string of when validation occurred. */
+  validated_at: string | null;
+  /** Free-text notes about the validation (e.g., corroboration evidence). */
+  validation_notes: string;
 }
 
 /** A research notebook — one per analytical lens / theme. */
@@ -242,6 +283,14 @@ export interface Research {
   related_research_ids: string[];
   /** All version ids belonging to this research lineage. */
   version_ids: string[];
+  /** Who created this entry: human, agent, or collaborative. */
+  origin: ResearchOrigin;
+  /** Identity of the agent that created/updated this (null for human origin). */
+  agent_identity: AgentIdentity | null;
+  /** IDs of research entries or sources used as input context (ISO 42001 traceability). */
+  input_context: string[];
+  /** Human oversight status for agent-contributed research. */
+  review_status: ReviewStatus;
 }
 
 // -----------------------------------------------------------------------------
@@ -383,4 +432,52 @@ export interface ApiUsageEntry {
   estimated_cost: number;
   currency: string;
   metadata: Record<string, unknown>;
+}
+
+// -----------------------------------------------------------------------------
+// Agent API — API Keys
+// -----------------------------------------------------------------------------
+
+/** An API key for agent or external system access. */
+export interface ApiKey {
+  id: string;
+  /** Human-readable name, e.g. "researcher-agent-prod". */
+  name: string;
+  /** SHA-256 hash of the key. Plaintext is never stored. */
+  key_hash: string;
+  permissions: ApiKeyPermission;
+  agent_identity: AgentIdentity;
+  /** User ID of the admin who created this key. */
+  created_by: string;
+  /** ISO 8601 date-time string. */
+  created_at: string;
+  /** ISO 8601 date-time string of last API call using this key. */
+  last_used_at: string | null;
+  is_active: boolean;
+  /** ISO 8601 date-time string. Null means no expiry. */
+  expires_at: string | null;
+}
+
+// -----------------------------------------------------------------------------
+// Agent API — File Attachments
+// -----------------------------------------------------------------------------
+
+/** A file stored in Firebase Storage and linked to a research entry. */
+export interface FileAttachment {
+  id: string;
+  research_id: string;
+  /** Source ID this file supports (null if general attachment). */
+  source_id: string | null;
+  file_name: string;
+  /** MIME type, validated by magic bytes on upload. */
+  file_type: string;
+  /** Path in Firebase Storage bucket. */
+  storage_path: string;
+  download_url: string;
+  size_bytes: number;
+  /** User ID or agent ID of the uploader. */
+  uploaded_by: string;
+  /** ISO 8601 date-time string. */
+  uploaded_at: string;
+  origin: ResearchOrigin;
 }

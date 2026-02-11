@@ -132,6 +132,10 @@ export default function NewResearchPage(): React.JSX.Element {
         assumptions: [],
         related_research_ids: [],
         version_ids: [],
+        origin: "human",
+        agent_identity: null,
+        input_context: [],
+        review_status: "none",
       });
       updateForm({ isGenerating: false, isGenerated: true });
       router.push(`/research/${newId}`);

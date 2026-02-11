@@ -1,20 +1,15 @@
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // -------------------------------------------------------------------------
-    // Helper functions
-    // -------------------------------------------------------------------------
+    // ============ Helper Functions ============
 
     function isAuthenticated() {
       return request.auth != null;
     }
 
     function isAdmin() {
-      // MVP: @itq.nl emails are admins (matches deriveRole in use-auth.tsx)
       return isAuthenticated()
-        && request.auth.token.email != null
         && request.auth.token.email.matches('.*@itq[.]nl$');
     }
 
@@ -22,20 +17,7 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
-    // -------------------------------------------------------------------------
-    // Users — /users/{userId}
-    // -------------------------------------------------------------------------
-
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isAdmin();
-    }
-
-    // -------------------------------------------------------------------------
-    // Research — /research/{researchId}
-    // -------------------------------------------------------------------------
+    // ============ Research ============
 
     match /research/{researchId} {
       allow read: if isAuthenticated();
@@ -47,37 +29,58 @@ service cloud.firestore {
       // Notebooks sub-collection
       match /notebooks/{notebookId} {
         allow read: if isAuthenticated();
-        allow write: if isAuthenticated()
-          && (get(/databases/$(database)/documents/research/$(researchId)).data.author_id == request.auth.uid
-              || isAdmin());
+        allow write: if isAuthenticated();
       }
     }
 
-    // -------------------------------------------------------------------------
-    // Context Documents — /context-documents/{docId}
-    // -------------------------------------------------------------------------
+    // ============ Context Documents ============
 
     match /context-documents/{docId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
-      allow update: if isAuthenticated()
-        && (resource.data.uploaded_by == request.auth.uid || isAdmin());
+      allow update: if isAuthenticated();
       allow delete: if isAdmin();
     }
 
-    // -------------------------------------------------------------------------
-    // Taxonomy — /taxonomy/{document}
-    // Read: all authenticated users. Write: admins only.
-    // -------------------------------------------------------------------------
+    // ============ API Keys (admin only) ============
 
-    match /taxonomy/{document} {
+    match /api-keys/{keyId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ============ File Attachments ============
+
+    match /file-attachments/{attachmentId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isAdmin();
+    }
+
+    // ============ Audit Logs (write-only, immutable) ============
+
+    match /audit_logs/{logId} {
+      allow read: if false;
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
+    }
+
+    // ============ Taxonomy ============
+
+    match /taxonomy/{docId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
 
-    // -------------------------------------------------------------------------
-    // Admin — Prompt Templates, AI Tool Profiles, Prompt Assignments
-    // -------------------------------------------------------------------------
+    // ============ Users ============
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if false;
+    }
+
+    // ============ Admin Collections ============
 
     match /prompt-templates/{templateId} {
       allow read: if isAuthenticated();
@@ -94,33 +97,9 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // -------------------------------------------------------------------------
-    // Admin — Context Rules
-    // -------------------------------------------------------------------------
-
     match /context-rules/{ruleId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
-    }
-
-    // -------------------------------------------------------------------------
-    // Activity Log — /activity-log/{entryId}
-    // -------------------------------------------------------------------------
-
-    match /activity-log/{entryId} {
-      allow read: if isAdmin();
-      allow create: if isAuthenticated();
-      allow update, delete: if false;
-    }
-
-    // -------------------------------------------------------------------------
-    // API Usage — /api-usage/{entryId}
-    // -------------------------------------------------------------------------
-
-    match /api-usage/{entryId} {
-      allow read: if isAdmin();
-      allow create: if isAuthenticated();
-      allow update, delete: if false;
     }
   }
 }
