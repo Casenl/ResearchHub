@@ -1,0 +1,138 @@
+# =============================================================================
+# Scheduled Competitive Intelligence Sweep
+# =============================================================================
+#
+# Runs a weekly competitive intelligence sweep against the ResearchHub REST API.
+# Iterates over configured regions and domains, collecting market intelligence
+# and posting a summary to the job output.
+#
+# Required secrets:
+#   RESEARCHHUB_API_URL — Cloud Functions API base URL (e.g. https://us-central1-xxx.cloudfunctions.net)
+#   RESEARCHHUB_API_KEY — Agent API key (rh_xxx format)
+# =============================================================================
+
+name: Competitive Intelligence Sweep
+
+on:
+  # Weekly schedule: every Monday at 06:00 UTC
+  schedule:
+    - cron: "0 6 * * 1"
+
+  # Manual trigger with configurable inputs
+  workflow_dispatch:
+    inputs:
+      regions:
+        description: "Comma-separated region codes to sweep"
+        required: false
+        type: string
+        default: "NL,BE,DE,UK,US"
+      domains:
+        description: "Comma-separated domain identifiers to sweep"
+        required: false
+        type: string
+        default: "managed_services,data_analytics,cloud_platform"
+
+# Restrict permissions to the minimum required
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job: sweep
+  # Runs the competitive-sweep script against the ResearchHub API
+  # ---------------------------------------------------------------------------
+  sweep:
+    name: Run Competitive Sweep
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      # 1. Checkout the repository so the sweep script is available
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js 20 with npm cache for faster installs
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Install dependencies (clean install for reproducibility)
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Execute the competitive sweep script
+      #    - REGIONS/DOMAINS come from workflow_dispatch inputs or fall back to defaults
+      #    - API_URL/API_KEY are injected from repository secrets
+      - name: Run competitive sweep
+        id: sweep
+        env:
+          REGIONS: ${{ inputs.regions || 'NL,BE,DE,UK,US' }}
+          DOMAINS: ${{ inputs.domains || 'managed_services,data_analytics,cloud_platform' }}
+          API_URL: ${{ secrets.RESEARCHHUB_API_URL }}
+          API_KEY: ${{ secrets.RESEARCHHUB_API_KEY }}
+        run: npx tsx scripts/competitive-sweep.ts
+
+      # 5. Post a summary to the GitHub Actions job summary
+      - name: Post sweep summary
+        if: always()
+        run: |
+          echo "## Competitive Intelligence Sweep Results" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Parameter | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-----------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Regions** | \`${{ inputs.regions || 'NL,BE,DE,UK,US' }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Domains** | \`${{ inputs.domains || 'managed_services,data_analytics,cloud_platform' }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Status** | \`${{ steps.sweep.outcome }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Triggered by** | \`${{ github.event_name }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |" >> "$GITHUB_STEP_SUMMARY"
+
+  # ---------------------------------------------------------------------------
+  # Job: notify
+  # Creates a GitHub issue if the sweep job fails, so failures are visible
+  # ---------------------------------------------------------------------------
+  notify:
+    name: Notify on Failure
+    runs-on: ubuntu-latest
+    needs: sweep
+    if: failure()
+
+    steps:
+      - name: Create failure issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          FAIL_DATE="$(date -u +'%Y-%m-%d')"
+          FAIL_DATETIME="$(date -u +'%A, %B %d %Y at %H:%M UTC')"
+
+          cat > /tmp/issue-body.md <<EOF
+          ## Competitive Intelligence Sweep Failed
+
+          The scheduled competitive sweep failed on **${FAIL_DATETIME}**.
+
+          ### Details
+
+          | Field | Value |
+          |-------|-------|
+          | **Workflow** | \`${{ github.workflow }}\` |
+          | **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+          | **Trigger** | \`${{ github.event_name }}\` |
+          | **Regions** | \`${{ inputs.regions || 'NL,BE,DE,UK,US' }}\` |
+          | **Domains** | \`${{ inputs.domains || 'managed_services,data_analytics,cloud_platform' }}\` |
+          | **Branch** | \`${{ github.ref_name }}\` |
+
+          ### Next Steps
+
+          1. Check the [workflow run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for error details
+          2. Verify the \`RESEARCHHUB_API_URL\` and \`RESEARCHHUB_API_KEY\` secrets are configured correctly
+          3. Ensure the API endpoint is reachable and the agent key has not expired
+          4. Re-run the workflow manually once the issue is resolved
+          EOF
+
+          gh issue create \
+            --repo "${{ github.repository }}" \
+            --title "Competitive sweep failed - ${FAIL_DATE}" \
+            --label "bug,automated" \
+            --body-file /tmp/issue-body.md
