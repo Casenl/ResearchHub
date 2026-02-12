@@ -250,6 +250,22 @@ The portal implements the ITQ standardised research process:
 
 The prompt template engine (`lib/prompt-templates.ts`) generates domain-specific prompts for steps 3-5.
 
+## Post-Push CI Verification
+
+After every `git push`, always:
+
+1. **Check CI results**: `gh run list --branch <branch> --limit 1` then `gh run view <id>`
+2. **If failed**: read logs with `gh run view <id> --log-failed`, fix errors, commit, push again
+3. **Feedback loop**: after fixing, evaluate if the failure could have been prevented by a guideline and update CLAUDE.md or child docs
+
+### Known CI Failure Patterns
+
+| Pattern | Root cause | Prevention |
+|---------|-----------|------------|
+| `Cannot find module` in CI but works locally | File exists on disk but not committed | Before committing, run `git diff --cached --name-only` and verify all imported files are staged. If file A imports file B, both must be in the same commit. |
+| `Property X does not exist on type Y` | Interface was updated in uncommitted code | Same as above — ensure type definitions and their consumers are committed together |
+| Integration tests skipped | Expected on feature branch pushes | Integration tests only run on `main` and PRs (`if:` condition in CI) |
+
 ## Maintenance
 
 When to update these docs:
@@ -263,5 +279,6 @@ When to update these docs:
 | Test infrastructure changed | `docs/testing.md` |
 | CI job added/changed | CI Pipeline table in this file |
 | New Firebase pattern or gotcha | `docs/code-patterns.md` |
+| CI failure caused by preventable mistake | Known CI Failure Patterns table above |
 
 The global Self-Improving Guidelines (`~/.claude/CLAUDE.md`) also apply: when fixing a bug reveals a documentation gap, propose the specific update.
