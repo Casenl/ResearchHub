@@ -6,8 +6,12 @@
   "scripts": {
     "build": "tsc",
     "build:watch": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run -c vitest.integration.config.ts",
     "serve": "npm run build && firebase emulators:start --only functions",
-    "deploy": "firebase deploy --only functions"
+    "deploy": "firebase deploy --only functions",
+    "deploy:staging": "firebase deploy --only functions --project staging"
   },
   "engines": {
     "node": "22"
@@ -22,6 +26,9 @@
   "devDependencies": {
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.3",
-    "typescript": "^5.9.3"
+    "@types/supertest": "^6.0.3",
+    "supertest": "^7.2.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

@@ -45,6 +45,10 @@ next-env.d.ts
 
 # Firebase
 marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json
+marketintelligence-hub-staging-sa-key.json
 apphosting.yaml
 functions/lib/
 functions/node_modules/
+
+# Integration test state
+functions/__tests__/integration/.test-state.json

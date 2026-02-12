@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "marketintelligence-hub"
+    "default": "marketintelligence-hub",
+    "staging": "marketintelligence-hub-staging"
   }
 }

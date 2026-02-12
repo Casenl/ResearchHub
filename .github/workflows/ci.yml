@@ -6,6 +6,7 @@
 #   1. unit-tests    — Vitest unit test suite
 #   2. build-check   — TypeScript type-check + Next.js production build
 #   3. functions-build — Firebase Cloud Functions TypeScript compilation
+#   4. functions-tests — Cloud Functions API route tests (Vitest + Supertest)
 #
 # All jobs use Node.js 20 with npm caching for fast installs.
 # =============================================================================
@@ -119,3 +120,65 @@ jobs:
       # 4. Compile TypeScript
       - name: Build functions
         run: npm run build --prefix functions
+
+  # ---------------------------------------------------------------------------
+  # Job: functions-tests
+  # Runs Cloud Functions API route tests (Vitest + Supertest)
+  # ---------------------------------------------------------------------------
+  functions-tests:
+    name: Functions Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js 20 with npm cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Install functions dependencies
+      - name: Install functions dependencies
+        run: npm ci --prefix functions
+
+      # 4. Run API route tests
+      - name: Run functions tests
+        run: npm test --prefix functions
+
+  # ---------------------------------------------------------------------------
+  # Job: functions-integration
+  # Runs integration tests against the deployed staging Cloud Functions
+  # ---------------------------------------------------------------------------
+  functions-integration:
+    name: Functions Integration Tests
+    runs-on: ubuntu-latest
+    needs: [functions-tests, functions-build]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    timeout-minutes: 5
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js 20 with npm cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Install functions dependencies
+      - name: Install functions dependencies
+        run: npm ci --prefix functions
+
+      # 4. Run integration tests against staging
+      - name: Run integration tests
+        env:
+          STAGING_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.STAGING_SA_KEY_BASE64 }}
+          STAGING_API_URL: https://europe-west1-marketintelligence-hub-staging.cloudfunctions.net/api
+        run: npm run test:integration --prefix functions
