@@ -260,6 +260,7 @@ Follow the global post-push workflow in `~/.claude/docs/ci-cd.md`. Project-speci
 |---------|-----------|------------|
 | Integration tests skipped | Expected on feature branch pushes | Integration tests only run on `main` and PRs (`if:` condition in CI) |
 | `auth/argument-error` on Google sign-in | `initializeAuth()` called without `popupRedirectResolver` | Always pass `browserPopupRedirectResolver` when using `initializeAuth()`. See `docs/code-patterns.md` for details. Validated by `firebase-config.test.ts` unit tests. |
+| 404 on production for a route that works locally | Page file created locally but never committed to git | `routes.test.ts` verifies all expected routes have a `page.tsx` on disk. Fails in CI when uncommitted. **When adding a new route, add it to `EXPECTED_ROUTES` in `src/lib/__tests__/routes.test.ts`.** |
 
 ## Maintenance
 
@@ -267,7 +268,7 @@ When to update these docs:
 
 | Trigger | Update |
 |---------|--------|
-| New route added | Route Groups table in this file |
+| New route added | Route Groups table in this file **+ `EXPECTED_ROUTES` in `src/lib/__tests__/routes.test.ts`** |
 | New hook or service module | Directory Structure tree in this file |
 | New API endpoint | `docs/api-reference.md` |
 | New Firestore collection | `docs/api-reference.md` collection paths |
