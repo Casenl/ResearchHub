@@ -18,6 +18,8 @@ import {
   type User as FirebaseUser,
 } from "firebase/auth";
 import { getFirebaseAuth } from "@/lib/firebase";
+import { subscribeUserById, upsertUser } from "@/lib/firestore/users";
+import { getAppSettings } from "@/lib/firestore/settings";
 import type { UserRole } from "@/types";
 
 // -----------------------------------------------------------------------------
@@ -69,30 +71,6 @@ interface AuthContextValue {
 
 const googleProvider = new GoogleAuthProvider();
 
-/**
- * Derive the user role from custom claims or fall back to a default.
- * In production you'd set custom claims via Firebase Admin SDK or
- * Cloud Functions. For now, we default to "researcher" and treat the
- * first user (or a specific email domain) as admin.
- */
-function deriveRole(firebaseUser: FirebaseUser): UserRole {
-  // TODO: Read from Firestore users collection or custom claims
-  // For MVP: emails ending with @itq.nl get admin, others get researcher
-  const email = firebaseUser.email ?? "";
-  if (email.endsWith("@itq.nl")) return "admin";
-  return "researcher";
-}
-
-function toAuthUser(firebaseUser: FirebaseUser): AuthUser {
-  return {
-    uid: firebaseUser.uid,
-    email: firebaseUser.email,
-    displayName: firebaseUser.displayName,
-    photoURL: firebaseUser.photoURL,
-    role: deriveRole(firebaseUser),
-  };
-}
-
 // -----------------------------------------------------------------------------
 // Context
 // -----------------------------------------------------------------------------
@@ -105,18 +83,76 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [firestoreRole, setFirestoreRole] = useState<UserRole | null>(null);
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
+  // 1. Listen for Firebase Auth state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (fbUser) => {
       setFirebaseUser(fbUser);
-      setIsLoading(false);
+      if (!fbUser) {
+        setFirestoreRole(null);
+      }
+      setIsAuthReady(true);
     });
     return unsubscribe;
   }, []);
 
-  const user = firebaseUser ? toAuthUser(firebaseUser) : null;
+  // 2. When we have a Firebase user, subscribe to their Firestore user doc
+  //    for the role. Auto-create the doc on first login.
+  useEffect(() => {
+    if (!firebaseUser) return;
+
+    const unsubscribe = subscribeUserById(
+      firebaseUser.uid,
+      async (userDoc) => {
+        if (userDoc) {
+          setFirestoreRole(userDoc.role);
+        } else {
+          // First login — create user doc with default role from app settings
+          let defaultRole: UserRole = "researcher";
+          try {
+            const settings = await getAppSettings();
+            defaultRole = settings.default_role;
+          } catch {
+            // Settings not available — fall back to researcher
+          }
+
+          await upsertUser({
+            id: firebaseUser.uid,
+            name: firebaseUser.displayName ?? "",
+            email: firebaseUser.email ?? "",
+            role: defaultRole,
+            domain_ids: [],
+          });
+          // The subscription will fire again with the new doc
+        }
+      },
+      (err) => {
+        console.error("Error subscribing to user doc:", err);
+        // Fall back to viewer on error so the app doesn't break
+        setFirestoreRole("viewer");
+      }
+    );
+
+    return unsubscribe;
+  }, [firebaseUser]);
+
+  // Loading until both auth state and Firestore role are resolved
+  const isLoading = !isAuthReady || (firebaseUser !== null && firestoreRole === null);
+
+  const user: AuthUser | null =
+    firebaseUser && firestoreRole
+      ? {
+          uid: firebaseUser.uid,
+          email: firebaseUser.email,
+          displayName: firebaseUser.displayName,
+          photoURL: firebaseUser.photoURL,
+          role: firestoreRole,
+        }
+      : null;
+
   const role = user?.role ?? "viewer";
 
   const signInWithEmail = useCallback(
