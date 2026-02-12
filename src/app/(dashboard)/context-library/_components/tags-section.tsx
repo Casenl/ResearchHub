@@ -81,7 +81,7 @@ export function TagsSection({
                 <button
                   type="button"
                   onClick={() => removeTag(tag)}
-                  className="ml-0.5 rounded-full p-0.5 hover:bg-gray-300/50 transition-colors"
+                  className="ml-0.5 rounded-full p-0.5 hover:bg-muted transition-colors"
                   aria-label={`Remove tag ${tag}`}
                 >
                   <X className="h-3 w-3" />

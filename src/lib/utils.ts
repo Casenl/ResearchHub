@@ -43,14 +43,14 @@ export function getRelativeTime(date: string): string {
  */
 export function getStatusColor(status: ResearchStatus): string {
   const statusColors: Record<ResearchStatus, string> = {
-    draft: "text-gray-500 bg-gray-100",
-    in_progress: "text-blue-700 bg-blue-100",
-    review: "text-amber-700 bg-amber-100",
-    published: "text-green-700 bg-green-100",
-    archived: "text-slate-500 bg-slate-100",
+    draft: "text-muted-foreground bg-muted",
+    in_progress: "text-blue-700 bg-blue-100 dark:text-blue-200 dark:bg-blue-950",
+    review: "text-amber-700 bg-amber-100 dark:text-amber-200 dark:bg-amber-950",
+    published: "text-green-700 bg-green-100 dark:text-green-200 dark:bg-green-950",
+    archived: "text-slate-500 bg-slate-100 dark:text-slate-400 dark:bg-slate-900",
   };
 
-  return statusColors[status] ?? "text-gray-500 bg-gray-100";
+  return statusColors[status] ?? "text-muted-foreground bg-muted";
 }
 
 /**

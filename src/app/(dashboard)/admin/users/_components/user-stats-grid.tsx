@@ -43,7 +43,7 @@ export function UserStatsGrid({ users }: UserStatsGridProps): React.JSX.Element 
       </div>
       <div className="rounded-lg border border-border bg-background p-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Users className="h-4 w-4 text-gray-500" />
+          <Users className="h-4 w-4 text-muted-foreground" />
           Viewers
         </div>
         <p className="mt-1 text-2xl font-bold">{viewerCount}</p>

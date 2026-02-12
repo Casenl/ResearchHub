@@ -371,7 +371,7 @@ export default function AdminSettingsPage(): React.JSX.Element {
               }`}
             >
               <span
-                className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${
+                className={`inline-block h-4 w-4 rounded-full bg-white dark:bg-gray-200 transition-transform ${
                   settings.registrations_enabled ? "translate-x-6" : "translate-x-1"
                 }`}
               />

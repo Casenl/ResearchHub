@@ -126,9 +126,23 @@ import { DOMAINS } from '@/data/domains';
 - Protected routes via `<ProtectedRoute>` component
 - Admin routes check `isAdmin` before rendering nav items and page content
 
-## Dark Mode Colors for Badges/Tags
+## Theme-Aware Colors (Dark Mode)
 
-Every hardcoded Tailwind color class MUST include a `dark:` variant:
+**Always use CSS variable-based theme tokens** instead of hardcoded Tailwind gray colors. This ensures automatic dark mode support without manual `dark:` overrides.
+
+### Preferred theme tokens
+
+| Instead of | Use |
+|-----------|-----|
+| `text-gray-900`, `text-gray-800`, `text-gray-700` | `text-foreground` |
+| `text-gray-500`, `text-gray-400`, `text-gray-600` | `text-muted-foreground` |
+| `bg-white` | `bg-background` or `bg-card` |
+| `bg-gray-50`, `bg-gray-100` | `bg-muted` |
+| `border-gray-200`, `border-gray-300` | `border-border` |
+
+### Accent/semantic colors require `dark:` variants
+
+When you need a non-neutral color (blue, green, amber, etc.) for badges, tags, or selection states, always pair light and dark variants:
 
 | Light | Dark |
 |-------|------|
@@ -137,6 +151,10 @@ Every hardcoded Tailwind color class MUST include a `dark:` variant:
 | `border-{color}-200` | `dark:border-{color}-800` |
 
 Reference implementation: `src/hooks/use-toast.tsx` VARIANT_STYLES.
+
+### Toggle switch dots
+
+The `bg-white` dot inside toggle switches is intentional (white on colored track), but add `dark:bg-gray-200` to maintain contrast in dark mode.
 
 ## Frontend Aesthetics
 

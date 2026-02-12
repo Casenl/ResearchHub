@@ -39,7 +39,7 @@ Detailed docs are in `docs/`. Read the relevant doc when working in that area:
 
 - **[Testing](docs/testing.md)** — Cloud Functions unit/integration tests, E2E (Playwright), conventions, env vars
 - **[API Reference](docs/api-reference.md)** — REST endpoints, data model, Firestore collections, indexes
-- **[Code Patterns](docs/code-patterns.md)** — Firebase lazy init, Firestore loading/writing, import order, auth, frontend aesthetics
+- **[Code Patterns](docs/code-patterns.md)** — Firebase lazy init, Firestore loading/writing, import order, auth, **theme-aware colors (dark mode)**, frontend aesthetics
 - **[MCP & Agent Guide](docs/mcp-guide.md)** — REST API usage, MCP server tools/resources, agent integration patterns
 
 Global standards (type safety, naming, file size, security, React patterns) are in `~/.claude/docs/`.
@@ -56,6 +56,16 @@ Global standards (type safety, naming, file size, security, React patterns) are 
 | Backend | Firebase (Firestore, Auth, Storage) |
 | Auth | Firebase Auth (Google + Email/Password) |
 | Utilities | date-fns, uuid, clsx + tailwind-merge, react-markdown |
+
+### Styling Rule: Always Use Theme Tokens
+
+**Never use hardcoded Tailwind gray colors** (`text-gray-700`, `bg-white`, `border-gray-200`, etc.) for neutral UI elements. Always use CSS variable-based theme tokens that auto-adapt to dark mode:
+
+- Text: `text-foreground`, `text-muted-foreground`
+- Backgrounds: `bg-background`, `bg-card`, `bg-muted`, `bg-accent`
+- Borders: `border-border`, `border-input`
+
+For semantic/accent colors (blue, green, amber, etc.), always pair with a `dark:` variant. See `docs/code-patterns.md` for the full mapping.
 
 ### Directory Structure
 

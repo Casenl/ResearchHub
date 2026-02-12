@@ -104,14 +104,14 @@ function DimensionCheckboxGroup({
                 "inline-flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
                 isSelected
                   ? activeColorClass
-                  : "border-border bg-white text-muted-foreground hover:bg-muted/50"
+                  : "border-border bg-background text-muted-foreground hover:bg-muted/50"
               )}
             >
               <input
                 type="checkbox"
                 checked={isSelected}
                 onChange={() => onToggle(item.id)}
-                className="h-3.5 w-3.5 rounded border-gray-300 text-primary focus:ring-primary"
+                className="h-3.5 w-3.5 rounded border-border text-primary focus:ring-primary"
               />
               {item.name}
             </label>
