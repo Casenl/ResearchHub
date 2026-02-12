@@ -28,7 +28,7 @@ export function StepDefine({
       <CardContent className="space-y-6">
         {/* Research Type */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-foreground">
             Research Type
           </label>
           <div className="grid grid-cols-3 gap-3">
@@ -60,14 +60,14 @@ export function StepDefine({
                 className={cn(
                   "rounded-lg border-2 p-4 text-left transition-colors",
                   form.researchType === opt.value
-                    ? "border-blue-600 bg-blue-50"
-                    : "border-gray-200 hover:border-gray-300"
+                    ? "border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-950"
+                    : "border-border hover:border-border/80"
                 )}
               >
-                <span className="block text-sm font-semibold text-gray-900">
+                <span className="block text-sm font-semibold text-foreground">
                   {opt.label}
                 </span>
-                <span className="block text-xs text-gray-500 mt-1">
+                <span className="block text-xs text-muted-foreground mt-1">
                   {opt.desc}
                 </span>
               </button>
@@ -79,7 +79,7 @@ export function StepDefine({
         {(form.researchType === "refresh" ||
           form.researchType === "clone") && (
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Reference Research
             </label>
             <select
@@ -87,7 +87,7 @@ export function StepDefine({
               onChange={(e) =>
                 onUpdate({ referenceResearchId: e.target.value })
               }
-              className="flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="flex h-10 w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
               <option value="">Select existing research...</option>
               {MOCK_EXISTING_RESEARCH.map((r) => (
@@ -102,7 +102,7 @@ export function StepDefine({
         {/* Clone Changed Dimension */}
         {form.researchType === "clone" && (
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700">
+            <label className="text-sm font-medium text-foreground">
               Which dimension is changing?
             </label>
             <div className="flex gap-3">
@@ -122,8 +122,8 @@ export function StepDefine({
                   className={cn(
                     "rounded-md border px-4 py-2 text-sm font-medium transition-colors",
                     form.clonedChangedDimension === opt.value
-                      ? "border-blue-600 bg-blue-50 text-blue-800"
-                      : "border-gray-200 text-gray-600 hover:border-gray-300"
+                      ? "border-blue-600 bg-blue-50 text-blue-800 dark:border-blue-500 dark:bg-blue-950 dark:text-blue-200"
+                      : "border-border text-muted-foreground hover:border-border/80"
                   )}
                 >
                   {opt.label}
@@ -135,7 +135,7 @@ export function StepDefine({
 
         {/* Title */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Title</label>
+          <label className="text-sm font-medium text-foreground">Title</label>
           <Input
             placeholder="e.g. Netherlands Security Market Analysis Q1 2026"
             value={form.title}
@@ -145,7 +145,7 @@ export function StepDefine({
 
         {/* Description */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-foreground">
             Description
           </label>
           <Textarea
@@ -158,10 +158,10 @@ export function StepDefine({
 
         {/* Core Question */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-foreground">
             Core Question
           </label>
-          <p className="text-xs text-gray-500">
+          <p className="text-xs text-muted-foreground">
             What must this research answer?
           </p>
           <Textarea
@@ -174,7 +174,7 @@ export function StepDefine({
 
         {/* Output Format */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">
+          <label className="text-sm font-medium text-foreground">
             Output Format
           </label>
           <div className="grid grid-cols-2 gap-3">
@@ -188,23 +188,23 @@ export function StepDefine({
                   className={cn(
                     "flex items-start gap-3 rounded-lg border-2 p-4 text-left transition-colors",
                     form.outputFormat === opt.value
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-950"
+                      : "border-border hover:border-border/80"
                   )}
                 >
                   <Icon
                     className={cn(
                       "h-5 w-5 mt-0.5 shrink-0",
                       form.outputFormat === opt.value
-                        ? "text-blue-600"
-                        : "text-gray-400"
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-muted-foreground"
                     )}
                   />
                   <div>
-                    <span className="block text-sm font-semibold text-gray-900">
+                    <span className="block text-sm font-semibold text-foreground">
                       {opt.label}
                     </span>
-                    <span className="block text-xs text-gray-500 mt-0.5">
+                    <span className="block text-xs text-muted-foreground mt-0.5">
                       {opt.description}
                     </span>
                   </div>
@@ -216,8 +216,8 @@ export function StepDefine({
 
         {/* Context Description */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700">Context</label>
-          <p className="text-xs text-gray-500">
+          <label className="text-sm font-medium text-foreground">Context</label>
+          <p className="text-xs text-muted-foreground">
             Why is this research needed?
           </p>
           <Textarea

@@ -153,10 +153,10 @@ export default function NewResearchPage(): React.JSX.Element {
     <div className="mx-auto max-w-3xl">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-2xl font-bold text-foreground">
           New Research Project
         </h1>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-muted-foreground">
           Set up a new market intelligence research project with structured
           prompts and notebook generation.
         </p>
@@ -198,7 +198,7 @@ export default function NewResearchPage(): React.JSX.Element {
               Back
             </Button>
           ) : (
-            <Button variant="ghost" asChild className="gap-2 text-gray-500">
+            <Button variant="ghost" asChild className="gap-2 text-muted-foreground">
               <Link href="/research">
                 <ArrowLeft className="h-4 w-4" />
                 Cancel
@@ -213,7 +213,7 @@ export default function NewResearchPage(): React.JSX.Element {
               <ArrowRight className="h-4 w-4" />
             </Button>
           ) : (
-            <Button variant="ghost" asChild className="gap-2 text-gray-500">
+            <Button variant="ghost" asChild className="gap-2 text-muted-foreground">
               <Link href="/research">
                 Cancel
               </Link>

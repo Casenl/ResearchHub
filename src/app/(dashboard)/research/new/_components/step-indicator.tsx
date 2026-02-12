@@ -51,7 +51,7 @@ export function StepIndicator({
                     isCurrent &&
                       "border-blue-600 bg-blue-600 text-white",
                     isUpcoming &&
-                      "border-gray-300 bg-white text-gray-400"
+                      "border-border bg-background text-muted-foreground"
                   )}
                 >
                   {isCompleted ? (
@@ -63,9 +63,9 @@ export function StepIndicator({
                 <span
                   className={cn(
                     "mt-2 text-xs font-medium",
-                    isCompleted && "text-green-700",
-                    isCurrent && "text-blue-700",
-                    isUpcoming && "text-gray-400"
+                    isCompleted && "text-green-700 dark:text-green-300",
+                    isCurrent && "text-blue-700 dark:text-blue-300",
+                    isUpcoming && "text-muted-foreground"
                   )}
                 >
                   {STEP_LABELS[i]}
@@ -75,7 +75,7 @@ export function StepIndicator({
                 <div
                   className={cn(
                     "mt-[-1.25rem] h-0.5 flex-1 mx-3 transition-colors",
-                    step < currentStep ? "bg-green-600" : "bg-gray-200"
+                    step < currentStep ? "bg-green-600" : "bg-border"
                   )}
                 />
               )}
@@ -83,7 +83,7 @@ export function StepIndicator({
           );
         })}
       </div>
-      <p className="mt-4 text-center text-sm text-gray-500">
+      <p className="mt-4 text-center text-sm text-muted-foreground">
         Step {currentStep} of {totalSteps}
       </p>
     </div>

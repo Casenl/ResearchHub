@@ -118,9 +118,9 @@ export function StepReview({
         <CardContent>
           <div className="space-y-6">
             {/* Header */}
-            <div className="rounded-lg bg-gray-50 p-4 space-y-3">
+            <div className="rounded-lg bg-muted p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-gray-900">
+                <h3 className="text-base font-semibold text-foreground">
                   {form.title || "Untitled Research"}
                 </h3>
                 <Badge variant="default" className="px-2.5 py-0.5 text-sm">
@@ -128,34 +128,34 @@ export function StepReview({
                 </Badge>
               </div>
               {form.description && (
-                <p className="text-sm text-gray-600">{form.description}</p>
+                <p className="text-sm text-muted-foreground">{form.description}</p>
               )}
             </div>
 
             {/* Details Grid */}
             <div className="grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
               <div>
-                <span className="font-medium text-gray-500">
+                <span className="font-medium text-muted-foreground">
                   Output Format
                 </span>
-                <p className="text-gray-900 mt-0.5">
+                <p className="text-foreground mt-0.5">
                   {OUTPUT_FORMAT_LABELS[form.outputFormat]}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-gray-500">
+                <span className="font-medium text-muted-foreground">
                   Refresh Schedule
                 </span>
-                <p className="text-gray-900 mt-0.5">
+                <p className="text-foreground mt-0.5">
                   {REFRESH_SCHEDULE_LABELS[form.refreshSchedule]}
                 </p>
               </div>
               <div>
-                <span className="font-medium text-gray-500">Requester</span>
-                <p className="text-gray-900 mt-0.5">
+                <span className="font-medium text-muted-foreground">Requester</span>
+                <p className="text-foreground mt-0.5">
                   {form.requesterName}
                   {form.requesterRole && (
-                    <span className="text-gray-500">
+                    <span className="text-muted-foreground">
                       {" "}
                       &middot; {form.requesterRole}
                     </span>
@@ -163,8 +163,8 @@ export function StepReview({
                 </p>
               </div>
               <div>
-                <span className="font-medium text-gray-500">Deadline</span>
-                <p className="text-gray-900 mt-0.5">
+                <span className="font-medium text-muted-foreground">Deadline</span>
+                <p className="text-foreground mt-0.5">
                   {form.deadline || "Not set"}
                 </p>
               </div>
@@ -173,10 +173,10 @@ export function StepReview({
             {/* Core Question */}
             {form.coreQuestion && (
               <div>
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-muted-foreground">
                   Core Question
                 </span>
-                <p className="text-sm text-gray-900 mt-1 bg-amber-50 border border-amber-200 rounded-md p-3">
+                <p className="text-sm text-foreground mt-1 bg-amber-50 border border-amber-200 rounded-md p-3 dark:bg-amber-950 dark:border-amber-800 dark:text-amber-200">
                   {form.coreQuestion}
                 </p>
               </div>
@@ -185,10 +185,10 @@ export function StepReview({
             {/* Context Description */}
             {form.contextDescription && (
               <div>
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-muted-foreground">
                   Context
                 </span>
-                <p className="text-sm text-gray-700 mt-1">
+                <p className="text-sm text-foreground/80 mt-1">
                   {form.contextDescription}
                 </p>
               </div>
@@ -196,12 +196,12 @@ export function StepReview({
 
             {/* Dimensions */}
             <div className="space-y-3">
-              <span className="text-sm font-medium text-gray-500">
+              <span className="text-sm font-medium text-muted-foreground">
                 Dimensions
               </span>
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <span className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">
                     Markets
                   </span>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -216,14 +216,14 @@ export function StepReview({
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground/70">
                         None selected
                       </span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <span className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">
                     Domains
                   </span>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -238,14 +238,14 @@ export function StepReview({
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground/70">
                         None selected
                       </span>
                     )}
                   </div>
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <span className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">
                     Sectors
                   </span>
                   <div className="flex flex-wrap gap-1.5 mt-1.5">
@@ -267,7 +267,7 @@ export function StepReview({
                         </Badge>
                       ))
                     ) : (
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-muted-foreground/70">
                         None selected
                       </span>
                     )}
@@ -279,16 +279,16 @@ export function StepReview({
             {/* Context Documents */}
             {selectedDocs.length > 0 && (
               <div>
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-muted-foreground">
                   Context Documents
                 </span>
                 <ul className="mt-1.5 space-y-1">
                   {selectedDocs.map((doc) => (
                     <li
                       key={doc.id}
-                      className="flex items-center gap-2 text-sm text-gray-700"
+                      className="flex items-center gap-2 text-sm text-foreground/80"
                     >
-                      <FileText className="h-3.5 w-3.5 text-gray-400" />
+                      <FileText className="h-3.5 w-3.5 text-muted-foreground/70" />
                       {doc.title}
                     </li>
                   ))}
@@ -299,16 +299,16 @@ export function StepReview({
             {/* Reference Research (Refresh/Clone) */}
             {form.referenceResearchId && (
               <div>
-                <span className="text-sm font-medium text-gray-500">
+                <span className="text-sm font-medium text-muted-foreground">
                   Reference Research
                 </span>
-                <p className="text-sm text-gray-700 mt-0.5">
+                <p className="text-sm text-foreground/80 mt-0.5">
                   {MOCK_EXISTING_RESEARCH.find(
                     (r) => r.id === form.referenceResearchId
                   )?.title ?? form.referenceResearchId}
                 </p>
                 {form.clonedChangedDimension && (
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-muted-foreground mt-0.5">
                     Changed dimension:{" "}
                     <span className="font-medium capitalize">
                       {form.clonedChangedDimension}
@@ -369,14 +369,14 @@ function GeneratedNotebooksList({
 }): React.JSX.Element {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 text-green-700">
+      <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
         <Check className="h-5 w-5" />
         <span className="text-sm font-semibold">
           Notebook structure generated successfully
         </span>
       </div>
 
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-muted-foreground">
         Based on the{" "}
         <strong>{OUTPUT_FORMAT_LABELS[outputFormat]}</strong>{" "}
         format, the following notebooks are needed:
