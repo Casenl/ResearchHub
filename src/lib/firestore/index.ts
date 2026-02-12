@@ -6,6 +6,7 @@ export * from "./converters";
 export * from "./taxonomy";
 export * from "./research";
 export * from "./context-documents";
+export * from "./competitors";
 export * from "./users";
 export * from "./admin";
 export * from "./activity";

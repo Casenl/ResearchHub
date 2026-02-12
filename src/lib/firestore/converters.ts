@@ -14,6 +14,7 @@ import {
 import type {
   Research,
   ContextDocument,
+  Competitor,
   User,
   PromptTemplate,
   AIToolProfile,
@@ -150,6 +151,30 @@ export const contextDocumentConverter: FirestoreDataConverter<ContextDocument> =
     updated_at: timestampToISO(data.updated_at),
     version: data.version ?? 1,
     tag_ids: data.tag_ids ?? [],
+  }));
+
+// -----------------------------------------------------------------------------
+// Competitor converter
+// -----------------------------------------------------------------------------
+
+export const competitorConverter: FirestoreDataConverter<Competitor> =
+  createConverter<Competitor>((id, data) => ({
+    id,
+    name: data.name ?? "",
+    description: data.description ?? "",
+    website: data.website ?? "",
+    logo_url: data.logo_url ?? null,
+    type: data.type ?? "msp",
+    headquarters_market_id: data.headquarters_market_id ?? "",
+    employee_range: data.employee_range ?? "",
+    revenue_range: data.revenue_range ?? "",
+    founded_year: data.founded_year ?? null,
+    positions: data.positions ?? [],
+    events: data.events ?? [],
+    tag_ids: data.tag_ids ?? [],
+    created_by: data.created_by ?? "",
+    created_at: timestampToISO(data.created_at),
+    updated_at: timestampToISO(data.updated_at),
   }));
 
 // -----------------------------------------------------------------------------

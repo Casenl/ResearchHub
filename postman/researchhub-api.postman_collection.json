@@ -817,7 +817,372 @@
       ]
     },
     {
-      "name": "7. Negative Tests",
+      "name": "7. Competitors",
+      "description": "Competitor CRUD endpoints. Manage competitor profiles, competitive positions (per market x domain), and timeline events.",
+      "item": [
+        {
+          "name": "Create Competitor",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Competitor - Postman\",\n  \"description\": \"Created via Postman for testing\",\n  \"website\": \"https://example.com\",\n  \"type\": \"msp\",\n  \"headquarters_market_id\": \"NL\",\n  \"employee_range\": \"1000-5000\",\n  \"revenue_range\": \"100M-500M EUR\",\n  \"founded_year\": 2005,\n  \"tag_ids\": []\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/competitors",
+              "host": ["{{base_url}}"],
+              "path": ["competitors"]
+            },
+            "description": "Create a new competitor profile. Requires read_write or admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has name\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"name\", \"Test Competitor - Postman\");",
+                  "});",
+                  "",
+                  "pm.test(\"Positions and events are empty arrays\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.positions).to.be.an(\"array\").that.is.empty;",
+                  "    pm.expect(json.events).to.be.an(\"array\").that.is.empty;",
+                  "});",
+                  "",
+                  "// Chain: store competitor_id for subsequent requests",
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"competitor_id\", json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Competitors",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/competitors",
+              "host": ["{{base_url}}"],
+              "path": ["competitors"]
+            },
+            "description": "List all competitors ordered by updated_at descending. Requires read or higher permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has total\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has results array\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"results\");",
+                  "    pm.expect(json.results).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Competitor by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/competitors/{{competitor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["competitors", "{{competitor_id}}"]
+            },
+            "description": "Fetch a single competitor by ID with full detail including positions and events."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\", pm.environment.get(\"competitor_id\"));",
+                  "});",
+                  "",
+                  "pm.test(\"Response has name and type\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"name\");",
+                  "    pm.expect(json).to.have.property(\"type\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Competitor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"Updated description via Postman\",\n  \"employee_range\": \"5000-10000\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/competitors/{{competitor_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["competitors", "{{competitor_id}}"]
+            },
+            "description": "Update competitor fields. Every update auto-sets updated_at and creates an audit log entry. Requires read_write or admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response confirms update\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"message\", \"Competitor updated\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Position",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"market_id\": \"NL\",\n  \"domain_id\": \"managed_services\",\n  \"sector_ids\": [\"enterprise\"],\n  \"services\": [\"Managed Detection & Response\", \"SOC-as-a-Service\"],\n  \"packaging_model\": \"managed\",\n  \"vendor_partnerships\": [\"Microsoft\", \"Palo Alto\"],\n  \"strengths\": \"Strong local presence and Dutch-language support\",\n  \"weaknesses\": \"Limited multi-cloud capabilities\",\n  \"notes\": \"Added via Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/competitors/{{competitor_id}}/positions",
+              "host": ["{{base_url}}"],
+              "path": ["competitors", "{{competitor_id}}", "positions"]
+            },
+            "description": "Add a competitive position (per market x domain) to a competitor. Requires read_write or admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has market_id and domain_id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"market_id\", \"NL\");",
+                  "    pm.expect(json).to.have.property(\"domain_id\", \"managed_services\");",
+                  "});",
+                  "",
+                  "// Chain: store position_id for subsequent requests",
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"position_id\", json.id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Position",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"market_id\": \"NL\",\n  \"domain_id\": \"managed_services\",\n  \"sector_ids\": [\"enterprise\", \"healthcare\"],\n  \"services\": [\"Managed Detection & Response\", \"SOC-as-a-Service\", \"Incident Response\"],\n  \"packaging_model\": \"managed\",\n  \"vendor_partnerships\": [\"Microsoft\", \"Palo Alto\", \"CrowdStrike\"],\n  \"strengths\": \"Strong local presence and Dutch-language support. 24/7 SOC.\",\n  \"weaknesses\": \"Limited multi-cloud capabilities\",\n  \"notes\": \"Updated via Postman\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/competitors/{{competitor_id}}/positions/{{position_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["competitors", "{{competitor_id}}", "positions", "{{position_id}}"]
+            },
+            "description": "Update an existing competitive position. Requires read_write or admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has correct id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\", pm.environment.get(\"position_id\"));",
+                  "});",
+                  "",
+                  "pm.test(\"Services list is updated\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json.services).to.include(\"Incident Response\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Add Event",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"event_type\": \"service_launch\",\n  \"title\": \"Launched MDR Service in Netherlands\",\n  \"description\": \"Expanded managed detection and response offering to Dutch market\",\n  \"date\": \"2026-01-15\",\n  \"market_ids\": [\"NL\"],\n  \"domain_ids\": [\"managed_services\"],\n  \"sector_ids\": [],\n  \"source_url\": \"https://example.com/press-release\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/competitors/{{competitor_id}}/events",
+              "host": ["{{base_url}}"],
+              "path": ["competitors", "{{competitor_id}}", "events"]
+            },
+            "description": "Add a timeline event to a competitor. Events track market moves like service launches, acquisitions, partnerships, etc. The agent_identity is automatically attached. Requires read_write or admin permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has id\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"id\");",
+                  "});",
+                  "",
+                  "pm.test(\"Origin is agent\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"origin\", \"agent\");",
+                  "});",
+                  "",
+                  "pm.test(\"Event type is correct\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"event_type\", \"service_launch\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "List Events",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/competitors/{{competitor_id}}/events",
+              "host": ["{{base_url}}"],
+              "path": ["competitors", "{{competitor_id}}", "events"]
+            },
+            "description": "List all timeline events for a competitor, sorted reverse-chronologically. Requires read or higher permission."
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Response has total\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"total\");",
+                  "});",
+                  "",
+                  "pm.test(\"Response has events array\", function() {",
+                  "    var json = pm.response.json();",
+                  "    pm.expect(json).to.have.property(\"events\");",
+                  "    pm.expect(json.events).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "8. Negative Tests",
       "description": "Error handling and edge case tests. These requests are expected to fail with specific error codes.",
       "item": [
         {
@@ -933,7 +1298,7 @@
       ]
     },
     {
-      "name": "8. Lifecycle (Ordered Workflow)",
+      "name": "9. Lifecycle (Ordered Workflow)",
       "description": "End-to-end lifecycle test. Run this folder sequentially via Postman Collection Runner to exercise the full create -> source -> validate -> query -> archive workflow.\n\nEach request chains to the next via environment variables.",
       "item": [
         {

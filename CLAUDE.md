@@ -80,6 +80,7 @@ src/
 │       ├── layout.tsx            # Dashboard layout (AppShell)
 │       ├── page.tsx              # Dashboard home
 │       ├── research/             # Research Library, detail, wizard
+│       ├── competitors/          # Competitor Intelligence (listing, detail, create)
 │       ├── context-library/      # Context Library CRUD
 │       ├── settings/             # User preferences (appearance, notifications)
 │       └── admin/                # Admin pages (taxonomy, users, api-keys, prompts, etc.)
@@ -90,6 +91,7 @@ src/
 ├── hooks/                        # Custom React hooks
 │   ├── use-auth.tsx              # Firebase Auth provider + hook
 │   ├── use-research.ts           # Research CRUD operations
+│   ├── use-competitors.ts        # Competitor CRUD operations
 │   ├── use-context-documents.ts  # Context document operations
 │   ├── use-taxonomy.ts           # Taxonomy data access
 │   ├── use-firestore-collection.ts  # Generic collection hook
@@ -114,6 +116,7 @@ src/
 │       ├── converters.ts         # Firestore ↔ TypeScript converters
 │       ├── research.ts           # Research CRUD
 │       ├── taxonomy.ts           # Taxonomy reads
+│       ├── competitors.ts        # Competitor CRUD
 │       ├── context-documents.ts  # Context document CRUD
 │       ├── users.ts              # User profile operations
 │       ├── admin.ts              # Admin data (api-keys, prompts, rules)
@@ -147,7 +150,8 @@ functions/
 │       ├── research.ts       # CRUD for research documents
 │       ├── sources.ts        # Source management within notebooks
 │       ├── files.ts          # File upload to Storage + Firestore metadata
-│       ├── intelligence.ts   # Competitors, landscape, summary endpoints
+│       ├── intelligence.ts   # Landscape, summary endpoints
+│       ├── competitors.ts   # Competitor CRUD, positions, events
 │       └── auth-keys.ts      # API key lifecycle (create/list/revoke)
 ├── __tests__/                # Unit tests (mocked) + integration tests (staging)
 ├── vitest.config.ts          # Unit test config (excludes integration/)
@@ -180,6 +184,9 @@ functions/
 | `/research` | Research Library listing with search + filters | Yes |
 | `/research/new` | Research Wizard (multi-step form) | Yes |
 | `/research/[id]` | Research detail with tabs | Yes |
+| `/competitors` | Competitor Intelligence listing with filters | Yes |
+| `/competitors/new` | Add new competitor profile | Yes |
+| `/competitors/[id]` | Competitor detail with tabs (Overview, Positions, Timeline, Related Research) | Yes |
 | `/context-library` | Context Library listing | Yes |
 | `/context-library/new` | Upload context document | Yes |
 | `/context-library/[id]` | Context document detail | Yes |

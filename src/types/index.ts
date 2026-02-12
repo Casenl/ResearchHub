@@ -40,6 +40,22 @@ export type ContextDocumentCategory =
 
 export type FileType = 'pdf' | 'docx' | 'md' | 'url';
 
+export type CompetitorType = 'msp' | 'vendor_partner' | 'both';
+
+export type CompetitorEventType =
+  | 'service_launch'
+  | 'acquisition'
+  | 'partnership'
+  | 'market_entry'
+  | 'market_exit'
+  | 'pricing_change'
+  | 'certification'
+  | 'leadership_change'
+  | 'funding'
+  | 'other';
+
+export type PackagingModel = 'managed' | 'project' | 'hybrid' | 'consulting';
+
 export type UserRole = 'viewer' | 'researcher' | 'admin';
 
 export type TagType = 'system' | 'free';
@@ -291,6 +307,63 @@ export interface Research {
   input_context: string[];
   /** Human oversight status for agent-contributed research. */
   review_status: ReviewStatus;
+}
+
+// -----------------------------------------------------------------------------
+// Competitors
+// -----------------------------------------------------------------------------
+
+/** Per market x domain competitive position. */
+export interface CompetitorPosition {
+  id: string;
+  market_id: string;
+  domain_id: string;
+  sector_ids: string[];
+  services: string[];
+  packaging_model: PackagingModel;
+  vendor_partnerships: string[];
+  strengths: string;
+  weaknesses: string;
+  notes: string;
+  updated_at: string;
+  updated_by: string;
+}
+
+/** A timeline event for a competitor. */
+export interface CompetitorEvent {
+  id: string;
+  event_type: CompetitorEventType;
+  title: string;
+  description: string;
+  date: string;
+  market_ids: string[];
+  domain_ids: string[];
+  sector_ids: string[];
+  source_url: string;
+  origin: ResearchOrigin;
+  agent_identity: AgentIdentity | null;
+  created_at: string;
+  created_by: string;
+}
+
+/** A competitor company tracked in the portal. */
+export interface Competitor {
+  id: string;
+  name: string;
+  description: string;
+  website: string;
+  logo_url: string | null;
+  type: CompetitorType;
+  headquarters_market_id: string;
+  employee_range: string;
+  revenue_range: string;
+  founded_year: number | null;
+  positions: CompetitorPosition[];
+  events: CompetitorEvent[];
+  tag_ids: string[];
+  created_by: string;
+  created_at: string;
+  updated_at: string;
 }
 
 // -----------------------------------------------------------------------------

@@ -15,6 +15,9 @@ import type {
   ReviewStatus,
   ResearchOrigin,
   ApiKeyPermission,
+  CompetitorType,
+  CompetitorEventType,
+  PackagingModel,
 } from "@/types";
 
 // ---------------------------------------------------------------------------
@@ -316,3 +319,33 @@ export const BUSINESS_UNITS: string[] = [
   "Digital Workspace BU",
   "AI BU",
 ];
+
+// ---------------------------------------------------------------------------
+// Competitor Intelligence — Labels
+// ---------------------------------------------------------------------------
+
+export const COMPETITOR_TYPE_LABELS: Record<CompetitorType, string> = {
+  msp: "MSP",
+  vendor_partner: "Vendor Partner",
+  both: "MSP & Vendor Partner",
+};
+
+export const COMPETITOR_EVENT_TYPE_LABELS: Record<CompetitorEventType, string> = {
+  service_launch: "Service Launch",
+  acquisition: "Acquisition",
+  partnership: "Partnership",
+  market_entry: "Market Entry",
+  market_exit: "Market Exit",
+  pricing_change: "Pricing Change",
+  certification: "Certification",
+  leadership_change: "Leadership Change",
+  funding: "Funding",
+  other: "Other",
+};
+
+export const PACKAGING_MODEL_LABELS: Record<PackagingModel, string> = {
+  managed: "Managed Service",
+  project: "Project-Based",
+  hybrid: "Hybrid",
+  consulting: "Consulting",
+};

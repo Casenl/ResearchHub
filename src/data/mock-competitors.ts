@@ -1,0 +1,241 @@
+/**
+ * Mock competitors for the ITQ Market Intelligence Portal.
+ * Used during development to populate the Competitors UI.
+ */
+
+import type { Competitor } from "@/types";
+
+export const MOCK_COMPETITORS: Competitor[] = [
+  {
+    id: "comp-1",
+    name: "Atos Cybersecurity",
+    description:
+      "European managed security services provider offering SOC, MDR, IAM, and compliance services. Part of Atos Group with deep presence across DACH and Benelux markets.",
+    website: "https://atos.net",
+    logo_url: null,
+    type: "msp",
+    headquarters_market_id: "market-fr",
+    employee_range: "5000-10000",
+    revenue_range: "500M-1B EUR",
+    founded_year: 1997,
+    positions: [
+      {
+        id: "pos-1",
+        market_id: "market-nl",
+        domain_id: "domain-sec",
+        sector_ids: ["sector-fs", "sector-gov"],
+        services: ["SOC-as-a-Service", "MDR", "IAM", "Compliance Consulting"],
+        packaging_model: "managed",
+        vendor_partnerships: ["Microsoft", "Palo Alto", "CrowdStrike"],
+        strengths:
+          "Strong government contracts and security clearances. Large analyst team with 24/7 coverage.",
+        weaknesses:
+          "Slower to adopt new technologies due to corporate bureaucracy. Pricing is premium tier.",
+        notes: "",
+        updated_at: "2026-01-15T10:00:00Z",
+        updated_by: "user-1",
+      },
+      {
+        id: "pos-2",
+        market_id: "market-de",
+        domain_id: "domain-sec",
+        sector_ids: ["sector-mfg"],
+        services: ["OT Security", "SOC", "Vulnerability Management"],
+        packaging_model: "hybrid",
+        vendor_partnerships: ["Fortinet", "Nozomi Networks"],
+        strengths:
+          "Deep OT/ICS security expertise. Strong manufacturing sector references.",
+        weaknesses: "Limited cloud-native security capabilities.",
+        notes: "",
+        updated_at: "2026-01-10T14:30:00Z",
+        updated_by: "user-1",
+      },
+    ],
+    events: [
+      {
+        id: "evt-1",
+        event_type: "acquisition",
+        title: "Acquired SecureLink Netherlands",
+        description:
+          "Atos completed acquisition of SecureLink's Dutch operations, expanding their SOC capacity in the Benelux region.",
+        date: "2025-09-15",
+        market_ids: ["market-nl", "market-bnl"],
+        domain_ids: ["domain-sec"],
+        sector_ids: [],
+        source_url: "https://example.com/atos-securelink",
+        origin: "human",
+        agent_identity: null,
+        created_at: "2025-09-20T08:00:00Z",
+        created_by: "user-1",
+      },
+      {
+        id: "evt-2",
+        event_type: "service_launch",
+        title: "Launched AI-powered MDR service",
+        description:
+          "New managed detection and response service using machine learning for automated threat hunting and incident triage.",
+        date: "2026-01-05",
+        market_ids: ["market-nl", "market-de"],
+        domain_ids: ["domain-sec", "domain-ai"],
+        sector_ids: [],
+        source_url: "https://example.com/atos-ai-mdr",
+        origin: "agent",
+        agent_identity: {
+          agent_id: "agent-research-01",
+          agent_name: "Research Scout",
+          agent_version: "1.0.0",
+          run_id: "run-abc-123",
+        },
+        created_at: "2026-01-08T12:00:00Z",
+        created_by: "agent-research-01",
+      },
+    ],
+    tag_ids: [],
+    created_by: "user-1",
+    created_at: "2025-06-01T09:00:00Z",
+    updated_at: "2026-01-15T10:00:00Z",
+  },
+  {
+    id: "comp-2",
+    name: "Computacenter",
+    description:
+      "Pan-European IT infrastructure services provider with managed services across hybrid cloud, digital workspace, and security. Strong partner ecosystem with VMware, Microsoft, and ServiceNow.",
+    website: "https://computacenter.com",
+    logo_url: null,
+    type: "both",
+    headquarters_market_id: "market-uk",
+    employee_range: "10000-20000",
+    revenue_range: "1B-5B EUR",
+    founded_year: 1981,
+    positions: [
+      {
+        id: "pos-3",
+        market_id: "market-nl",
+        domain_id: "domain-hc",
+        sector_ids: ["sector-fs"],
+        services: [
+          "Cloud Migration",
+          "Multi-cloud Management",
+          "IaaS",
+          "PaaS",
+        ],
+        packaging_model: "project",
+        vendor_partnerships: ["VMware", "Microsoft Azure", "AWS"],
+        strengths:
+          "Extensive cloud migration track record. Strong VMware partnership.",
+        weaknesses:
+          "Less focused on security integration within cloud services.",
+        notes: "",
+        updated_at: "2025-12-01T09:00:00Z",
+        updated_by: "user-1",
+      },
+      {
+        id: "pos-4",
+        market_id: "market-de",
+        domain_id: "domain-dw",
+        sector_ids: ["sector-mfg", "sector-auto"],
+        services: ["VDI", "DaaS", "UEM", "Collaboration Platform"],
+        packaging_model: "managed",
+        vendor_partnerships: ["Citrix", "Microsoft 365", "VMware Horizon"],
+        strengths:
+          "Largest Citrix partner in DACH. Strong automotive sector references.",
+        weaknesses:
+          "Weak AI/ML integration in workspace analytics.",
+        notes: "",
+        updated_at: "2025-11-15T11:00:00Z",
+        updated_by: "user-1",
+      },
+    ],
+    events: [
+      {
+        id: "evt-3",
+        event_type: "partnership",
+        title: "Strategic partnership with ServiceNow",
+        description:
+          "Announced expanded strategic partnership with ServiceNow for ITSM and ITOM managed services across European markets.",
+        date: "2025-11-01",
+        market_ids: ["market-nl", "market-de", "market-uk"],
+        domain_ids: ["domain-hc", "domain-dw"],
+        sector_ids: [],
+        source_url: "https://example.com/cc-servicenow",
+        origin: "human",
+        agent_identity: null,
+        created_at: "2025-11-05T10:00:00Z",
+        created_by: "user-1",
+      },
+    ],
+    tag_ids: [],
+    created_by: "user-1",
+    created_at: "2025-05-15T09:00:00Z",
+    updated_at: "2025-12-01T09:00:00Z",
+  },
+  {
+    id: "comp-3",
+    name: "Claranet",
+    description:
+      "European managed services provider specializing in cloud hosting, cybersecurity, and application management. Mid-market focused with strong presence in Benelux, France, and Iberia.",
+    website: "https://claranet.com",
+    logo_url: null,
+    type: "msp",
+    headquarters_market_id: "market-uk",
+    employee_range: "1000-5000",
+    revenue_range: "100M-500M EUR",
+    founded_year: 1996,
+    positions: [
+      {
+        id: "pos-5",
+        market_id: "market-nl",
+        domain_id: "domain-hc",
+        sector_ids: ["sector-retail", "sector-hlth"],
+        services: ["Managed Cloud", "Cloud-native Development", "DevOps"],
+        packaging_model: "managed",
+        vendor_partnerships: ["AWS", "Google Cloud"],
+        strengths:
+          "Strong cloud-native expertise. Agile delivery model attractive to mid-market.",
+        weaknesses:
+          "Limited enterprise security practice. No OT/ICS capabilities.",
+        notes: "",
+        updated_at: "2025-10-20T08:30:00Z",
+        updated_by: "user-1",
+      },
+    ],
+    events: [
+      {
+        id: "evt-4",
+        event_type: "market_entry",
+        title: "Expanded into DACH market",
+        description:
+          "Opened offices in Munich and Zurich to serve the DACH region with managed cloud and security services.",
+        date: "2025-08-01",
+        market_ids: ["market-de", "market-ch"],
+        domain_ids: ["domain-hc", "domain-sec"],
+        sector_ids: [],
+        source_url: "https://example.com/claranet-dach",
+        origin: "human",
+        agent_identity: null,
+        created_at: "2025-08-10T09:00:00Z",
+        created_by: "user-1",
+      },
+      {
+        id: "evt-5",
+        event_type: "funding",
+        title: "Received EUR 150M growth investment",
+        description:
+          "Private equity firm TowerBrook Capital invested EUR 150M to fund European expansion and M&A strategy.",
+        date: "2025-06-15",
+        market_ids: [],
+        domain_ids: [],
+        sector_ids: [],
+        source_url: "https://example.com/claranet-funding",
+        origin: "human",
+        agent_identity: null,
+        created_at: "2025-06-20T10:00:00Z",
+        created_by: "user-1",
+      },
+    ],
+    tag_ids: [],
+    created_by: "user-1",
+    created_at: "2025-07-01T09:00:00Z",
+    updated_at: "2025-10-20T08:30:00Z",
+  },
+];

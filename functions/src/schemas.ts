@@ -130,6 +130,67 @@ export const CreateApiKeySchema = z.object({
 });
 
 // =============================================================================
+// Competitor schemas
+// =============================================================================
+
+const CompetitorTypeSchema = z.enum(['msp', 'vendor_partner', 'both']);
+const CompetitorEventTypeSchema = z.enum([
+  'service_launch', 'acquisition', 'partnership',
+  'market_entry', 'market_exit', 'pricing_change',
+  'certification', 'leadership_change', 'funding', 'other',
+]);
+const PackagingModelSchema = z.enum(['managed', 'project', 'hybrid', 'consulting']);
+
+export const CreateCompetitorSchema = z.object({
+  name: z.string().min(1).max(200),
+  description: z.string().max(5000).default(''),
+  website: z.string().max(500).default(''),
+  type: CompetitorTypeSchema,
+  headquarters_market_id: z.string().default(''),
+  employee_range: z.string().max(100).default(''),
+  revenue_range: z.string().max(100).default(''),
+  founded_year: z.number().int().min(1800).max(2100).nullable().default(null),
+  tag_ids: z.array(z.string()).default([]),
+});
+
+export const UpdateCompetitorSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(5000).optional(),
+  website: z.string().max(500).optional(),
+  type: CompetitorTypeSchema.optional(),
+  headquarters_market_id: z.string().optional(),
+  employee_range: z.string().max(100).optional(),
+  revenue_range: z.string().max(100).optional(),
+  founded_year: z.number().int().min(1800).max(2100).nullable().optional(),
+  tag_ids: z.array(z.string()).optional(),
+});
+
+export const AddPositionSchema = z.object({
+  market_id: z.string().min(1),
+  domain_id: z.string().min(1),
+  sector_ids: z.array(z.string()).default([]),
+  services: z.array(z.string()).default([]),
+  packaging_model: PackagingModelSchema,
+  vendor_partnerships: z.array(z.string()).default([]),
+  strengths: z.string().max(5000).default(''),
+  weaknesses: z.string().max(5000).default(''),
+  notes: z.string().max(5000).default(''),
+});
+
+export const UpdatePositionSchema = AddPositionSchema;
+
+export const AddEventSchema = z.object({
+  event_type: CompetitorEventTypeSchema,
+  title: z.string().min(1).max(300),
+  description: z.string().max(5000).default(''),
+  date: z.string().min(1),
+  market_ids: z.array(z.string()).default([]),
+  domain_ids: z.array(z.string()).default([]),
+  sector_ids: z.array(z.string()).default([]),
+  source_url: z.string().max(1000).default(''),
+});
+
+// =============================================================================
 // Inferred types
 // =============================================================================
 
@@ -140,3 +201,7 @@ export type CreateSourceInput = z.infer<typeof CreateSourceSchema>;
 export type ValidateSourceInput = z.infer<typeof ValidateSourceSchema>;
 export type UploadFileInput = z.infer<typeof UploadFileSchema>;
 export type CreateApiKeyInput = z.infer<typeof CreateApiKeySchema>;
+export type CreateCompetitorInput = z.infer<typeof CreateCompetitorSchema>;
+export type UpdateCompetitorInput = z.infer<typeof UpdateCompetitorSchema>;
+export type AddPositionInput = z.infer<typeof AddPositionSchema>;
+export type AddEventInput = z.infer<typeof AddEventSchema>;

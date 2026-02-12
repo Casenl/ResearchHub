@@ -19,6 +19,14 @@ All endpoints (except `/health`) require `Authorization: Bearer <api-key>` heade
 | POST | `/research/:id/sources/:sourceId/validate` | read_write, admin | Validate + adjust tier |
 | POST | `/research/:id/files` | read_write, admin | Upload file (base64) |
 | GET | `/research/:id/files` | read+ | List file attachments |
+| GET | `/competitors` | read+ | List all competitors |
+| POST | `/competitors` | read_write, admin | Create competitor |
+| GET | `/competitors/:id` | read+ | Get single competitor |
+| PUT | `/competitors/:id` | read_write, admin | Update competitor |
+| POST | `/competitors/:id/positions` | read_write, admin | Add competitive position |
+| PUT | `/competitors/:id/positions/:posId` | read_write, admin | Update position |
+| POST | `/competitors/:id/events` | read_write, admin | Add timeline event |
+| GET | `/competitors/:id/events` | read+ | List events (reverse-chronological) |
 | GET | `/intelligence/competitors` | read+ | Competitor analysis by region |
 | GET | `/intelligence/landscape` | read+ | Domain landscape by region |
 | GET | `/intelligence/summary` | read+ | Research brief (narrative/structured) |
@@ -31,6 +39,7 @@ All endpoints (except `/health`) require `Authorization: Bearer <api-key>` heade
 Defined in `src/types/index.ts`. The three core dimension types (Market, Domain, Sector) form classification axes for all research and context documents.
 
 - **Research** — the primary artifact; contains notebooks, sources, synthesis, assumptions, version lineage
+- **Competitor** — a tracked competitor with embedded positions (per market x domain) and timeline events
 - **ContextDocument** — ITQ internal docs or curated external sources used as research input
 - **Notebook** — a research lens (market_regulation, competitive, business_model, local_sector)
 - **Source** — a reference with quality tier (1-8) and discovery tool attribution
@@ -40,6 +49,7 @@ Defined in `src/types/index.ts`. The three core dimension types (Market, Domain,
 ```
 research/{researchId}                    — Research documents
 research/{researchId}/notebooks/{nbId}   — Notebook sub-collection
+competitors/{competitorId}               — Competitor profiles (embedded positions[] + events[])
 context-documents/{docId}                — Context Library documents
 taxonomy/markets                         — Market taxonomy
 taxonomy/domains                         — Domain taxonomy

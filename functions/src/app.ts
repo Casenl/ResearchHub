@@ -5,6 +5,7 @@ import { researchRouter } from './routes/research';
 import { sourcesRouter } from './routes/sources';
 import { filesRouter } from './routes/files';
 import { intelligenceRouter } from './routes/intelligence';
+import { competitorsRouter } from './routes/competitors';
 import { authKeysRouter } from './routes/auth-keys';
 
 const app = express();
@@ -28,6 +29,7 @@ app.use('/research', researchRouter);
 app.use('/research', sourcesRouter);
 app.use('/research', filesRouter);
 app.use('/intelligence', intelligenceRouter);
+app.use('/competitors', competitorsRouter);
 app.use('/auth/keys', authKeysRouter);
 
 export { app };
