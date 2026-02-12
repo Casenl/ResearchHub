@@ -66,7 +66,7 @@ export default function LoginPage(): React.JSX.Element | null {
         setError("Password must be at least 6 characters.");
       } else if (message.includes("invalid-email")) {
         setError("Please enter a valid email address.");
-      } else if (message.includes("api-key-not-valid") || message.includes("auth/configuration") || message.includes("argument-error")) {
+      } else if (message.includes("api-key-not-valid") || message.includes("auth/configuration")) {
         setError(
           "Firebase is not configured yet. Add your Firebase credentials to .env.local and restart the dev server."
         );
@@ -90,7 +90,7 @@ export default function LoginPage(): React.JSX.Element | null {
       if (message.includes("popup-closed-by-user")) {
         // User closed the popup, not really an error
         setError(null);
-      } else if (message.includes("api-key-not-valid") || message.includes("auth/configuration") || message.includes("argument-error")) {
+      } else if (message.includes("api-key-not-valid") || message.includes("auth/configuration")) {
         setError(
           "Firebase is not configured yet. Add your Firebase credentials to .env.local and restart the dev server."
         );
