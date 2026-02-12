@@ -20,49 +20,28 @@ npm run test          # Run unit tests (Vitest)
 npm run test:e2e      # Run E2E tests (Playwright, requires dev server)
 npm run test:e2e:ui   # Open Playwright UI mode (interactive)
 npm run test:e2e:headed  # Run with visible browser
+
+# Cloud Functions testing (run from functions/)
+cd functions
+npm test              # Run unit tests (88 tests, mocked Firestore/Storage)
+npm run test:integration  # Run integration tests (35 tests, hits staging)
+
+# Deployment
+npm run deploy:staging:rules   # Deploy Firestore + Storage rules to staging
+cd functions
+npm run deploy                 # Deploy functions to production
+npm run deploy:staging         # Deploy functions to staging
 ```
 
-## E2E Testing
+## Child Docs
 
-Playwright E2E tests live in `e2e/` and cover authentication, navigation, dashboard, research library, settings, theme consistency, and admin pages.
+Detailed docs are in `docs/`. Read the relevant doc when working in that area:
 
-### Architecture
+- **[Testing](docs/testing.md)** — Cloud Functions unit/integration tests, E2E (Playwright), conventions, env vars
+- **[API Reference](docs/api-reference.md)** — REST endpoints, data model, Firestore collections, indexes
+- **[Code Patterns](docs/code-patterns.md)** — Firebase lazy init, Firestore loading/writing, import order, auth, frontend aesthetics
 
-- **Page Object Model (POM)** — all page interactions are encapsulated in `e2e/pages/`. Tests import page objects rather than using raw selectors.
-- **Auth strategy** — `e2e/fixtures/auth.setup.ts` signs in as both a regular user and admin, saving `storageState` to `e2e/.auth/`. Tests reuse this state via Playwright projects:
-  - `chromium` — user auth (researcher role)
-  - `chromium-admin` — admin auth
-  - `chromium-noauth` — no auth (login page tests)
-- **Theme helpers** — `e2e/helpers/theme-helpers.ts` provides CSS variable validation for light/dark mode assertions.
-
-### Directory Structure
-
-```
-e2e/
-├── .auth/           # Git-ignored saved auth state
-├── fixtures/        # Auth setup + custom test function with POM fixtures
-├── helpers/         # Theme color assertions, shared utilities
-├── pages/           # Page Object Models (one per page/feature)
-│   └── admin/       # Admin-specific POMs
-└── tests/           # Test suites
-    └── admin/       # Admin test suites
-```
-
-### Conventions
-
-- Import `test` and `expect` from `e2e/fixtures/test-fixtures.ts` (not from `@playwright/test` directly)
-- Use POM fixtures: `async ({ dashboardPage, appShell, page }) => { ... }`
-- Tests that require admin auth go in `e2e/tests/admin/` (except `admin-access.spec.ts` which tests non-admin access)
-- Clean up theme state at end of tests that change theme/density
-
-### Environment Variables
-
-E2E tests require these in `.env.local`:
-```
-E2E_USER_EMAIL=m.jilderda+e2euser@gmail.com
-E2E_ADMIN_EMAIL=m.jilderda+e2eadmin@gmail.com
-E2E_TEST_PASSWORD=<shared-password>
-```
+Global standards (type safety, naming, file size, security, React patterns) are in `~/.claude/docs/`.
 
 ## Architecture
 
@@ -91,21 +70,45 @@ src/
 │       ├── page.tsx              # Dashboard home
 │       ├── research/             # Research Library, detail, wizard
 │       ├── context-library/      # Context Library CRUD
-│       └── admin/                # Taxonomy + user management
+│       ├── settings/             # User preferences (appearance, notifications)
+│       └── admin/                # Admin pages (taxonomy, users, api-keys, prompts, etc.)
 ├── components/
-│   ├── ui/                       # Base UI primitives (Badge, Button, Card, Input, Textarea)
+│   ├── ui/                       # Base primitives (Badge, Button, Card, Input, Textarea, ConfirmDialog)
 │   ├── layout/                   # AppShell (sidebar + header + main)
-│   ├── shared/                   # Reusable domain components (StatusBadge, DimensionTags, etc.)
-│   ├── research/                 # Research-specific components (future)
-│   ├── context/                  # Context Library components (future)
-│   └── admin/                    # Admin components (future)
+│   └── shared/                   # Domain components (StatusBadge, DimensionTags, TrustTierBadge, etc.)
 ├── hooks/                        # Custom React hooks
-│   └── use-auth.tsx              # Firebase Auth provider + hook
+│   ├── use-auth.tsx              # Firebase Auth provider + hook
+│   ├── use-research.ts           # Research CRUD operations
+│   ├── use-context-documents.ts  # Context document operations
+│   ├── use-taxonomy.ts           # Taxonomy data access
+│   ├── use-firestore-collection.ts  # Generic collection hook
+│   ├── use-firestore-document.ts    # Generic document hook
+│   ├── use-admin-data.ts         # Admin dashboard data
+│   ├── use-activity.ts           # Audit log data
+│   ├── use-usage.ts              # API usage stats
+│   ├── use-users.ts              # User management
+│   ├── use-research-transition.ts   # Research workflow state machine
+│   ├── use-theme.tsx             # Theme/density preferences
+│   └── use-toast.tsx             # Toast notifications
 ├── lib/                          # Utilities and services
-│   ├── firebase.ts               # Firebase lazy init (SSR-safe)
+│   ├── firebase.ts               # Firebase client lazy init (SSR-safe)
+│   ├── firebase-admin.ts         # Firebase Admin SDK (server-side scripts)
 │   ├── utils.ts                  # cn(), formatDate(), generateId(), etc.
 │   ├── constants.ts              # Label maps, configs, enums
-│   └── prompt-templates.ts       # Research prompt generation engine
+│   ├── prompt-templates.ts       # Research prompt generation engine
+│   ├── trust-tiers.ts            # Source quality tier definitions
+│   ├── research-workflow.ts      # Research status transition logic
+│   └── firestore/                # Firestore service layer
+│       ├── index.ts              # Barrel export for all services
+│       ├── converters.ts         # Firestore ↔ TypeScript converters
+│       ├── research.ts           # Research CRUD
+│       ├── taxonomy.ts           # Taxonomy reads
+│       ├── context-documents.ts  # Context document CRUD
+│       ├── users.ts              # User profile operations
+│       ├── admin.ts              # Admin data (api-keys, prompts, rules)
+│       ├── activity.ts           # Audit log queries
+│       ├── usage.ts              # API usage aggregation
+│       └── settings.ts           # User/system settings
 ├── types/
 │   └── index.ts                  # All TypeScript types and union types
 └── data/                         # Seed data and mock data
@@ -117,14 +120,45 @@ src/
     └── mock-context-documents.ts # Mock context documents (MVP)
 ```
 
+### Cloud Functions Architecture
+
+```
+functions/
+├── src/
+│   ├── index.ts              # Entry point — exports `api` Cloud Function (europe-west1)
+│   ├── app.ts                # Express app — mounts all routes, CORS, auth middleware
+│   ├── schemas.ts            # Zod validation schemas for all endpoints
+│   ├── lib/
+│   │   └── admin.ts          # Firebase Admin SDK lazy init (db(), storage())
+│   ├── middleware/
+│   │   └── auth.ts           # API key auth — SHA-256 hash lookup, permission checks
+│   └── routes/
+│       ├── research.ts       # CRUD for research documents
+│       ├── sources.ts        # Source management within notebooks
+│       ├── files.ts          # File upload to Storage + Firestore metadata
+│       ├── intelligence.ts   # Competitors, landscape, summary endpoints
+│       └── auth-keys.ts      # API key lifecycle (create/list/revoke)
+├── __tests__/                # Unit tests (mocked) + integration tests (staging)
+├── vitest.config.ts          # Unit test config (excludes integration/)
+├── vitest.integration.config.ts  # Integration test config
+├── tsconfig.json
+└── package.json
+```
+
 ### Key Files
 
 - `src/types/index.ts` — All TypeScript types; **single source of truth** for the data model
-- `src/lib/firebase.ts` — Lazy Firebase initialization; **never** import Firebase at module level in server components
+- `src/lib/firebase.ts` — Lazy Firebase client initialization; **never** import at module level in server components
+- `src/lib/firestore/index.ts` — Barrel export for all Firestore service modules
+- `src/lib/firestore/converters.ts` — Firestore ↔ TypeScript data converters
 - `src/hooks/use-auth.tsx` — Auth state, sign-in/out methods, role derivation
 - `src/lib/prompt-templates.ts` — Generates discovery/analysis/synthesis prompts per domain and notebook type
 - `src/lib/constants.ts` — All label maps, notebook configs, refresh schedules, time estimates
+- `src/lib/research-workflow.ts` — Research status transition logic and validation
 - `src/components/layout/app-shell.tsx` — Main navigation shell; wraps all authenticated pages
+- `functions/src/app.ts` — Express app mounting all API routes
+- `functions/src/schemas.ts` — Zod schemas for all API request validation
+- `functions/src/middleware/auth.ts` — API key authentication and permission middleware
 
 ### Route Groups
 
@@ -138,307 +172,17 @@ src/
 | `/context-library` | Context Library listing | Yes |
 | `/context-library/new` | Upload context document | Yes |
 | `/context-library/[id]` | Context document detail | Yes |
-| `/admin/taxonomy` | Taxonomy management (admin only) | Yes (admin) |
-| `/admin/users` | User management (admin only) | Yes (admin) |
-
-### Data Model
-
-The portal's data model is defined in `src/types/index.ts`. The three core dimension types (Market, Domain, Sector) form the classification axes for all research and context documents. Key entities:
-
-- **Research** — the primary artifact; contains notebooks, sources, synthesis, assumptions, version lineage
-- **ContextDocument** — ITQ internal docs or curated external sources used as research input
-- **Notebook** — a research lens (market_regulation, competitive, business_model, local_sector)
-- **Source** — a reference with quality tier (1-8) and discovery tool attribution
-
-## Security Requirements
-
-### Firebase Security
-
-- NEVER use `allow read: if true` or `allow write: if true` in Firestore rules
-- Always check authentication: `if request.auth != null`
-- Always verify ownership or role-based access before allowing operations
-- Test security rules with Firebase emulator before deploying
-
-### Authentication
-
-- Firebase Auth with lazy initialization (SSR-safe — no module-level `getAuth()`)
-- Role derivation: `@itq.eu` emails → admin, others → researcher (MVP)
-- Protected routes via `<ProtectedRoute>` component
-- Admin routes check `isAdmin` before rendering nav items and page content
-
-### Input Sanitization
-
-- Sanitize user input before embedding in HTML
-- Validate file types and sizes on Context Library uploads
-- Escape markdown content before rendering with react-markdown
-- Never expose raw error messages to users
-
-## Code Quality Standards
-
-### No Code Duplication
-
-- NEVER duplicate code across multiple files
-- Extract common patterns into shared utilities in `lib/`
-- Create custom hooks for repeated React patterns
-- Use shared components from `components/ui/` and `components/shared/`
-- Before writing similar code, check if a utility/hook/component already exists
-
-### Naming Conventions
-
-| Type | Convention | Example |
-|------|-----------|---------|
-| Boolean variables | Prefix with `is`, `has`, `can` | `isLoading`, `hasAccess`, `canEdit` |
-| Loading states | Use `isLoading` consistently | `isLoading` (not `loading`) |
-| Async functions | Prefix with `handle` or `fetch` | `handleSubmit`, `fetchResearch` |
-| Event handlers | Prefix with `handle` | `handleClick`, `handleFilterChange` |
-| Directories | Lowercase with dashes | `components/context-library` |
-| Types/Interfaces | PascalCase | `Research`, `ContextDocument` |
-| Union types | PascalCase | `ResearchStatus`, `OutputFormat` |
-| Constants | UPPER_SNAKE_CASE for exports | `MOCK_RESEARCH`, `DOMAINS` |
-| Seed data arrays | Plural UPPER_SNAKE | `MARKETS`, `SECTORS`, `SYSTEM_TAGS` |
-
-### Type Safety
-
-- NEVER use `any` type unless absolutely necessary
-- Define proper interfaces in `types/index.ts`
-- TypeScript strict mode is enabled
-- Properly type Firestore documents when integrating
-- Prefer `interface` over `type` for object shapes
-- Use explicit return type annotations for exported functions
-- Use union types for known string sets (e.g., `ResearchStatus`, `OutputFormat`)
-
-```typescript
-// Good
-interface ResearchCardProps {
-  research: Research;
-  onSelect: (id: string) => void;
-}
-
-// Bad
-type ResearchCardProps = { research: any; onSelect: Function; };
-```
-
-### React File Size Guidelines
-
-- Components should stay between **50–150 lines**
-- Files over **200 lines** should be split
-- Files over **300 lines** indicate missing separation of concerns
-
-Rules of thumb:
-- One component = one responsibility
-- Business logic lives in hooks or services, not components
-- Hooks should be 30–80 lines and focus on a single concern
-- Components should mainly contain JSX, minimal state, and callbacks
-- If a file needs comments to explain its sections, it should be split
-
-**Decomposition pattern:** When a component exceeds 200 lines, extract sub-pieces into a same-name subdirectory:
-- UI sections → named sub-components
-- Business logic → custom hooks (`useResearchFilters.ts`)
-- Forms → separate form components
-- The parent file becomes an orchestrator that imports and composes sub-pieces
-
-### Error Handling
-
-Always use try-catch in async functions with consistent pattern:
-
-```typescript
-try {
-  // operation
-} catch (error) {
-  console.error('Context - what failed:', error);
-  // Show user-friendly message via UI
-}
-```
-
-- Log errors with context (what operation failed)
-- Show user-friendly error messages in UI
-- Never expose raw error messages to users
-- Firebase errors should be translated to friendly messages (see login page for pattern)
-
-## Code Patterns
-
-### React Components
-
-```typescript
-interface Props {
-  research: Research;
-  onSelect?: (id: string) => void;
-}
-
-export function ResearchCard({ research, onSelect }: Props) {
-  const { isAdmin } = useAuth();
-  // ...
-}
-```
-
-Use `function` declarations for exported components (not arrow functions assigned to const).
-
-### State Management
-
-```typescript
-const [isLoading, setIsLoading] = useState(true);
-const [data, setData] = useState<Research[]>([]);
-const [error, setError] = useState<string | null>(null);
-```
-
-### Firestore Data Loading (when Firebase is connected)
-
-```typescript
-const loadResearch = async () => {
-  try {
-    setIsLoading(true);
-    const snapshot = await getDocs(collection(getFirestoreDb(), 'research'));
-    const items = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-      createdAt: doc.data().createdAt?.toDate?.()?.toISOString() ?? '',
-      updatedAt: doc.data().updatedAt?.toDate?.()?.toISOString() ?? '',
-    })) as Research[];
-    setData(items);
-  } catch (error) {
-    console.error('Error loading research:', error);
-  } finally {
-    setIsLoading(false);
-  }
-};
-```
-
-### Firestore Data Writing
-
-Always include timestamps when writing:
-
-```typescript
-import { serverTimestamp } from 'firebase/firestore';
-
-const researchData = {
-  ...formData,
-  updatedAt: serverTimestamp(),
-};
-
-// For new documents
-const newResearchData = {
-  ...researchData,
-  createdAt: serverTimestamp(),
-};
-```
-
-### Firebase Initialization
-
-Firebase is initialized lazily to avoid SSR errors. **Never** import Firebase instances at module top-level in files that may run on the server.
-
-```typescript
-// Good — lazy getter, only runs client-side
-import { getFirebaseAuth } from '@/lib/firebase';
-
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (user) => { ... });
-  return unsubscribe;
-}, []);
-
-// Bad — module-level initialization breaks SSR
-import { auth } from '@/lib/firebase'; // crashes during build
-```
-
-### Firestore Collection Paths (planned)
-
-```
-research/{researchId}                    — Research documents
-research/{researchId}/notebooks/{nbId}   — Notebook sub-collection
-context-documents/{docId}                — Context Library documents
-taxonomy/markets                         — Market taxonomy
-taxonomy/domains                         — Domain taxonomy
-taxonomy/sectors                         — Sector taxonomy
-taxonomy/tags                            — Tags
-users/{userId}                           — User profiles and roles
-```
-
-## Import Consistency
-
-```typescript
-// React / Next.js imports first
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-
-// External libraries
-import { format } from 'date-fns';
-import { Search, Filter } from 'lucide-react';
-
-// Firebase — always use lazy getters
-import { getFirebaseAuth, getFirestoreDb } from '@/lib/firebase';
-import { collection, doc, getDoc } from 'firebase/firestore';
-
-// Internal — types
-import type { Research, ContextDocument } from '@/types';
-
-// Internal — utilities and constants
-import { cn, formatDate } from '@/lib/utils';
-import { RESEARCH_STATUS_LABELS } from '@/lib/constants';
-
-// Internal — components
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
-import { StatusBadge } from '@/components/shared/status-badge';
-
-// Internal — hooks
-import { useAuth } from '@/hooks/use-auth';
-
-// Internal — data
-import { DOMAINS } from '@/data/domains';
-```
-
-## Anti-Patterns to Avoid
-
-```typescript
-// Don't: Use any type
-function processResearch(data: any) { }
-// Do: Use proper types
-function processResearch(data: Research): ResearchSummary { }
-
-// Don't: Duplicate Firestore loading logic
-const loadResearch = async () => { /* same pattern in 10 files */ }
-// Do: Create shared data hooks
-import { useResearchList } from '@/hooks/use-research';
-
-// Don't: Inconsistent loading state naming
-const [loading, setLoading] = useState(false);
-// Do: Consistent naming with is- prefix
-const [isLoading, setIsLoading] = useState(false);
-
-// Don't: Nested ternaries
-const label = a ? (b ? 'x' : 'y') : 'z';
-// Do: Use switch or if/else
-switch (true) {
-  case a && b: return 'x';
-  case a: return 'y';
-  default: return 'z';
-}
-
-// Don't: Import Firebase at module level
-import { auth } from '@/lib/firebase';
-// Do: Use lazy getters inside hooks/effects
-import { getFirebaseAuth } from '@/lib/firebase';
-```
-
-## Frontend Aesthetics
-
-Avoid generic "AI slop" aesthetics. Make creative, distinctive frontends that surprise and delight.
-
-**Typography:** Choose fonts that are beautiful, unique, and interesting. Avoid generic fonts like Arial and Inter; opt instead for distinctive choices that elevate the design.
-
-**Color & Theme:** Commit to a cohesive aesthetic. Use CSS variables (defined in `globals.css`) for consistency. Dominant colors with sharp accents outperform timid, evenly-distributed palettes.
-
-**Motion:** Use animations for effects and micro-interactions. Prioritize CSS-only solutions. Focus on high-impact moments: one well-orchestrated page load with staggered reveals creates more delight than scattered micro-interactions.
-
-**Backgrounds:** Create atmosphere and depth rather than defaulting to solid colors. Layer CSS gradients, use geometric patterns, or add contextual effects.
-
-**Avoid:**
-- Overused font families (Inter, Roboto, Arial, system fonts)
-- Cliched color schemes (purple gradients on white)
-- Predictable layouts and component patterns
-- Cookie-cutter design lacking context-specific character
-
-Vary between light and dark themes, different fonts, different aesthetics. Never converge on the same common choices across generations.
+| `/settings` | User appearance + notification preferences | Yes |
+| `/admin/taxonomy` | Taxonomy management | Yes (admin) |
+| `/admin/users` | User management | Yes (admin) |
+| `/admin/api-keys` | API key management for agents | Yes (admin) |
+| `/admin/prompts` | Prompt template configuration | Yes (admin) |
+| `/admin/context-rules` | Context injection rules | Yes (admin) |
+| `/admin/review-queue` | Research review workflow | Yes (admin) |
+| `/admin/activity` | Audit log viewer | Yes (admin) |
+| `/admin/usage` | API usage analytics | Yes (admin) |
+| `/admin/coverage` | Research coverage dashboard | Yes (admin) |
+| `/admin/settings` | System-wide settings | Yes (admin) |
 
 ## Environment Variables
 
@@ -454,17 +198,39 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=
 ```
 
-Firebase project: `marketintelligence-hub`. Credentials are stored in `.env.local` (not committed).
+### Firebase Projects
 
-### Firebase Service Account Key
+| Environment | Project ID | Purpose |
+|-------------|-----------|---------|
+| Production | `marketintelligence-hub` | Live application |
+| Staging | `marketintelligence-hub-staging` | Integration tests, pre-deploy validation |
 
-The service account key for the Firebase MCP server is stored at the project root:
+Both projects share identical Firestore rules, Storage rules, and Cloud Functions code. The staging alias is configured in `.firebaserc`.
 
-```
-./marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json
-```
+Credentials are stored in `.env.local` (not committed).
 
-This file is listed in `.gitignore` and must **never** be committed. It is referenced by `.mcp.json` for the Firebase MCP server.
+### Firebase Service Account Keys
+
+| Key file | Project | Used by |
+|----------|---------|---------|
+| `./marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json` | Production | Firebase MCP server (`.mcp.json`) |
+| `./marketintelligence-hub-staging-sa-key.json` | Staging | Integration tests |
+
+Both files are listed in `.gitignore` and must **never** be committed. For CI, the staging key is stored as GitHub secret `STAGING_SA_KEY_BASE64` (base64-encoded).
+
+## CI Pipeline
+
+GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR:
+
+| Job | What it does | Depends on |
+|-----|-------------|------------|
+| `unit-tests` | Vitest unit tests (Next.js) | -- |
+| `build-check` | TypeScript type-check + Next.js production build | -- |
+| `functions-build` | Compile Cloud Functions TypeScript | -- |
+| `functions-tests` | Cloud Functions unit tests | -- |
+| `functions-integration` | Cloud Functions integration tests (staging) | `functions-tests`, `functions-build` |
+
+The integration job only runs on `main` and PRs. It requires the `STAGING_SA_KEY_BASE64` GitHub secret.
 
 ## MCP Servers
 
@@ -483,3 +249,19 @@ The portal implements the ITQ standardised research process:
 6. **Publish** — review, tag, set refresh schedule, publish
 
 The prompt template engine (`lib/prompt-templates.ts`) generates domain-specific prompts for steps 3-5.
+
+## Maintenance
+
+When to update these docs:
+
+| Trigger | Update |
+|---------|--------|
+| New route added | Route Groups table in this file |
+| New hook or service module | Directory Structure tree in this file |
+| New API endpoint | `docs/api-reference.md` |
+| New Firestore collection | `docs/api-reference.md` collection paths |
+| Test infrastructure changed | `docs/testing.md` |
+| CI job added/changed | CI Pipeline table in this file |
+| New Firebase pattern or gotcha | `docs/code-patterns.md` |
+
+The global Self-Improving Guidelines (`~/.claude/CLAUDE.md`) also apply: when fixing a bug reveals a documentation gap, propose the specific update.
