@@ -40,6 +40,7 @@ Detailed docs are in `docs/`. Read the relevant doc when working in that area:
 - **[Testing](docs/testing.md)** — Cloud Functions unit/integration tests, E2E (Playwright), conventions, env vars
 - **[API Reference](docs/api-reference.md)** — REST endpoints, data model, Firestore collections, indexes
 - **[Code Patterns](docs/code-patterns.md)** — Firebase lazy init, Firestore loading/writing, import order, auth, frontend aesthetics
+- **[MCP & Agent Guide](docs/mcp-guide.md)** — REST API usage, MCP server tools/resources, agent integration patterns
 
 Global standards (type safety, naming, file size, security, React patterns) are in `~/.claude/docs/`.
 
@@ -218,6 +219,19 @@ Credentials are stored in `.env.local` (not committed).
 
 Both files are listed in `.gitignore` and must **never** be committed. For CI, the staging key is stored as GitHub secret `STAGING_SA_KEY_BASE64` (base64-encoded).
 
+### Staging Testing
+
+To test against staging locally:
+
+1. Swap env: `cp .env.staging.local .env.local`
+2. Start dev server: `npm run dev`
+3. Log in (ensure Google + Email/Password auth providers are enabled in staging project)
+4. Set your user role to `admin` via Firestore Console > `users/{uid}` > `role: "admin"`
+5. Test the features
+6. Restore production: `cp .env.local.prod.bak .env.local`
+
+Files: `.env.staging.local` (staging config, not committed), `.env.local.prod.bak` (backup, not committed).
+
 ## CI Pipeline
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR:
@@ -225,7 +239,7 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR:
 | Job | What it does | Depends on |
 |-----|-------------|------------|
 | `unit-tests` | Vitest unit tests (Next.js) | -- |
-| `build-check` | TypeScript type-check + Next.js production build | -- |
+| `build-check` | TypeScript type-check + ESLint + Next.js production build | -- |
 | `functions-build` | Compile Cloud Functions TypeScript | -- |
 | `functions-tests` | Cloud Functions unit tests | -- |
 | `functions-integration` | Cloud Functions integration tests (staging) | `functions-tests`, `functions-build` |
@@ -261,6 +275,7 @@ Follow the global post-push workflow in `~/.claude/docs/ci-cd.md`. Project-speci
 | Integration tests skipped | Expected on feature branch pushes | Integration tests only run on `main` and PRs (`if:` condition in CI) |
 | `auth/argument-error` on Google sign-in | `initializeAuth()` called without `popupRedirectResolver` | Always pass `browserPopupRedirectResolver` when using `initializeAuth()`. See `docs/code-patterns.md` for details. Validated by `firebase-config.test.ts` unit tests. |
 | 404 on production for a route that works locally | Page file created locally but never committed to git | `routes.test.ts` verifies all expected routes have a `page.tsx` on disk. Fails in CI when uncommitted. **When adding a new route, add it to `EXPECTED_ROUTES` in `src/lib/__tests__/routes.test.ts`.** |
+| ESLint warning on push | Unused import/variable or missing dark variant | CI lint step runs with `--max-warnings 0`. Fix locally before pushing. |
 
 ## Maintenance
 

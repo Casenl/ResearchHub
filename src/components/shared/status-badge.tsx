@@ -10,23 +10,23 @@ const STATUS_CONFIG: Record<
 > = {
   draft: {
     label: "Draft",
-    className: "bg-gray-100 text-gray-700 border-gray-200",
+    className: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700",
   },
   in_progress: {
     label: "In Progress",
-    className: "bg-blue-100 text-blue-700 border-blue-200",
+    className: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-800",
   },
   review: {
     label: "In Review",
-    className: "bg-amber-100 text-amber-700 border-amber-200",
+    className: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800",
   },
   published: {
     label: "Published",
-    className: "bg-green-100 text-green-700 border-green-200",
+    className: "bg-green-100 text-green-700 border-green-200 dark:bg-green-950 dark:text-green-200 dark:border-green-800",
   },
   archived: {
     label: "Archived",
-    className: "bg-slate-100 text-slate-600 border-slate-200",
+    className: "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-700",
   },
 };
 
@@ -38,7 +38,7 @@ interface StatusBadgeProps {
 export function StatusBadge({ status, className }: StatusBadgeProps): React.JSX.Element {
   const config = STATUS_CONFIG[status] ?? {
     label: status,
-    className: "bg-gray-100 text-gray-700 border-gray-200",
+    className: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700",
   };
 
   return (

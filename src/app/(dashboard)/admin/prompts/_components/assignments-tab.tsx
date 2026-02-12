@@ -10,7 +10,7 @@ import { useAIToolProfiles, usePromptAssignments } from "@/hooks/use-admin-data"
 
 import { useToast } from "./use-toast";
 
-import type { PromptAssignment, ResearchStep } from "@/types";
+import type { ResearchStep } from "@/types";
 
 // =============================================================================
 // Constants

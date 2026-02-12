@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }): React
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [firestoreRole, setFirestoreRole] = useState<UserRole | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
-  const [authError, setAuthError] = useState<string | null>(null);
+  const [authError] = useState<string | null>(null);
 
   // 1. Listen for Firebase Auth state
   useEffect(() => {

@@ -34,11 +34,11 @@ const MOCK_RESEARCH_REFERENCES = [
 ];
 
 const STATUS_BADGE_COLORS: Record<string, string> = {
-  draft: "bg-gray-100 text-gray-700",
-  in_progress: "bg-amber-100 text-amber-700",
-  review: "bg-blue-100 text-blue-700",
-  published: "bg-green-100 text-green-700",
-  archived: "bg-slate-100 text-slate-500",
+  draft: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
+  in_progress: "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-200",
+  review: "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-200",
+  published: "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-200",
+  archived: "bg-slate-100 text-slate-500 dark:bg-slate-900 dark:text-slate-400",
 };
 
 // ---------------------------------------------------------------------------
@@ -124,17 +124,17 @@ export function DocumentContent({
             <DimensionGroup
               label="Domains"
               names={domainNames}
-              colorClass="bg-purple-100 text-purple-800"
+              colorClass="bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200"
             />
             <DimensionGroup
               label="Markets"
               names={marketNames}
-              colorClass="bg-blue-100 text-blue-800"
+              colorClass="bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200"
             />
             <DimensionGroup
               label="Sectors"
               names={sectorNames}
-              colorClass="bg-emerald-100 text-emerald-800"
+              colorClass="bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200"
             />
           </div>
         </CardContent>

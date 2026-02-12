@@ -44,8 +44,8 @@ export function StepDimensions({
       <CardContent className="space-y-8">
         {/* Markets */}
         <div className="space-y-3">
-          <label className="text-sm font-medium text-gray-700">Markets</label>
-          <p className="text-xs text-gray-500">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Markets</label>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Select one or more geographic markets for this research.
           </p>
           <MarketHierarchy
@@ -73,8 +73,8 @@ export function StepDimensions({
 
         {/* Domains */}
         <div className="space-y-3">
-          <label className="text-sm font-medium text-gray-700">Domains</label>
-          <p className="text-xs text-gray-500">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Domains</label>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Select the technology domains to investigate.
           </p>
           <div className="grid grid-cols-2 gap-3">
@@ -91,26 +91,26 @@ export function StepDimensions({
                   className={cn(
                     "flex items-start gap-3 rounded-lg border-2 p-4 text-left transition-colors",
                     isSelected
-                      ? "border-blue-600 bg-blue-50"
-                      : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-600 bg-blue-50 dark:border-blue-500 dark:bg-blue-950"
+                      : "border-gray-200 hover:border-gray-300 dark:border-gray-700 dark:hover:border-gray-600"
                   )}
                 >
                   <Icon
                     className={cn(
                       "h-5 w-5 mt-0.5 shrink-0",
-                      isSelected ? "text-blue-600" : "text-gray-400"
+                      isSelected ? "text-blue-600 dark:text-blue-400" : "text-gray-400 dark:text-gray-500"
                     )}
                   />
                   <div className="min-w-0">
-                    <span className="block text-sm font-semibold text-gray-900">
+                    <span className="block text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {domain.name}
                     </span>
-                    <span className="block text-xs text-gray-500 mt-0.5 line-clamp-2">
+                    <span className="block text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2">
                       {domain.description}
                     </span>
                   </div>
                   {isSelected && (
-                    <Check className="h-4 w-4 text-blue-600 shrink-0 ml-auto" />
+                    <Check className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 ml-auto" />
                   )}
                 </button>
               );
@@ -137,8 +137,8 @@ export function StepDimensions({
 
         {/* Sectors */}
         <div className="space-y-3">
-          <label className="text-sm font-medium text-gray-700">Sectors</label>
-          <p className="text-xs text-gray-500">
+          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Sectors</label>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             Select specific sectors or include all.
           </p>
 
@@ -154,16 +154,16 @@ export function StepDimensions({
             className={cn(
               "flex items-center gap-2 rounded-md border px-4 py-2 text-sm font-medium transition-colors w-full",
               form.allSectors
-                ? "border-blue-600 bg-blue-50 text-blue-800"
-                : "border-gray-200 text-gray-600 hover:border-gray-300"
+                ? "border-blue-600 bg-blue-50 text-blue-800 dark:border-blue-500 dark:bg-blue-950 dark:text-blue-200"
+                : "border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600"
             )}
           >
             <div
               className={cn(
                 "flex h-5 w-5 items-center justify-center rounded border-2 transition-colors",
                 form.allSectors
-                  ? "border-blue-600 bg-blue-600"
-                  : "border-gray-300"
+                  ? "border-blue-600 bg-blue-600 dark:border-blue-500 dark:bg-blue-500"
+                  : "border-gray-300 dark:border-gray-600"
               )}
             >
               {form.allSectors && <Check className="h-3 w-3 text-white" />}
@@ -186,14 +186,14 @@ export function StepDimensions({
                     className={cn(
                       "flex items-center gap-2.5 rounded-md border px-3 py-2.5 text-sm text-left transition-colors",
                       isSelected
-                        ? "border-blue-600 bg-blue-50 text-blue-800 font-medium"
-                        : "border-gray-200 text-gray-700 hover:border-gray-300"
+                        ? "border-blue-600 bg-blue-50 text-blue-800 font-medium dark:border-blue-500 dark:bg-blue-950 dark:text-blue-200"
+                        : "border-gray-200 text-gray-700 hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"
                     )}
                   >
-                    <Icon className="h-4 w-4 shrink-0 text-gray-400" />
+                    <Icon className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" />
                     <span>{sector.name}</span>
                     {isSelected && (
-                      <Check className="h-4 w-4 text-blue-600 shrink-0 ml-auto" />
+                      <Check className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 ml-auto" />
                     )}
                   </button>
                 );

@@ -126,6 +126,18 @@ import { DOMAINS } from '@/data/domains';
 - Protected routes via `<ProtectedRoute>` component
 - Admin routes check `isAdmin` before rendering nav items and page content
 
+## Dark Mode Colors for Badges/Tags
+
+Every hardcoded Tailwind color class MUST include a `dark:` variant:
+
+| Light | Dark |
+|-------|------|
+| `bg-{color}-50` or `-100` | `dark:bg-{color}-950` |
+| `text-{color}-700` or `-800` | `dark:text-{color}-200` or `-300` |
+| `border-{color}-200` | `dark:border-{color}-800` |
+
+Reference implementation: `src/hooks/use-toast.tsx` VARIANT_STYLES.
+
 ## Frontend Aesthetics
 
 Avoid generic "AI slop" aesthetics. Make creative, distinctive frontends that surprise and delight.

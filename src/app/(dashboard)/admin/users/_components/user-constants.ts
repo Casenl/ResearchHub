@@ -9,9 +9,9 @@ import type { User, UserRole } from "@/types";
 export const ROLE_OPTIONS: UserRole[] = ["admin", "researcher", "viewer"];
 
 export const ROLE_BADGE_STYLES: Record<UserRole, string> = {
-  admin: "border-transparent bg-red-100 text-red-800",
-  researcher: "border-transparent bg-blue-100 text-blue-800",
-  viewer: "border-transparent bg-gray-100 text-gray-700",
+  admin: "border-transparent bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200",
+  researcher: "border-transparent bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200",
+  viewer: "border-transparent bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
 };
 
 // =============================================================================

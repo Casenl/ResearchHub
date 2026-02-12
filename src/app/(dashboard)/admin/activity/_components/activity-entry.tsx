@@ -18,25 +18,29 @@ import type { ActivityLogEntry, ActivityAction, ActivityTargetType } from "@/typ
 
 function getActionColor(action: ActivityAction): string {
   switch (action) {
-    case "created": return "bg-green-100 text-green-700";
-    case "updated": return "bg-blue-100 text-blue-700";
-    case "deleted": return "bg-red-100 text-red-700";
-    case "published": return "bg-emerald-100 text-emerald-700";
-    case "archived": return "bg-slate-100 text-slate-600";
-    case "login": return "bg-purple-100 text-purple-700";
-    case "role_changed": return "bg-amber-100 text-amber-700";
-    default: return "bg-gray-100 text-gray-700";
+    case "created": return "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-200";
+    case "updated": return "bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-200";
+    case "deleted": return "bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-200";
+    case "published": return "bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-200";
+    case "archived": return "bg-slate-100 text-slate-600 dark:bg-slate-900 dark:text-slate-400";
+    case "login": return "bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-200";
+    case "role_changed": return "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-200";
+    default: return "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300";
   }
 }
 
-function getTargetIcon(targetType: ActivityTargetType): React.ElementType {
+function TargetIcon({ targetType, className }: { targetType: ActivityTargetType; className?: string }) {
   switch (targetType) {
-    case "research": return FileText;
-    case "context_document": return FileText;
-    case "prompt_template": return FileText;
-    case "ai_tool_profile": return Activity;
-    case "user": return Users;
-    case "taxonomy": return Shield;
+    case "research":
+    case "context_document":
+    case "prompt_template":
+      return <FileText className={className} />;
+    case "ai_tool_profile":
+      return <Activity className={className} />;
+    case "user":
+      return <Users className={className} />;
+    case "taxonomy":
+      return <Shield className={className} />;
   }
 }
 
@@ -54,7 +58,6 @@ interface ActivityEntryProps {
 
 export function ActivityEntry({ entry }: ActivityEntryProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const TargetIcon = getTargetIcon(entry.target_type);
   const hasDetails = Object.keys(entry.details).length > 0;
 
   return (
@@ -98,7 +101,7 @@ export function ActivityEntry({ entry }: ActivityEntryProps) {
 
         {/* Target */}
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <TargetIcon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+          <TargetIcon targetType={entry.target_type} className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           <span className="text-[11px] text-muted-foreground">
             {ACTIVITY_TARGET_TYPE_LABELS[entry.target_type]}
           </span>

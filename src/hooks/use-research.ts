@@ -66,25 +66,20 @@ interface UseResearchByIdResult {
 export function useResearchById(
   id: string | undefined
 ): UseResearchByIdResult {
-  const [data, setData] = useState<Research | null>(null);
+  const mockItem = id ? (MOCK_RESEARCH.find((r) => r.id === id) ?? null) : null;
+  const [data, setData] = useState<Research | null>(mockItem);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) {
-      setData(null);
-      setIsLoading(false);
-      return;
-    }
+    if (!id) return;
 
-    // Set fallback from mock data while loading
-    const mockItem = MOCK_RESEARCH.find((r) => r.id === id) ?? null;
-    setData(mockItem);
+    const fallback = MOCK_RESEARCH.find((r) => r.id === id) ?? null;
 
     const unsubscribe = subscribeResearchById(
       id,
       (item) => {
-        setData(item ?? mockItem);
+        setData(item ?? fallback);
         setIsLoading(false);
         setError(null);
       },
@@ -96,6 +91,10 @@ export function useResearchById(
 
     return unsubscribe;
   }, [id]);
+
+  if (!id) {
+    return { data: null, isLoading: false, error: null };
+  }
 
   return { data, isLoading, error };
 }

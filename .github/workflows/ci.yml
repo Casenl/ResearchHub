@@ -78,7 +78,11 @@ jobs:
       - name: Type-check
         run: npx tsc --noEmit
 
-      # 5. Next.js production build
+      # 5. ESLint (fail on errors AND warnings)
+      - name: Lint
+        run: npx eslint src --max-warnings 0
+
+      # 6. Next.js production build
       #    Firebase env vars are set to dummy values — the build only needs them
       #    to be present, not valid, since no runtime Firebase calls occur at
       #    build time.

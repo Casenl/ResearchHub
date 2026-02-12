@@ -10,7 +10,7 @@ service cloud.firestore {
 
     function isAdmin() {
       return isAuthenticated()
-        && request.auth.token.email.matches('.*@itq[.]nl$');
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
     function isOwner(userId) {
@@ -59,7 +59,7 @@ service cloud.firestore {
     // ============ Audit Logs (write-only, immutable) ============
 
     match /audit_logs/{logId} {
-      allow read: if false;
+      allow read: if isAdmin();
       allow create: if isAuthenticated();
       allow update, delete: if false;
     }
@@ -100,6 +100,21 @@ service cloud.firestore {
     match /context-rules/{ruleId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
+    }
+
+    // ============ App Settings ============
+
+    match /app-settings/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // ============ API Usage ============
+
+    match /api-usage/{entryId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false;
     }
   }
 }

@@ -20,6 +20,9 @@ const DEFAULT_SETTINGS: AppSettings = {
   registrations_enabled: true,
   auto_register_domains: ["itq.eu"],
   default_role: "researcher",
+  logo_url: null,
+  logo_login_url: null,
+  brand_name: "ITQ",
 };
 
 // -----------------------------------------------------------------------------
@@ -38,6 +41,9 @@ export async function getAppSettings(): Promise<AppSettings> {
     registrations_enabled: data.registrations_enabled ?? DEFAULT_SETTINGS.registrations_enabled,
     auto_register_domains: data.auto_register_domains ?? DEFAULT_SETTINGS.auto_register_domains,
     default_role: data.default_role ?? DEFAULT_SETTINGS.default_role,
+    logo_url: data.logo_url ?? DEFAULT_SETTINGS.logo_url,
+    logo_login_url: data.logo_login_url ?? DEFAULT_SETTINGS.logo_login_url,
+    brand_name: data.brand_name ?? DEFAULT_SETTINGS.brand_name,
   };
 }
 
@@ -60,6 +66,9 @@ export function subscribeAppSettings(
         registrations_enabled: data.registrations_enabled ?? DEFAULT_SETTINGS.registrations_enabled,
         auto_register_domains: data.auto_register_domains ?? DEFAULT_SETTINGS.auto_register_domains,
         default_role: data.default_role ?? DEFAULT_SETTINGS.default_role,
+        logo_url: data.logo_url ?? DEFAULT_SETTINGS.logo_url,
+        logo_login_url: data.logo_login_url ?? DEFAULT_SETTINGS.logo_login_url,
+        brand_name: data.brand_name ?? DEFAULT_SETTINGS.brand_name,
       });
     },
     (err) => {

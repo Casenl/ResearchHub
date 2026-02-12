@@ -48,7 +48,9 @@ taxonomy/tags                            — Tags
 users/{userId}                           — User profiles and roles
 api-keys/{keyId}                         — API keys (SHA-256 hashed, admin only)
 file-attachments/{attachmentId}          — File metadata (Storage refs)
-audit_logs/{logId}                       — Immutable audit trail
+audit_logs/{logId}                       — Audit trail (admin-readable)
+app-settings/global                      — Platform-wide settings
+api-usage/{entryId}                      — API usage records (admin-readable)
 ```
 
 ## Firestore Indexes

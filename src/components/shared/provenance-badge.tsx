@@ -12,17 +12,17 @@ const ORIGIN_CONFIG: Record<
 > = {
   human: {
     label: "Human",
-    className: "bg-slate-100 text-slate-700 border-slate-200",
+    className: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700",
     icon: User,
   },
   agent: {
     label: "Agent",
-    className: "bg-purple-100 text-purple-700 border-purple-200",
+    className: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-950 dark:text-purple-200 dark:border-purple-800",
     icon: Bot,
   },
   hybrid: {
     label: "Hybrid",
-    className: "bg-indigo-100 text-indigo-700 border-indigo-200",
+    className: "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950 dark:text-indigo-200 dark:border-indigo-800",
     icon: Users,
   },
 };
@@ -35,7 +35,7 @@ interface ProvenanceBadgeProps {
 export function ProvenanceBadge({ origin, className }: ProvenanceBadgeProps): React.JSX.Element {
   const config = ORIGIN_CONFIG[origin] ?? {
     label: origin,
-    className: "bg-gray-100 text-gray-700 border-gray-200",
+    className: "bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-700",
     icon: User,
   };
 

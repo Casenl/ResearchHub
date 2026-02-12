@@ -8,7 +8,7 @@ export async function addSource(
   researchId: string,
   notebookId: string,
   input: unknown,
-  addedBy: string,
+  _addedBy: string,
 ): Promise<Source> {
   const validated = CreateSourceSchema.parse(input);
   const db = getAdminFirestore();

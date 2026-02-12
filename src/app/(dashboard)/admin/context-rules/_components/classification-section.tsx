@@ -65,11 +65,18 @@ export function ClassificationSection({
           return (
             <Card key={rule.id} className="overflow-hidden">
               {/* Collapsed row */}
-              <button
-                type="button"
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => onToggleExpand(rule.id)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    onToggleExpand(rule.id);
+                  }
+                }}
                 className={cn(
-                  "flex w-full items-center justify-between px-5 py-3.5 text-left transition-colors hover:bg-muted/40",
+                  "flex w-full cursor-pointer items-center justify-between px-5 py-3.5 text-left transition-colors hover:bg-muted/40",
                   isExpanded && "border-b border-border bg-muted/20",
                 )}
               >
@@ -105,7 +112,7 @@ export function ClassificationSection({
                     </Button>
                   )}
                 </div>
-              </button>
+              </div>
 
               {/* Expanded detail */}
               {isExpanded && (

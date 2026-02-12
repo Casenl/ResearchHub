@@ -55,7 +55,7 @@ describe('CreateResearchSchema', () => {
   });
 
   it('rejects missing output_format', () => {
-    const { output_format, ...incomplete } = validPayload;
+    const { output_format: _output_format, ...incomplete } = validPayload;
     const result = CreateResearchSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
@@ -69,7 +69,7 @@ describe('CreateResearchSchema', () => {
   });
 
   it('rejects missing dimensions', () => {
-    const { dimensions, ...incomplete } = validPayload;
+    const { dimensions: _dimensions, ...incomplete } = validPayload;
     const result = CreateResearchSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });
@@ -162,7 +162,7 @@ describe('CreateSourceSchema', () => {
   });
 
   it('rejects missing url', () => {
-    const { url, ...incomplete } = validSource;
+    const { url: _url, ...incomplete } = validSource;
     const result = CreateSourceSchema.safeParse(incomplete);
     expect(result.success).toBe(false);
   });

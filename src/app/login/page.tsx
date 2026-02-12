@@ -7,6 +7,9 @@ import { AlertCircle, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/use-auth";
+import { subscribeAppSettings } from "@/lib/firestore/settings";
+
+import type { AppSettings } from "@/types";
 
 export default function LoginPage(): React.JSX.Element | null {
   const router = useRouter();
@@ -20,6 +23,19 @@ export default function LoginPage(): React.JSX.Element | null {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(authError);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [branding, setBranding] = useState<Pick<AppSettings, "logo_url" | "logo_login_url" | "brand_name">>({
+    logo_url: null,
+    logo_login_url: null,
+    brand_name: "ITQ",
+  });
+
+  useEffect(() => {
+    const unsubscribe = subscribeAppSettings(
+      (s) => setBranding({ logo_url: s.logo_url, logo_login_url: s.logo_login_url, brand_name: s.brand_name }),
+      () => {} // fall back to defaults on error
+    );
+    return unsubscribe;
+  }, []);
 
   // Surface authError from provider (e.g. registration blocked)
   useEffect(() => {
@@ -102,6 +118,8 @@ export default function LoginPage(): React.JSX.Element | null {
     }
   };
 
+  const loginLogo = branding.logo_login_url ?? branding.logo_url;
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -115,7 +133,16 @@ export default function LoginPage(): React.JSX.Element | null {
       {/* Left panel — branding */}
       <div className="hidden lg:flex lg:w-1/2 flex-col justify-between bg-[#0f172a] p-12 text-white">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">ITQ</h1>
+          {loginLogo ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={loginLogo}
+              alt={branding.brand_name}
+              className="h-8 object-contain"
+            />
+          ) : (
+            <h1 className="text-2xl font-bold tracking-tight">{branding.brand_name}</h1>
+          )}
           <p className="mt-1 text-sm text-slate-400">Market Intelligence</p>
         </div>
         <div className="space-y-4">
@@ -131,7 +158,7 @@ export default function LoginPage(): React.JSX.Element | null {
           </p>
         </div>
         <p className="text-xs text-slate-500">
-          &copy; {new Date().getFullYear()} ITQ Consultancy
+          &copy; {new Date().getFullYear()} {branding.brand_name} Consultancy
         </p>
       </div>
 
@@ -140,9 +167,18 @@ export default function LoginPage(): React.JSX.Element | null {
         <div className="w-full max-w-sm space-y-8">
           {/* Mobile logo */}
           <div className="lg:hidden text-center">
-            <h1 className="text-xl font-bold text-primary">
-              ITQ Market Intelligence
-            </h1>
+            {loginLogo ? (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={loginLogo}
+                alt={branding.brand_name}
+                className="mx-auto h-8 object-contain"
+              />
+            ) : (
+              <h1 className="text-xl font-bold text-primary">
+                {branding.brand_name} Market Intelligence
+              </h1>
+            )}
           </div>
 
           <div>

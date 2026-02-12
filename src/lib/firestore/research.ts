@@ -107,8 +107,8 @@ export async function transitionResearchStatus(
   id: string,
   from: ResearchStatus,
   to: ResearchStatus,
-  actor: { user_id: string; display_name: string },
-  title: string
+  _actor: { user_id: string; display_name: string },
+  _title: string
 ): Promise<void> {
   if (!isValidTransition(from, to)) {
     throw new Error(`Invalid transition: ${from} -> ${to}`);

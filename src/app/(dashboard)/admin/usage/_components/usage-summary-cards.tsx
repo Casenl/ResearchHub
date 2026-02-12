@@ -77,28 +77,28 @@ export function UsageSummaryCards(): React.JSX.Element {
         label="Total Cost (this month)"
         value={formatCurrency(stats.totalCost)}
         description="Estimated across all AI tools"
-        accentClass="bg-green-100 text-green-700"
+        accentClass="bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-200"
       />
       <StatCard
         icon={Zap}
         label="Tokens Consumed"
         value={formatNumber(stats.totalTokens)}
         description="Input + output tokens combined"
-        accentClass="bg-amber-100 text-amber-700"
+        accentClass="bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-200"
       />
       <StatCard
         icon={BarChart3}
         label="API Calls"
         value={formatNumber(stats.totalCalls)}
         description="Total requests this month"
-        accentClass="bg-blue-100 text-blue-700"
+        accentClass="bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-200"
       />
       <StatCard
         icon={TrendingUp}
         label="Top AI Tool"
         value={stats.topToolName}
         description={`${stats.topToolCount} calls this month`}
-        accentClass="bg-purple-100 text-purple-700"
+        accentClass="bg-purple-100 text-purple-700 dark:bg-purple-950 dark:text-purple-200"
       />
     </div>
   );

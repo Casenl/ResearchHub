@@ -18,7 +18,7 @@ import { activityLogConverter } from "./converters";
 
 import type { ActivityLogEntry } from "@/types";
 
-const COLLECTION = "activity-log";
+const COLLECTION = "audit_logs";
 
 // -----------------------------------------------------------------------------
 // Subscribe

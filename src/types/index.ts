@@ -447,6 +447,12 @@ export interface AppSettings {
   registrations_enabled: boolean;
   auto_register_domains: string[];
   default_role: UserRole;
+  /** Firebase Storage URL for sidebar/header logo. */
+  logo_url: string | null;
+  /** Optional separate logo for the login page. */
+  logo_login_url: string | null;
+  /** Brand name shown next to the logo (defaults to "ITQ"). */
+  brand_name: string;
 }
 
 /** An API key for agent or external system access. */

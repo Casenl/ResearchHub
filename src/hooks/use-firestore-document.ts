@@ -29,11 +29,7 @@ export function useFirestoreDocument<T extends { id: string }>(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!documentId) {
-      setData(null);
-      setIsLoading(false);
-      return;
-    }
+    if (!documentId) return;
 
     const db = getFirestoreDb();
     const docRef = doc(db, collectionPath, documentId).withConverter(converter);
@@ -61,6 +57,10 @@ export function useFirestoreDocument<T extends { id: string }>(
 
     return unsubscribe;
   }, [collectionPath, documentId, converter]);
+
+  if (!documentId) {
+    return { data: null, isLoading: false, error: null };
+  }
 
   return { data, isLoading, error };
 }

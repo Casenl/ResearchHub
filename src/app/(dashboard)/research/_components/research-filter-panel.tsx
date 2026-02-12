@@ -111,7 +111,7 @@ export function ResearchFilterPanel({
               onClick={() => onToggleDomain(d.id)}
               className={filterChipClass(
                 selectedDomains.includes(d.id),
-                "border-violet-400 bg-violet-50 text-violet-700",
+                "border-violet-400 bg-violet-50 text-violet-700 dark:border-violet-600 dark:bg-violet-950 dark:text-violet-200",
               )}
             >
               {d.name}
@@ -127,7 +127,7 @@ export function ResearchFilterPanel({
               onClick={() => onToggleMarket(m.id)}
               className={filterChipClass(
                 selectedMarkets.includes(m.id),
-                "border-sky-400 bg-sky-50 text-sky-700",
+                "border-sky-400 bg-sky-50 text-sky-700 dark:border-sky-600 dark:bg-sky-950 dark:text-sky-200",
               )}
             >
               {m.name}
@@ -143,7 +143,7 @@ export function ResearchFilterPanel({
               onClick={() => onToggleSector(s.id)}
               className={filterChipClass(
                 selectedSectors.includes(s.id),
-                "border-emerald-400 bg-emerald-50 text-emerald-700",
+                "border-emerald-400 bg-emerald-50 text-emerald-700 dark:border-emerald-600 dark:bg-emerald-950 dark:text-emerald-200",
               )}
             >
               {s.name}

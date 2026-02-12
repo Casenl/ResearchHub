@@ -4,10 +4,10 @@ import { getClassificationForTier } from "@/lib/trust-tiers";
 import type { QualityTier, ValidationStatus } from "@/types";
 
 const CLASSIFICATION_STYLES: Record<string, string> = {
-  authoritative: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  established: "bg-blue-100 text-blue-800 border-blue-200",
-  standard: "bg-amber-100 text-amber-800 border-amber-200",
-  unverified: "bg-red-100 text-red-800 border-red-200",
+  authoritative: "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-950 dark:text-emerald-200 dark:border-emerald-800",
+  established: "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950 dark:text-blue-200 dark:border-blue-800",
+  standard: "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800",
+  unverified: "bg-red-100 text-red-800 border-red-200 dark:bg-red-950 dark:text-red-200 dark:border-red-800",
 };
 
 const VALIDATION_DOT_STYLES: Record<string, string> = {

@@ -123,13 +123,6 @@ const SECTOR_GOV: Sector = {
   ],
 };
 
-const SECTOR_HC: Sector = {
-  id: "sector-hc",
-  name: "Healthcare",
-  code: "HC",
-  relevant_regulations: ["NIS2", "GDPR", "Medical Device Regulation"],
-};
-
 // ---------------------------------------------------------------------------
 // Mock Research Data
 // ---------------------------------------------------------------------------

@@ -45,13 +45,13 @@ export function DocumentHeader({
             {CONTEXT_CATEGORY_LABELS[document.category]}
           </Badge>
           {isDocExpired && (
-            <Badge className="px-2 py-0.5 text-xs bg-red-100 text-red-700">
+            <Badge className="px-2 py-0.5 text-xs bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-200">
               <AlertTriangle className="mr-1 h-3 w-3" />
               Expired
             </Badge>
           )}
           {isDocExpiringSoon && (
-            <Badge className="px-2 py-0.5 text-xs bg-amber-100 text-amber-700">
+            <Badge className="px-2 py-0.5 text-xs bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-200">
               <AlertTriangle className="mr-1 h-3 w-3" />
               Expiring soon
             </Badge>

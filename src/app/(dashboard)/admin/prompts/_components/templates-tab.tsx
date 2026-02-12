@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 
-import { cn, generateId } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 import { RESEARCH_STEP_LABELS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -14,7 +14,7 @@ import { useDomains } from "@/hooks/use-taxonomy";
 import { useToast } from "./use-toast";
 import { TemplateEditor } from "./template-editor";
 
-import type { PromptTemplate, ResearchStep } from "@/types";
+import type { PromptTemplate } from "@/types";
 
 // =============================================================================
 // TemplatesTab

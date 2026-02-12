@@ -7,7 +7,7 @@ import { useResearchList } from "@/hooks/use-research";
 
 import { getCellKey } from "./coverage-grid";
 
-import type { Market, Domain, Research } from "@/types";
+import type { Market, Research } from "@/types";
 import type { CoverageCellData, MarketGroup } from "./coverage-grid";
 import type { CoverageCellStatus } from "./coverage-cell";
 

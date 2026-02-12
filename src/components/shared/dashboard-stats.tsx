@@ -27,13 +27,14 @@ export function DashboardStats(): React.JSX.Element {
 
   const { publishedCount, expiringSoonCount, inReviewCount, contextDocCount } =
     useMemo(() => {
+      const now = new Date();
+      const ninetyDaysFromNow = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
       const published = research.filter((r) => r.status === "published").length;
       const expiring = research.filter(
         (r) =>
           r.expires_at &&
-          new Date(r.expires_at) > new Date() &&
-          new Date(r.expires_at) <
-            new Date(Date.now() + 90 * 24 * 60 * 60 * 1000)
+          new Date(r.expires_at) > now &&
+          new Date(r.expires_at) < ninetyDaysFromNow
       ).length;
       const inReview = research.filter((r) => r.status === "review").length;
       const contextDocs = research.reduce(

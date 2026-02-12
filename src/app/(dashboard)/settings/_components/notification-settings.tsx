@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 
 // ---------------------------------------------------------------------------
@@ -53,15 +53,16 @@ function Toggle({
 // ---------------------------------------------------------------------------
 
 export function NotificationSettings(): React.JSX.Element {
-  const [isEmailEnabled, setIsEmailEnabled] = useState(true);
-  const [isInAppEnabled, setIsInAppEnabled] = useState(true);
-
-  useEffect(() => {
-    const emailStored = localStorage.getItem(EMAIL_NOTIFICATIONS_KEY);
-    const inAppStored = localStorage.getItem(INAPP_NOTIFICATIONS_KEY);
-    if (emailStored !== null) setIsEmailEnabled(emailStored === "true");
-    if (inAppStored !== null) setIsInAppEnabled(inAppStored === "true");
-  }, []);
+  const [isEmailEnabled, setIsEmailEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem(EMAIL_NOTIFICATIONS_KEY);
+    return stored !== null ? stored === "true" : true;
+  });
+  const [isInAppEnabled, setIsInAppEnabled] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem(INAPP_NOTIFICATIONS_KEY);
+    return stored !== null ? stored === "true" : true;
+  });
 
   const toggleEmail = () => {
     const newValue = !isEmailEnabled;

@@ -1,19 +1,8 @@
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { QueryResearchSchema } from '@/lib/validations';
-import type { Research, QualityTier } from '@/types';
+import type { Research } from '@/types';
 
 type ResearchWithId = Research & { id: string };
-
-interface CompetitorEntry {
-  name: string;
-  region: string;
-  domain: string;
-  threat_level: string;
-  trust_tier: QualityTier;
-  source_count: number;
-  last_updated: string;
-  research_id: string;
-}
 
 interface LandscapeEntry {
   region: string;

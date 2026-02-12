@@ -66,25 +66,21 @@ interface UseContextDocumentByIdResult {
 export function useContextDocumentById(
   id: string | undefined
 ): UseContextDocumentByIdResult {
-  const [data, setData] = useState<ContextDocument | null>(null);
+  const mockItem = id ? (MOCK_CONTEXT_DOCUMENTS.find((d) => d.id === id) ?? null) : null;
+  const [data, setData] = useState<ContextDocument | null>(mockItem);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) {
-      setData(null);
-      setIsLoading(false);
-      return;
-    }
+    if (!id) return;
 
-    const mockItem =
+    const fallback =
       MOCK_CONTEXT_DOCUMENTS.find((d) => d.id === id) ?? null;
-    setData(mockItem);
 
     const unsubscribe = subscribeContextDocumentById(
       id,
       (item) => {
-        setData(item ?? mockItem);
+        setData(item ?? fallback);
         setIsLoading(false);
         setError(null);
       },
@@ -96,6 +92,10 @@ export function useContextDocumentById(
 
     return unsubscribe;
   }, [id]);
+
+  if (!id) {
+    return { data: null, isLoading: false, error: null };
+  }
 
   return { data, isLoading, error };
 }

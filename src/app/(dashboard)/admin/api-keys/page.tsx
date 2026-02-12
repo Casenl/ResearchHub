@@ -12,7 +12,7 @@ import {
   updateDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { Key, Loader2, Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 
 import { getFirestoreDb } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";

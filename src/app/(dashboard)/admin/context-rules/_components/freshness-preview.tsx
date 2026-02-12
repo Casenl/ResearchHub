@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 import { Clock, FileCheck, AlertTriangle } from "lucide-react";
 import { differenceInDays } from "date-fns";
 
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CONTEXT_CATEGORY_LABELS } from "@/lib/constants";
 import { useContextDocuments } from "@/hooks/use-context-documents";

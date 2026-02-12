@@ -74,8 +74,8 @@ export function DocumentCard({ document: doc }: DocumentCardProps): React.JSX.El
       <Card
         className={cn(
           "h-full transition-shadow hover:shadow-md",
-          isDocExpired && "border-red-200 bg-red-50/30",
-          isDocExpiringSoon && "border-amber-200 bg-amber-50/30"
+          isDocExpired && "border-red-200 bg-red-50/30 dark:border-red-800 dark:bg-red-950/30",
+          isDocExpiringSoon && "border-amber-200 bg-amber-50/30 dark:border-amber-800 dark:bg-amber-950/30"
         )}
       >
         <CardContent className="p-5">
@@ -95,13 +95,13 @@ export function DocumentCard({ document: doc }: DocumentCardProps): React.JSX.El
               </Badge>
             </div>
             {isDocExpired && (
-              <div className="flex items-center gap-1 text-red-600">
+              <div className="flex items-center gap-1 text-red-600 dark:text-red-400">
                 <AlertTriangle className="h-4 w-4" />
                 <span className="text-xs font-medium">Expired</span>
               </div>
             )}
             {isDocExpiringSoon && (
-              <div className="flex items-center gap-1 text-amber-600">
+              <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
                 <Clock className="h-4 w-4" />
                 <span className="text-xs font-medium">Expiring soon</span>
               </div>
@@ -123,7 +123,7 @@ export function DocumentCard({ document: doc }: DocumentCardProps): React.JSX.El
             {domainNames.map((name) => (
               <Badge
                 key={name}
-                className="px-2 py-0.5 text-xs bg-purple-50 text-purple-700"
+                className="px-2 py-0.5 text-xs bg-purple-50 text-purple-700 dark:bg-purple-950 dark:text-purple-200"
               >
                 {name}
               </Badge>
@@ -131,7 +131,7 @@ export function DocumentCard({ document: doc }: DocumentCardProps): React.JSX.El
             {marketNames.map((name) => (
               <Badge
                 key={name}
-                className="px-2 py-0.5 text-xs bg-blue-50 text-blue-700"
+                className="px-2 py-0.5 text-xs bg-blue-50 text-blue-700 dark:bg-blue-950 dark:text-blue-200"
               >
                 {name}
               </Badge>

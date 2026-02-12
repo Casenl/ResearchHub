@@ -79,7 +79,7 @@ export function DocumentFilterBar({
       </div>
 
       {/* Filters */}
-      <div className="space-y-4 rounded-lg border border-border bg-white p-4">
+      <div className="space-y-4 rounded-lg border border-border bg-white dark:bg-gray-900 p-4">
         {/* Category Pills */}
         <div>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -99,7 +99,7 @@ export function DocumentFilterBar({
                   "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors",
                   selectedCategories.includes(key)
                     ? CATEGORY_COLORS[key]
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 )}
               >
                 {label}
@@ -123,8 +123,8 @@ export function DocumentFilterBar({
                   className={cn(
                     "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors",
                     selectedDomains.includes(domain.id)
-                      ? "bg-purple-100 text-purple-800"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-purple-100 text-purple-800 dark:bg-purple-950 dark:text-purple-200"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   )}
                 >
                   {domain.name}
@@ -146,8 +146,8 @@ export function DocumentFilterBar({
                   className={cn(
                     "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors",
                     selectedMarkets.includes(market.id)
-                      ? "bg-blue-100 text-blue-800"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   )}
                 >
                   {market.name}
@@ -169,8 +169,8 @@ export function DocumentFilterBar({
                   className={cn(
                     "inline-flex items-center rounded-full px-3 py-1 text-xs font-medium transition-colors",
                     validityFilter === option.value
-                      ? "bg-gray-800 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      ? "bg-gray-800 text-white dark:bg-gray-200 dark:text-gray-900"
+                      : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                   )}
                 >
                   {option.label}

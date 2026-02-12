@@ -1,7 +1,7 @@
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { CreateResearchSchema, UpdateResearchSchema } from '@/lib/validations';
 import { createAuditLog } from './audit-service';
-import type { Research, ResearchOrigin, AgentIdentity } from '@/types';
+import type { Research } from '@/types';
 
 type ResearchWithId = Research & { id: string };
 

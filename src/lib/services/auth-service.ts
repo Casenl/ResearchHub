@@ -89,7 +89,7 @@ export async function listApiKeys(): Promise<Array<Omit<ApiKey, 'key_hash'> & { 
   try {
     const snapshot = await db.collection('api-keys').orderBy('created_at', 'desc').get();
     return snapshot.docs.map(doc => {
-      const { key_hash, ...rest } = doc.data() as Omit<ApiKey, 'id'>;
+      const { key_hash: _key_hash, ...rest } = doc.data() as Omit<ApiKey, 'id'>;
       return { id: doc.id, ...rest } as Omit<ApiKey, 'key_hash'> & { id: string };
     });
   } catch (error) {

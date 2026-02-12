@@ -29,15 +29,15 @@ export function CopyablePrompt({
   return (
     <div className="space-y-1.5">
       <div className="flex items-center justify-between">
-        <label className="text-sm font-medium text-gray-700">{label}</label>
+        <label className="text-sm font-medium text-gray-700 dark:text-gray-300">{label}</label>
         <button
           type="button"
           onClick={handleCopy}
           className={cn(
             "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
             isCopied
-              ? "bg-green-100 text-green-700"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-200"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
           )}
         >
           {isCopied ? (
@@ -57,7 +57,7 @@ export function CopyablePrompt({
         readOnly
         value={value}
         rows={5}
-        className="flex w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 font-mono leading-relaxed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+        className="flex w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 font-mono leading-relaxed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300"
       />
     </div>
   );

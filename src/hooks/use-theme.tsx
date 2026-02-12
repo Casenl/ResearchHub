@@ -76,26 +76,25 @@ function applyDensity(density: Density): void {
 // =============================================================================
 
 export function ThemeProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
-  const [theme, setThemeState] = useState<Theme>("system");
-  const [density, setDensityState] = useState<Density>("default");
-  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>("light");
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window === "undefined") return "system";
+    return (localStorage.getItem(THEME_KEY) as Theme | null) ?? "system";
+  });
+  const [density, setDensityState] = useState<Density>(() => {
+    if (typeof window === "undefined") return "default";
+    return (localStorage.getItem(DENSITY_KEY) as Density | null) ?? "default";
+  });
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => {
+    if (typeof window === "undefined") return "light";
+    const stored = (localStorage.getItem(THEME_KEY) as Theme | null) ?? "system";
+    return resolveTheme(stored);
+  });
 
-  // Initialize from localStorage
+  // Apply theme and density to DOM on mount
   useEffect(() => {
-    const storedTheme = localStorage.getItem(THEME_KEY) as Theme | null;
-    const storedDensity = localStorage.getItem(DENSITY_KEY) as Density | null;
-
-    const initialTheme = storedTheme ?? "system";
-    const initialDensity = storedDensity ?? "default";
-
-    setThemeState(initialTheme);
-    setDensityState(initialDensity);
-
-    const resolved = resolveTheme(initialTheme);
-    setResolvedTheme(resolved);
-    applyTheme(resolved);
-    applyDensity(initialDensity);
-  }, []);
+    applyTheme(resolvedTheme);
+    applyDensity(density);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps -- one-time DOM init
 
   // Listen for system theme changes
   useEffect(() => {

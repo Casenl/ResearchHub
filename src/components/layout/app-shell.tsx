@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -26,6 +26,9 @@ import {
 import { cn } from "@/lib/utils";
 import { ProtectedRoute } from "@/components/shared/protected-route";
 import { useAuth } from "@/hooks/use-auth";
+import { subscribeAppSettings } from "@/lib/firestore/settings";
+
+import type { AppSettings } from "@/types";
 
 interface NavItem {
   label: string;
@@ -80,8 +83,20 @@ const navigation: NavSection[] = [
 
 export function AppShell({ children }: { children: React.ReactNode }): React.JSX.Element {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [branding, setBranding] = useState<Pick<AppSettings, "logo_url" | "brand_name">>({
+    logo_url: null,
+    brand_name: "ITQ",
+  });
   const pathname = usePathname();
   const { user, isLoading, signOut, isAdmin } = useAuth();
+
+  useEffect(() => {
+    const unsubscribe = subscribeAppSettings(
+      (s) => setBranding({ logo_url: s.logo_url, brand_name: s.brand_name }),
+      () => {} // fall back to defaults on error
+    );
+    return unsubscribe;
+  }, []);
 
   const isActive = (href: string) => {
     if (href === "/") return pathname === "/";
@@ -109,9 +124,18 @@ export function AppShell({ children }: { children: React.ReactNode }): React.JSX
           {/* Logo Area */}
           <div className="flex h-16 items-center border-b border-border px-4">
             <div className="flex items-center gap-2 overflow-hidden">
-              <span className="text-xl font-bold text-primary shrink-0">
-                ITQ
-              </span>
+              {branding.logo_url ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={branding.logo_url}
+                  alt={branding.brand_name}
+                  className="h-7 shrink-0 object-contain"
+                />
+              ) : (
+                <span className="text-xl font-bold text-primary shrink-0">
+                  {branding.brand_name}
+                </span>
+              )}
               {!isCollapsed && (
                 <span className="text-xs text-muted-foreground truncate">
                   Market Intelligence
@@ -176,6 +200,7 @@ export function AppShell({ children }: { children: React.ReactNode }): React.JSX
                 )}
               >
                 {user.photoURL ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={user.photoURL}
                     alt=""
