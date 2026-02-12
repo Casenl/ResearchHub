@@ -1,0 +1,15 @@
+env:
+  - variable: NEXT_PUBLIC_FIREBASE_API_KEY
+    value: AIzaSyDM8PCHBcDQSkak73FbxtcwYSYtDMIq1-g
+  - variable: NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+    value: marketintelligence-hub.firebaseapp.com
+  - variable: NEXT_PUBLIC_FIREBASE_PROJECT_ID
+    value: marketintelligence-hub
+  - variable: NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
+    value: marketintelligence-hub.firebasestorage.app
+  - variable: NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
+    value: "35359237101"
+  - variable: NEXT_PUBLIC_FIREBASE_APP_ID
+    value: "1:35359237101:web:e891069f359f2db443bde4"
+  - variable: NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+    value: G-4VH1ZK429E
