@@ -47,6 +47,8 @@ interface AuthContextValue {
   isViewer: boolean;
   /** The current user's role. */
   role: UserRole;
+  /** Auth-level error (e.g. sign-in failure surfaced to the provider). */
+  authError: string | null;
   /** Sign in with email and password. */
   signInWithEmail: (email: string, password: string) => Promise<void>;
   /** Create account with email and password. */
@@ -104,6 +106,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }): React.JSX.Element {
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (fbUser) => {
@@ -151,6 +154,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }): React
     isAdmin: role === "admin",
     isResearcher: role === "researcher",
     isViewer: role === "viewer",
+    authError,
     signInWithEmail,
     signUpWithEmail,
     signInWithGoogle,
