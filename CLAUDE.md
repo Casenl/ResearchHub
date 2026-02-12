@@ -259,6 +259,7 @@ Follow the global post-push workflow in `~/.claude/docs/ci-cd.md`. Project-speci
 | Pattern | Root cause | Prevention |
 |---------|-----------|------------|
 | Integration tests skipped | Expected on feature branch pushes | Integration tests only run on `main` and PRs (`if:` condition in CI) |
+| `auth/argument-error` on Google sign-in | `initializeAuth()` called without `popupRedirectResolver` | Always pass `browserPopupRedirectResolver` when using `initializeAuth()`. See `docs/code-patterns.md` for details. Validated by `firebase-config.test.ts` unit tests. |
 
 ## Maintenance
 

@@ -19,6 +19,31 @@ useEffect(() => {
 import { auth } from '@/lib/firebase'; // crashes during build
 ```
 
+### initializeAuth() requires explicit resolvers
+
+When using `initializeAuth()` instead of `getAuth()` (e.g. to set custom persistence), you **must** also pass `popupRedirectResolver`. Without it, `signInWithPopup` throws `auth/argument-error` at runtime — a silent failure that builds and type-checks fine.
+
+```typescript
+// Good — explicit persistence AND popup resolver
+import {
+  initializeAuth,
+  browserLocalPersistence,
+  browserPopupRedirectResolver,
+} from 'firebase/auth';
+
+initializeAuth(app, {
+  persistence: browserLocalPersistence,
+  popupRedirectResolver: browserPopupRedirectResolver,
+});
+
+// Bad — missing resolver, signInWithPopup breaks at runtime
+initializeAuth(app, {
+  persistence: browserLocalPersistence,
+});
+```
+
+**Why**: `getAuth()` bundles the popup resolver automatically. `initializeAuth()` strips all defaults — you must opt in to each capability explicitly.
+
 ## Firestore Data Loading
 
 ```typescript
