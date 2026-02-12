@@ -18,7 +18,8 @@ import {
 import { getFirestoreDb } from "@/lib/firebase";
 import { researchConverter } from "./converters";
 
-import type { Research } from "@/types";
+import { isValidTransition } from "@/lib/research-workflow";
+import type { Research, ResearchStatus } from "@/types";
 
 const COLLECTION = "research";
 
@@ -99,4 +100,31 @@ export async function deleteResearch(id: string): Promise<void> {
   const db = getFirestoreDb();
   const docRef = doc(db, COLLECTION, id);
   await deleteDoc(docRef);
+}
+
+/** Transition a research document to a new status with audit trail. */
+export async function transitionResearchStatus(
+  id: string,
+  from: ResearchStatus,
+  to: ResearchStatus,
+  actor: { user_id: string; display_name: string },
+  title: string
+): Promise<void> {
+  if (!isValidTransition(from, to)) {
+    throw new Error(`Invalid transition: ${from} -> ${to}`);
+  }
+
+  const db = getFirestoreDb();
+  const docRef = doc(db, COLLECTION, id);
+
+  const updates: Record<string, unknown> = {
+    status: to,
+    updated_at: serverTimestamp(),
+  };
+
+  if (to === "published") {
+    updates.published_at = serverTimestamp();
+  }
+
+  await updateDoc(docRef, updates);
 }

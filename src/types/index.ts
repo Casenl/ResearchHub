@@ -438,6 +438,17 @@ export interface ApiUsageEntry {
 // Agent API — API Keys
 // -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
+// Admin — App Settings
+// -----------------------------------------------------------------------------
+
+/** Platform-wide settings stored in Firestore (app-settings/global). */
+export interface AppSettings {
+  registrations_enabled: boolean;
+  auto_register_domains: string[];
+  default_role: UserRole;
+}
+
 /** An API key for agent or external system access. */
 export interface ApiKey {
   id: string;
