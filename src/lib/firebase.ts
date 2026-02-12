@@ -24,8 +24,26 @@ export interface FirebaseConfig {
   measurementId: string;
 }
 
+/** Required Firebase config fields — empty/missing values cause auth/argument-error. */
+const REQUIRED_CONFIG_KEYS: (keyof FirebaseConfig)[] = [
+  "apiKey",
+  "authDomain",
+  "projectId",
+  "appId",
+];
+
+/**
+ * Validate a Firebase config object. Returns an array of missing required field
+ * names, or an empty array if the config is valid.
+ */
+export function validateFirebaseConfig(
+  config: FirebaseConfig
+): (keyof FirebaseConfig)[] {
+  return REQUIRED_CONFIG_KEYS.filter((key) => !config[key]);
+}
+
 function getFirebaseConfig(): FirebaseConfig {
-  return {
+  const config: FirebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY ?? "",
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN ?? "",
     projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? "",
@@ -35,6 +53,16 @@ function getFirebaseConfig(): FirebaseConfig {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID ?? "",
     measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID ?? "",
   };
+
+  const missing = validateFirebaseConfig(config);
+  if (missing.length > 0) {
+    console.error(
+      `[Firebase] Missing required config: ${missing.join(", ")}. ` +
+        "Check your NEXT_PUBLIC_FIREBASE_* environment variables in .env.local."
+    );
+  }
+
+  return config;
 }
 
 // -----------------------------------------------------------------------------
