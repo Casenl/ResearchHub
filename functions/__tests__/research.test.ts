@@ -105,6 +105,36 @@ describe('Research Routes', () => {
   });
 
   // =========================================================================
+  // Document ID validation
+  // =========================================================================
+  describe('Document ID validation', () => {
+    it('rejects ID with dots in GET /:id', async () => {
+      const res = await request()
+        .get('/research/id.with.dots')
+        .set('Authorization', authHeader('read'));
+
+      expect(res.status).toBe(400);
+    });
+
+    it('rejects ID with special chars in PATCH /:id', async () => {
+      const res = await request()
+        .patch('/research/id@evil')
+        .set('Authorization', authHeader('read_write'))
+        .send({ title: 'X' });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('rejects ID with special chars in DELETE /:id', async () => {
+      const res = await request()
+        .delete('/research/id!drop')
+        .set('Authorization', authHeader('admin'));
+
+      expect(res.status).toBe(400);
+    });
+  });
+
+  // =========================================================================
   // GET /research/:id
   // =========================================================================
   describe('GET /research/:id', () => {

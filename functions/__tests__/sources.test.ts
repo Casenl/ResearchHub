@@ -123,6 +123,34 @@ describe('Sources Routes', () => {
       expect(res.status).toBe(404);
       expect(res.body.error).toMatch(/Research not found/);
     });
+
+    it('rejects invalid URL in update via schema validation', async () => {
+      const res = await request()
+        .patch('/research/research-1/sources/src-1')
+        .set('Authorization', authHeader('read_write'))
+        .send({ url: 'not-a-url' });
+
+      expect(res.status).toBe(400);
+      expect(res.body.error).toMatch(/Validation/);
+    });
+
+    it('rejects title over 300 characters', async () => {
+      const res = await request()
+        .patch('/research/research-1/sources/src-1')
+        .set('Authorization', authHeader('read_write'))
+        .send({ title: 'x'.repeat(301) });
+
+      expect(res.status).toBe(400);
+    });
+
+    it('rejects invalid research ID with special characters', async () => {
+      const res = await request()
+        .patch('/research/id.evil/sources/src-1')
+        .set('Authorization', authHeader('read_write'))
+        .send({ title: 'X' });
+
+      expect(res.status).toBe(400);
+    });
   });
 
   // =========================================================================

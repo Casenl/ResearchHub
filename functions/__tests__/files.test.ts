@@ -83,6 +83,33 @@ describe('Files Routes', () => {
       expect(files[0].path).toContain('test.pdf');
     });
 
+    it('sanitizes file_name in storage path (strips path traversal chars)', async () => {
+      await request()
+        .post('/research/test-id/files')
+        .set('Authorization', authHeader('admin'))
+        .send({
+          ...VALID_FILE_PAYLOAD,
+          file_name: '../../etc/passwd',
+        });
+
+      const files = getUploadedFiles();
+      expect(files.length).toBe(1);
+      // Slashes replaced with underscores — prevents directory traversal
+      expect(files[0].path).not.toContain('/etc/');
+      expect(files[0].path).toContain('.._.._etc_passwd');
+      // Path stays within the research directory
+      expect(files[0].path).toMatch(/^research\/test-id\//);
+    });
+
+    it('rejects invalid document ID with special characters', async () => {
+      const res = await request()
+        .post('/research/id.evil/files')
+        .set('Authorization', authHeader('admin'))
+        .send(VALID_FILE_PAYLOAD);
+
+      expect(res.status).toBe(400);
+    });
+
     it('stores file metadata in Firestore', async () => {
       await request()
         .post('/research/test-id/files')

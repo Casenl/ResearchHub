@@ -85,6 +85,12 @@ The API and frontend include production security measures:
 - **Auth custom claims** — `syncRoleClaims` trigger mirrors Firestore role to Auth token for Storage rules
 - **CSP** — `unsafe-eval` only in development mode
 - **Workflow protection** — `status` field excluded from `UpdateResearchSchema` to prevent workflow bypass
+- **DocumentIdSchema** — all API `:id` route params validated via `DocumentIdSchema.parse()` (regex: `[a-zA-Z0-9_-]+`, max 1500 chars)
+- **Input bounds** — all Zod schemas enforce `.max()` on strings and arrays across MCP tools, Cloud Functions, and shared validations
+- **Firestore field protection** — `doesNotTouch()` rule helper blocks direct writes to `status` (research) and `role`/`domain_ids`/`business_unit`/`monthly_token_budget` (users)
+- **File path sanitization** — `file_name` stripped of `/\:*?"<>|` before constructing storage paths
+- **MCP download guards** — `upload_file` tool checks Content-Length via HEAD, enforces 50MB limit, 60s timeout
+- **ISO date validation** — `publication_date` validated as ISO 8601 date/datetime at schema level; `formatDate()`/`getRelativeTime()` handle invalid dates defensively
 
 ### Directory Structure
 
@@ -169,8 +175,14 @@ src/
     ├── domains.ts                # Domain taxonomy with default sources
     ├── sectors.ts                # Sector taxonomy with regulations
     ├── tags.ts                   # System tags
+    ├── ai-tool-profiles.ts      # AI tool definitions (NotebookLM, Claude, Perplexity)
+    ├── context-rules.ts         # Context injection rule seeds
+    ├── prompt-templates.ts      # Prompt template seeds
     ├── mock-research.ts          # Mock research data (MVP)
-    └── mock-context-documents.ts # Mock context documents (MVP)
+    ├── mock-competitors.ts      # Mock competitor data (MVP)
+    ├── mock-context-documents.ts # Mock context documents (MVP)
+    ├── mock-activity.ts         # Mock audit log entries (MVP)
+    └── mock-usage.ts            # Mock API usage data (MVP)
 ```
 
 ### Cloud Functions Architecture
@@ -351,6 +363,7 @@ Follow the global post-push workflow in `~/.claude/docs/ci-cd.md`. Project-speci
 | `auth/argument-error` on Google sign-in | `initializeAuth()` called without `popupRedirectResolver` | Always pass `browserPopupRedirectResolver` when using `initializeAuth()`. See `docs/code-patterns.md` for details. Validated by `firebase-config.test.ts` unit tests. |
 | 404 on production for a route that works locally | Page file created locally but never committed to git | `routes.test.ts` verifies all expected routes have a `page.tsx` on disk. Fails in CI when uncommitted. **When adding a new route, add it to `EXPECTED_ROUTES` in `src/lib/__tests__/routes.test.ts`.** |
 | ESLint warning on push | Unused import/variable or missing dark variant | CI lint step runs with `--max-warnings 0`. Fix locally before pushing. |
+| `Invalid time value` on research detail | MCP or API inserted empty/invalid date string (e.g. `publication_date: ""`) | All date fields use ISO validation in Zod schemas (`z.string().date()` / `z.string().datetime()`). Frontend `formatDate()` and `getRelativeTime()` return fallback for invalid input. When adding new date fields, always validate at the schema layer. |
 
 ## Maintenance
 

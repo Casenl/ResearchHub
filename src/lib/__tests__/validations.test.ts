@@ -3,6 +3,7 @@ import {
   CreateResearchSchema,
   UpdateResearchSchema,
   QueryResearchSchema,
+  DocumentIdSchema,
   CreateSourceSchema,
   ValidateSourceSchema,
   UploadFileSchema,
@@ -283,5 +284,127 @@ describe('UploadFileSchema', () => {
       source_id: null,
     });
     expect(result.source_id).toBeNull();
+  });
+});
+
+// -----------------------------------------------------------------------------
+// DocumentIdSchema
+// -----------------------------------------------------------------------------
+
+describe('DocumentIdSchema', () => {
+  it('accepts valid alphanumeric IDs', () => {
+    expect(DocumentIdSchema.safeParse('research-1').success).toBe(true);
+    expect(DocumentIdSchema.safeParse('abc_123-XYZ').success).toBe(true);
+    expect(DocumentIdSchema.safeParse('a').success).toBe(true);
+  });
+
+  it('rejects empty string', () => {
+    expect(DocumentIdSchema.safeParse('').success).toBe(false);
+  });
+
+  it('rejects path traversal attempts', () => {
+    expect(DocumentIdSchema.safeParse('../evil').success).toBe(false);
+    expect(DocumentIdSchema.safeParse('foo/bar').success).toBe(false);
+    expect(DocumentIdSchema.safeParse('foo\\bar').success).toBe(false);
+  });
+
+  it('rejects special characters', () => {
+    expect(DocumentIdSchema.safeParse('id with spaces').success).toBe(false);
+    expect(DocumentIdSchema.safeParse('id<script>').success).toBe(false);
+    expect(DocumentIdSchema.safeParse('id;DROP TABLE').success).toBe(false);
+  });
+
+  it('rejects IDs exceeding max length', () => {
+    expect(DocumentIdSchema.safeParse('a'.repeat(1501)).success).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// CreateSourceSchema — ISO date validation
+// -----------------------------------------------------------------------------
+
+describe('CreateSourceSchema — date validation', () => {
+  const baseSource = {
+    title: 'Source Title',
+    url: 'https://example.com',
+    publisher: 'Publisher',
+    quality_tier: 3,
+    discovered_by: 'manual' as const,
+  };
+
+  it('accepts valid ISO date', () => {
+    const result = CreateSourceSchema.safeParse({
+      ...baseSource,
+      publication_date: '2025-01-15',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts valid ISO datetime', () => {
+    const result = CreateSourceSchema.safeParse({
+      ...baseSource,
+      publication_date: '2025-01-15T10:30:00Z',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts empty string (unknown date)', () => {
+    const result = CreateSourceSchema.safeParse({
+      ...baseSource,
+      publication_date: '',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('defaults to empty string when omitted', () => {
+    const result = CreateSourceSchema.parse(baseSource);
+    expect(result.publication_date).toBe('');
+  });
+
+  it('rejects invalid date string', () => {
+    const result = CreateSourceSchema.safeParse({
+      ...baseSource,
+      publication_date: 'banana',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects partial date', () => {
+    const result = CreateSourceSchema.safeParse({
+      ...baseSource,
+      publication_date: '2025-13-01', // invalid month
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// Input bounds
+// -----------------------------------------------------------------------------
+
+describe('Input bounds', () => {
+  it('CreateResearchSchema rejects findings over 50000 chars', () => {
+    const result = CreateResearchSchema.safeParse({
+      title: 'Test',
+      output_format: 'factsheet',
+      origin: 'human',
+      dimensions: { market_ids: [], domain_ids: [], sector_ids: [] },
+      findings: 'x'.repeat(50001),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('UpdateResearchSchema rejects change_log over 10000 chars', () => {
+    const result = UpdateResearchSchema.safeParse({
+      change_log: 'x'.repeat(10001),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('QueryResearchSchema rejects region over 100 chars', () => {
+    const result = QueryResearchSchema.safeParse({
+      region: 'x'.repeat(101),
+    });
+    expect(result.success).toBe(false);
   });
 });
