@@ -71,17 +71,33 @@ Global standards (type safety, naming, file size, security, React patterns) are 
 
 For semantic/accent colors (blue, green, amber, etc.), always pair with a `dark:` variant. See `docs/code-patterns.md` for the full mapping.
 
+### Security Hardening
+
+The API and frontend include production security measures:
+
+- **Signed URLs** — file uploads use `getSignedUrl()` (7-day expiry), not `makePublic()`
+- **Helmet** — security headers on all Cloud Functions responses
+- **Rate limiting** — 100 req/min general, 30 req/min for write endpoints
+- **CORS allowlist** — configurable via `CORS_ALLOWED_ORIGINS` env var
+- **Body limit** — 1MB default, 75MB only for file upload route
+- **Role-based rules** — Firestore create/write requires `researcher` or `admin` role
+- **Auth custom claims** — `syncRoleClaims` trigger mirrors Firestore role to Auth token for Storage rules
+- **CSP** — `unsafe-eval` only in development mode
+- **Workflow protection** — `status` field excluded from `UpdateResearchSchema` to prevent workflow bypass
+
 ### Directory Structure
 
 ```
 src/
 ├── app/                          # Next.js App Router pages
 │   ├── layout.tsx                # Root layout (Providers wrapper)
+│   ├── error.tsx                 # Root error boundary
 │   ├── providers.tsx             # Client-side providers (AuthProvider)
 │   ├── globals.css               # Tailwind v4 theme variables
 │   ├── login/                    # Standalone login page (no AppShell)
 │   └── (dashboard)/              # Route group — all pages wrapped in AppShell
 │       ├── layout.tsx            # Dashboard layout (AppShell)
+│       ├── error.tsx             # Dashboard error boundary
 │       ├── page.tsx              # Dashboard home
 │       ├── research/             # Research Library, detail, wizard
 │       ├── competitors/          # Competitor Intelligence (listing, detail, create)
@@ -159,13 +175,16 @@ src/
 ```
 functions/
 ├── src/
-│   ├── index.ts              # Entry point — exports `api` Cloud Function (europe-west1)
-│   ├── app.ts                # Express app — mounts all routes, CORS, auth middleware
+│   ├── index.ts              # Entry point — exports `api` + `syncRoleClaims` (europe-west1)
+│   ├── app.ts                # Express app — Helmet, rate limit, CORS allowlist, auth, routes
 │   ├── schemas.ts            # Zod validation schemas for all endpoints
 │   ├── lib/
 │   │   └── admin.ts          # Firebase Admin SDK lazy init (db(), storage())
 │   ├── middleware/
-│   │   └── auth.ts           # API key auth — SHA-256 hash lookup, permission checks
+│   │   ├── auth.ts           # API key auth — SHA-256 hash lookup, permission checks
+│   │   └── rate-limit.ts     # Rate limiting (100/min general, 30/min writes)
+│   ├── triggers/
+│   │   └── sync-role-claims.ts  # Sync Firestore user role → Auth custom claims
 │   └── routes/
 │       ├── research.ts       # CRUD for research documents
 │       ├── sources.ts        # Source management within notebooks
@@ -191,9 +210,10 @@ functions/
 - `src/lib/constants.ts` — All label maps, notebook configs, refresh schedules, time estimates
 - `src/lib/research-workflow.ts` — Research status transition logic and validation
 - `src/components/layout/app-shell.tsx` — Main navigation shell; wraps all authenticated pages
-- `functions/src/app.ts` — Express app mounting all API routes
+- `functions/src/app.ts` — Express app with Helmet, rate limiting, CORS allowlist, auth, and routes
 - `functions/src/schemas.ts` — Zod schemas for all API request validation
 - `functions/src/middleware/auth.ts` — API key authentication and permission middleware
+- `functions/src/triggers/sync-role-claims.ts` — Firestore trigger syncing user role to Auth custom claims
 - `src/lib/services/index.ts` — Barrel export for all MCP service modules
 - `src/lib/validations/index.ts` — Barrel export for Zod schemas (shared by MCP + Cloud Functions)
 - `src/mcp/server.ts` — ResearchHub MCP server entry point (15 tools, 4 resources)
@@ -258,6 +278,16 @@ Credentials are stored in `.env.local` (not committed).
 | `./marketintelligence-hub-staging-sa-key.json` | Staging | Integration tests |
 
 Both files are listed in `.gitignore` and must **never** be committed. For CI, the staging key is stored as GitHub secret `STAGING_SA_KEY_BASE64` (base64-encoded).
+
+### Cloud Functions Environment
+
+Set via Firebase Functions config or `.env` in the functions directory:
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `CORS_ALLOWED_ORIGINS` | Comma-separated allowed origins for CORS | `https://your-app.web.app,https://custom-domain.com` |
+
+If unset, CORS falls back to allowing all origins (development only).
 
 ### Staging Testing
 
