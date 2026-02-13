@@ -186,3 +186,36 @@ jobs:
           STAGING_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.STAGING_SA_KEY_BASE64 }}
           STAGING_API_URL: https://europe-west1-marketintelligence-hub-staging.cloudfunctions.net/api
         run: npm run test:integration --prefix functions
+
+  # ---------------------------------------------------------------------------
+  # Job: mcp-integration
+  # Runs MCP service layer integration tests against staging Firebase
+  # ---------------------------------------------------------------------------
+  mcp-integration:
+    name: MCP Integration Tests
+    runs-on: ubuntu-latest
+    needs: [unit-tests]
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    timeout-minutes: 5
+
+    steps:
+      # 1. Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js 20 with npm cache
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Clean install dependencies
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Run MCP integration tests against staging
+      - name: Run MCP integration tests
+        env:
+          STAGING_SERVICE_ACCOUNT_KEY_BASE64: ${{ secrets.STAGING_SA_KEY_BASE64 }}
+        run: npx vitest run --config vitest.integration.config.ts

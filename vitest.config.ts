@@ -4,7 +4,8 @@ import path from 'path';
 export default defineConfig({
   test: {
     include: ['src/**/*.test.ts'],
-    exclude: ['functions/**', 'node_modules/**'],
+    exclude: ['functions/**', 'node_modules/**', '**/integration/**'],
+    setupFiles: ['./src/lib/services/__tests__/helpers/setup.ts'],
   },
   resolve: {
     alias: {

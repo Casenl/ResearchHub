@@ -21,6 +21,10 @@ npm run test:e2e      # Run E2E tests (Playwright, requires dev server)
 npm run test:e2e:ui   # Open Playwright UI mode (interactive)
 npm run test:e2e:headed  # Run with visible browser
 
+# MCP service layer testing
+npm run test:mcp              # Run MCP service unit tests (62 tests, mocked)
+npm run test:mcp:integration  # Run MCP integration tests (15 tests, hits staging)
+
 # Cloud Functions testing (run from functions/)
 cd functions
 npm test              # Run unit tests (88 tests, mocked Firestore/Storage)
@@ -260,8 +264,9 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR:
 | `functions-build` | Compile Cloud Functions TypeScript | -- |
 | `functions-tests` | Cloud Functions unit tests | -- |
 | `functions-integration` | Cloud Functions integration tests (staging) | `functions-tests`, `functions-build` |
+| `mcp-integration` | MCP service layer integration tests (staging) | `unit-tests` |
 
-The integration job only runs on `main` and PRs. It requires the `STAGING_SA_KEY_BASE64` GitHub secret.
+The integration jobs only run on `main` and PRs. They require the `STAGING_SA_KEY_BASE64` GitHub secret.
 
 ## MCP Servers
 

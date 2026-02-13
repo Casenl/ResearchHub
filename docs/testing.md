@@ -65,6 +65,75 @@ STAGING_API_URL=https://europe-west1-marketintelligence-hub-staging.cloudfunctio
 - Permission enforcement tests verify read-only keys can't write and non-admin keys can't delete
 - `apiFetch()` reads body as text first, then parses JSON (avoids "body already read" errors)
 
+## MCP Service Layer — Unit Tests
+
+Unit tests for the MCP service layer live in `src/lib/services/__tests__/` and use Vitest. Firebase Admin SDK is fully mocked via an in-memory Map-based store — no network calls.
+
+```bash
+npm run test:mcp
+```
+
+- Config: `vitest.config.ts` (shared with other `src/` unit tests)
+- Setup: `src/lib/services/__tests__/helpers/setup.ts` (mocks `@/lib/firebase-admin`)
+- Mock helpers: `src/lib/services/__tests__/helpers/` (mock-admin, fixtures)
+- Test files: `src/lib/services/__tests__/*.test.ts`
+
+### Test Coverage
+
+| File | Tests | Key coverage |
+|------|-------|-------------|
+| `research-crud-service.test.ts` | 16 | CRUD, dimension ID-to-object resolution (Bug #1 regression), review_status by origin, audit logs |
+| `source-service.test.ts` | 13 | Add to existing notebook, auto-create notebook (Bug #2 regression), tier adjustment, validation |
+| `file-service.test.ts` | 13 | Magic byte validation (PDF, DOCX, text types), upload + storage, size/MIME rejection |
+| `intelligence-query-service.test.ts` | 16 | Status/origin/region/domain/sector/trust filters, pagination, landscape grouping, brief generation |
+| `audit-service.test.ts` | 4 | Audit log shape, timestamp, defaults, logApiAccess delegation |
+
+### Mock Architecture
+
+The mock (`helpers/mock-admin.ts`) adapts the Cloud Functions mock pattern with added support for sub-collection chaining (`doc(id).collection(name)`) required by the source service. Test helpers: `resetStore()`, `seedCollection()`, `getDoc()`, `getAllDocs()`, `resetStorage()`, `getUploadedFiles()`.
+
+## MCP Service Layer — Integration Tests
+
+Integration tests hit **staging Firestore directly** via the Firebase Admin SDK (not via HTTP/Cloud Functions). They validate the service layer against real Firestore read/write behavior.
+
+```bash
+npm run test:mcp:integration
+```
+
+- Config: `vitest.integration.config.ts` (30s test timeout, 60s hook timeout)
+- Global setup/teardown: `src/lib/services/__tests__/integration/setup.ts` and `teardown.ts`
+
+### How It Works
+
+1. **Global setup**: initializes Firebase Admin SDK with staging service account, seeds a test research document with a notebook, writes state to `.test-state.json`
+2. **Tests** dynamically import service modules after the admin app is initialized, then call services directly against staging Firestore
+3. **Global teardown**: deletes all test data (identified by `_mcptest_` prefix), audit logs, and Storage files
+
+### Directory Structure
+
+```
+src/lib/services/__tests__/integration/
+├── setup.ts                                    # Seed staging Firestore
+├── teardown.ts                                 # Clean up all test data
+├── helpers.ts                                  # SA key resolution, state management
+├── research-crud.integration.test.ts           # 4 tests — create, get, update, archive
+├── source.integration.test.ts                  # 3 tests — add, auto-create notebook, validate
+├── file.integration.test.ts                    # 3 tests — upload PDF, magic byte rejection, list
+└── intelligence-query.integration.test.ts      # 4 tests — status filter, region filter, landscape, brief
+```
+
+### Environment Variables
+
+Same as Cloud Functions integration tests:
+
+```bash
+# Path to staging service account key (local dev)
+STAGING_SERVICE_ACCOUNT_KEY=./marketintelligence-hub-staging-sa-key.json
+
+# Or base64-encoded key (CI)
+STAGING_SERVICE_ACCOUNT_KEY_BASE64=<base64>
+```
+
 ## E2E Tests (Playwright)
 
 Playwright E2E tests live in `e2e/` and cover authentication, navigation, dashboard, research library, settings, theme consistency, and admin pages.
