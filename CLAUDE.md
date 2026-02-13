@@ -23,7 +23,7 @@ npm run test:e2e:headed  # Run with visible browser
 
 # MCP service layer testing
 npm run test:mcp              # Run MCP service unit tests (62 tests, mocked)
-npm run test:mcp:integration  # Run MCP integration tests (15 tests, hits staging)
+npm run test:mcp:integration  # Run MCP integration tests (14 tests, hits staging)
 
 # Cloud Functions testing (run from functions/)
 cd functions
@@ -115,7 +115,19 @@ src/
 │   ├── prompt-templates.ts       # Research prompt generation engine
 │   ├── trust-tiers.ts            # Source quality tier definitions
 │   ├── research-workflow.ts      # Research status transition logic
-│   └── firestore/                # Firestore service layer
+│   ├── validations/              # Zod validation schemas (shared by MCP + API)
+│   │   ├── index.ts              # Barrel export
+│   │   ├── research-schemas.ts   # Create/Update/Query research schemas
+│   │   ├── source-schemas.ts     # Create/Validate source schemas
+│   │   └── file-schemas.ts       # Upload file schema + MIME/size limits
+│   ├── services/                 # MCP service layer (used by MCP server)
+│   │   ├── research-crud-service.ts      # Research CRUD with dimension resolution
+│   │   ├── source-service.ts             # Source add/validate with notebook auto-create
+│   │   ├── file-service.ts              # File upload with magic byte validation
+│   │   ├── intelligence-query-service.ts # Query, landscape, brief generation
+│   │   ├── audit-service.ts             # Audit log + API access logging
+│   │   └── auth-service.ts             # API key authentication
+│   └── firestore/                # Firestore service layer (used by frontend hooks)
 │       ├── index.ts              # Barrel export for all services
 │       ├── converters.ts         # Firestore ↔ TypeScript converters
 │       ├── research.ts           # Research CRUD
@@ -127,6 +139,10 @@ src/
 │       ├── activity.ts           # Audit log queries
 │       ├── usage.ts              # API usage aggregation
 │       └── settings.ts           # User/system settings
+├── mcp/                          # ResearchHub MCP server (stdio)
+│   ├── server.ts                 # MCP entry point (15 tools, 4 resources)
+│   ├── tools/                    # Tool handlers (research, source, intelligence, utility)
+│   └── resources/                # Resource handlers (taxonomy)
 ├── types/
 │   └── index.ts                  # All TypeScript types and union types
 └── data/                         # Seed data and mock data
@@ -178,6 +194,9 @@ functions/
 - `functions/src/app.ts` — Express app mounting all API routes
 - `functions/src/schemas.ts` — Zod schemas for all API request validation
 - `functions/src/middleware/auth.ts` — API key authentication and permission middleware
+- `src/lib/services/index.ts` — Barrel export for all MCP service modules
+- `src/lib/validations/index.ts` — Barrel export for Zod schemas (shared by MCP + Cloud Functions)
+- `src/mcp/server.ts` — ResearchHub MCP server entry point (15 tools, 4 resources)
 
 ### Route Groups
 
@@ -273,6 +292,7 @@ The integration jobs only run on `main` and PRs. They require the `STAGING_SA_KE
 Configured in `.mcp.json`:
 - **Context7** — library documentation lookups for up-to-date API references
 - **Firebase MCP** — direct Firestore/Auth/Storage operations via the service account key at project root
+- **ResearchHub MCP** (`src/mcp/server.ts`) — 15 tools + 4 resources for research CRUD, sources, files, intelligence queries. Uses Firebase Admin SDK via `FIREBASE_ADMIN_SDK_PATH` env var. See `docs/mcp-guide.md` for full tool reference.
 
 ## Research Process Reference
 
@@ -294,7 +314,7 @@ Follow the global post-push workflow in `~/.claude/docs/ci-cd.md`. Project-speci
 
 | Pattern | Root cause | Prevention |
 |---------|-----------|------------|
-| Integration tests skipped | Expected on feature branch pushes | Integration tests only run on `main` and PRs (`if:` condition in CI) |
+| Integration tests skipped | Branch not in CI gate | Integration tests run on `main`, PRs, and the current feature branch (`if:` condition in CI). Other branches are skipped. |
 | `auth/argument-error` on Google sign-in | `initializeAuth()` called without `popupRedirectResolver` | Always pass `browserPopupRedirectResolver` when using `initializeAuth()`. See `docs/code-patterns.md` for details. Validated by `firebase-config.test.ts` unit tests. |
 | 404 on production for a route that works locally | Page file created locally but never committed to git | `routes.test.ts` verifies all expected routes have a `page.tsx` on disk. Fails in CI when uncommitted. **When adding a new route, add it to `EXPECTED_ROUTES` in `src/lib/__tests__/routes.test.ts`.** |
 | ESLint warning on push | Unused import/variable or missing dark variant | CI lint step runs with `--max-warnings 0`. Fix locally before pushing. |
