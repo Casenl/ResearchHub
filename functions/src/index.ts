@@ -1,6 +1,7 @@
 import { onRequest } from 'firebase-functions/v2/https';
 import { setGlobalOptions } from 'firebase-functions/v2/options';
 import { app } from './app';
+import { syncRoleClaims } from './triggers/sync-role-claims';
 
 setGlobalOptions({
   region: 'europe-west1',
@@ -10,3 +11,6 @@ setGlobalOptions({
 
 /** Single Cloud Function wrapping the Express API. */
 export const api = onRequest(app);
+
+/** Sync Firestore user role to Auth custom claims for Storage rules. */
+export { syncRoleClaims };
