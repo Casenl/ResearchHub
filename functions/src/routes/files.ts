@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import { ZodError } from 'zod';
 import { AuthenticatedRequest, requirePermission } from '../middleware/auth';
-import { UploadFileSchema, MAX_FILE_SIZE_BYTES } from '../schemas';
+import { UploadFileSchema, MAX_FILE_SIZE_BYTES, DocumentIdSchema } from '../schemas';
 import { db, storage } from '../lib/admin';
 import { writeLimiter } from '../middleware/rate-limit';
 
@@ -28,8 +28,11 @@ filesRouter.post(
   requirePermission('read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = DocumentIdSchema.parse(req.params.id);
       const parsed = UploadFileSchema.parse(req.body);
+
+      // Sanitize file_name: strip directory traversal characters
+      const safeName = parsed.file_name.replace(/[/\\:*?"<>|]/g, '_');
 
       // Decode base64 payload
       const buffer = Buffer.from(parsed.file_data, 'base64');
@@ -48,7 +51,7 @@ filesRouter.post(
 
       // Upload to Firebase Storage
       const timestamp = Date.now();
-      const storagePath = `research/${id}/${timestamp}-${parsed.file_name}`;
+      const storagePath = `research/${id}/${timestamp}-${safeName}`;
       const bucket = storage().bucket();
       const file = bucket.file(storagePath);
       await file.save(buffer, { metadata: { contentType: parsed.file_type } });
@@ -113,7 +116,7 @@ filesRouter.get(
   requirePermission('read', 'read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
-      const { id } = req.params;
+      const id = DocumentIdSchema.parse(req.params.id);
 
       const snapshot = await db()
         .collection('file-attachments')

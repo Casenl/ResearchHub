@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import { ZodError } from 'zod';
 import { AuthenticatedRequest, requirePermission } from '../middleware/auth';
-import { CreateSourceSchema, ValidateSourceSchema } from '../schemas';
+import { CreateSourceSchema, UpdateSourceSchema, ValidateSourceSchema, DocumentIdSchema } from '../schemas';
 import { db } from '../lib/admin';
 
 export const sourcesRouter = Router();
@@ -32,7 +32,7 @@ sourcesRouter.post(
   requirePermission('read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id } = req.params;
+      const id = DocumentIdSchema.parse(req.params.id);
       const { notebook_id, ...sourceBody } = req.body;
 
       if (!notebook_id) {
@@ -41,7 +41,7 @@ sourcesRouter.post(
       }
 
       const parsed = CreateSourceSchema.parse(sourceBody);
-      const docRef = db().collection('research').doc(id as string);
+      const docRef = db().collection('research').doc(id);
       const doc = await docRef.get();
 
       if (!doc.exists) {
@@ -88,11 +88,11 @@ sourcesRouter.patch(
   requirePermission('read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id, sourceId } = req.params;
-      const updates = req.body;
-      const allowedFields = ['title', 'url', 'publisher', 'quality_tier', 'notes'];
+      const id = DocumentIdSchema.parse(req.params.id);
+      const { sourceId } = req.params;
+      const updates = UpdateSourceSchema.parse(req.body);
 
-      const docRef = db().collection('research').doc(id as string);
+      const docRef = db().collection('research').doc(id);
       const doc = await docRef.get();
 
       if (!doc.exists) {
@@ -108,9 +108,7 @@ sourcesRouter.patch(
         const sources = (nb.sources as Array<Record<string, unknown>>) ?? [];
         const srcIndex = sources.findIndex((s) => s.id === sourceId);
         if (srcIndex !== -1) {
-          for (const key of allowedFields) {
-            if (key in updates) sources[srcIndex][key] = updates[key];
-          }
+          Object.assign(sources[srcIndex], updates);
           isFound = true;
           break;
         }
@@ -136,10 +134,11 @@ sourcesRouter.post(
   requirePermission('read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id, sourceId } = req.params;
+      const id = DocumentIdSchema.parse(req.params.id);
+      const { sourceId } = req.params;
       const parsed = ValidateSourceSchema.parse(req.body);
 
-      const docRef = db().collection('research').doc(id as string);
+      const docRef = db().collection('research').doc(id);
       const doc = await docRef.get();
 
       if (!doc.exists) {

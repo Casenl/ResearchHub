@@ -22,13 +22,21 @@ service cloud.firestore {
       return isAuthenticated() && request.auth.uid == userId;
     }
 
+    // Prevent updates to specific privileged fields (unless admin)
+    function doesNotTouch(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
     // ============ Research ============
 
     match /research/{researchId} {
       allow read: if isAuthenticated();
       allow create: if isResearcherOrAdmin();
+      // Authors can update their own research, but nobody can directly set status
+      // (workflow transitions must go through the API/service layer)
       allow update: if isAuthenticated()
-        && (resource.data.author_id == request.auth.uid || isAdmin());
+        && (resource.data.author_id == request.auth.uid || isAdmin())
+        && doesNotTouch(['status']);
       allow delete: if isAdmin();
 
       // Notebooks sub-collection
@@ -61,11 +69,13 @@ service cloud.firestore {
       allow update, delete: if isAdmin();
     }
 
-    // ============ Audit Logs (write-only, immutable) ============
+    // ============ Audit Logs (backend-only writes, immutable) ============
 
     match /audit_logs/{logId} {
       allow read: if isAdmin();
-      allow create: if isAuthenticated();
+      // Only service accounts (Cloud Functions / Admin SDK) can create logs.
+      // Client SDK writes are blocked to prevent audit trail poisoning.
+      allow create: if false;
       allow update, delete: if false;
     }
 
@@ -81,7 +91,10 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if isAuthenticated();
       allow create: if isOwner(userId);
-      allow update: if isOwner(userId) || isAdmin();
+      // Users can update their own profile but NOT privileged fields.
+      // Only admins can change role, domain_ids, business_unit, monthly_token_budget.
+      allow update: if isAdmin()
+        || (isOwner(userId) && doesNotTouch(['role', 'domain_ids', 'business_unit', 'monthly_token_budget']));
       allow delete: if false;
     }
 
@@ -127,7 +140,8 @@ service cloud.firestore {
 
     match /api-usage/{entryId} {
       allow read: if isAdmin();
-      allow create: if isAuthenticated();
+      // Only service accounts can create usage records
+      allow create: if false;
       allow update, delete: if false;
     }
   }

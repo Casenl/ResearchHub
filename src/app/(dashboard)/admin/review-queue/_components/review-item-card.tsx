@@ -1,5 +1,6 @@
+import Link from "next/link";
 import { format } from "date-fns";
-import { Loader2, Check, X, Bot } from "lucide-react";
+import { Loader2, Check, X, Bot, ExternalLink } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -61,7 +62,13 @@ export function ReviewItemCard({
         <div className="min-w-0 flex-1 space-y-2">
           {/* Title row */}
           <div className="flex items-center gap-2">
-            <h3 className="truncate font-semibold">{item.title}</h3>
+            <Link
+              href={`/research/${item.id}`}
+              className="flex items-center gap-1.5 truncate font-semibold text-foreground hover:text-blue-600 hover:underline dark:hover:text-blue-400"
+            >
+              {item.title}
+              <ExternalLink className="size-3.5 shrink-0 opacity-50" />
+            </Link>
             <ProvenanceBadge origin={item.origin} />
           </div>
 

@@ -18,9 +18,9 @@ export function registerResearchTools(server: McpServer): void {
     'search_research',
     'Search and filter research entries by region, domain, sector, origin, trust tier, or status',
     {
-      region: z.string().optional().describe('Market region code or ID'),
-      domain: z.string().optional().describe('Domain code or ID'),
-      sector: z.string().optional().describe('Sector code or ID'),
+      region: z.string().max(100).optional().describe('Market region code or ID'),
+      domain: z.string().max(100).optional().describe('Domain code or ID'),
+      sector: z.string().max(100).optional().describe('Sector code or ID'),
       origin: z.enum(['human', 'agent', 'hybrid']).optional(),
       min_trust_tier: z.number().int().min(1).max(8).optional(),
       status: z.enum(['draft', 'in_progress', 'review', 'published', 'archived']).optional(),
@@ -43,7 +43,7 @@ export function registerResearchTools(server: McpServer): void {
     'get_research',
     'Get a single research entry by its ID',
     {
-      id: z.string().describe('Research document ID'),
+      id: z.string().min(1).max(1500).describe('Research document ID'),
     },
     async (input) => {
       try {
@@ -68,14 +68,14 @@ export function registerResearchTools(server: McpServer): void {
       description: z.string().max(5000).optional(),
       output_format: z.enum(['factsheet', 'competitive', 'proposition', 'full']),
       dimensions: z.object({
-        market_ids: z.array(z.string()),
-        domain_ids: z.array(z.string()),
-        sector_ids: z.array(z.string()),
+        market_ids: z.array(z.string().max(100)).max(50),
+        domain_ids: z.array(z.string().max(100)).max(50),
+        sector_ids: z.array(z.string().max(100)).max(50),
       }),
-      findings: z.string().optional(),
-      synthesis: z.string().optional(),
-      assumptions: z.array(z.string()).optional(),
-      input_context: z.array(z.string()).optional(),
+      findings: z.string().max(50000).optional(),
+      synthesis: z.string().max(50000).optional(),
+      assumptions: z.array(z.string().max(2000)).max(100).optional(),
+      input_context: z.array(z.string().max(5000)).max(50).optional(),
       agent_identity: z.object({
         agent_id: z.string().min(1),
         agent_name: z.string().min(1),
@@ -115,15 +115,15 @@ export function registerResearchTools(server: McpServer): void {
     'update_research',
     'Update fields on an existing research entry',
     {
-      id: z.string().describe('Research document ID'),
+      id: z.string().min(1).max(1500).describe('Research document ID'),
       title: z.string().min(1).max(200).optional(),
       description: z.string().max(5000).optional(),
-      status: z.enum(['draft', 'in_progress', 'review', 'published', 'archived']).optional(),
-      findings: z.string().optional(),
-      synthesis: z.string().optional(),
-      assumptions: z.array(z.string()).optional(),
+      // status intentionally excluded — use workflow transitions, not direct updates
+      findings: z.string().max(50000).optional(),
+      synthesis: z.string().max(50000).optional(),
+      assumptions: z.array(z.string().max(2000)).max(100).optional(),
       review_status: z.enum(['none', 'pending', 'approved', 'rejected']).optional(),
-      change_log: z.string().optional(),
+      change_log: z.string().max(10000).optional(),
     },
     async (input) => {
       try {

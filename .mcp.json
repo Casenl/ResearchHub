@@ -16,7 +16,8 @@
       "command": "cmd",
       "args": ["/c", "npx", "tsx", "src/mcp/server.ts"],
       "env": {
-        "FIREBASE_ADMIN_SDK_PATH": "./marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json"
+        "FIREBASE_ADMIN_SDK_PATH": "./marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json",
+        "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "marketintelligence-hub.firebasestorage.app"
       }
     }
   }

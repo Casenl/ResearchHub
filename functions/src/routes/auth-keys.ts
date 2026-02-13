@@ -3,7 +3,7 @@ import { randomBytes, createHash } from 'crypto';
 import { ZodError } from 'zod';
 import { db } from '../lib/admin';
 import { AuthenticatedRequest, requirePermission } from '../middleware/auth';
-import { CreateApiKeySchema } from '../schemas';
+import { CreateApiKeySchema, DocumentIdSchema } from '../schemas';
 
 export const authKeysRouter = Router();
 
@@ -114,7 +114,7 @@ authKeysRouter.delete(
   requirePermission('admin'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const keyId = req.params.id as string;
+      const keyId = DocumentIdSchema.parse(req.params.id);
       const ref = db().collection('api-keys').doc(keyId);
       const doc = await ref.get();
 

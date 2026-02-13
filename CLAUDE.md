@@ -22,16 +22,17 @@ npm run test:e2e:ui   # Open Playwright UI mode (interactive)
 npm run test:e2e:headed  # Run with visible browser
 
 # MCP service layer testing
-npm run test:mcp              # Run MCP service unit tests (62 tests, mocked)
-npm run test:mcp:integration  # Run MCP integration tests (14 tests, hits staging)
+npm run test:mcp              # Run MCP service unit tests (mocked)
+npm run test:mcp:integration  # Run MCP integration tests (hits staging)
 
 # Cloud Functions testing (run from functions/)
 cd functions
-npm test              # Run unit tests (88 tests, mocked Firestore/Storage)
-npm run test:integration  # Run integration tests (35 tests, hits staging)
+npm test              # Run unit tests (mocked Firestore/Storage)
+npm run test:integration  # Run integration tests (hits staging)
 
 # Deployment
 npm run deploy:staging:rules   # Deploy Firestore + Storage rules to staging
+firebase deploy --only hosting # Deploy Next.js app to Firebase Hosting
 cd functions
 npm run deploy                 # Deploy functions to production
 npm run deploy:staging         # Deploy functions to staging
@@ -94,6 +95,7 @@ src/
 │   ├── error.tsx                 # Root error boundary
 │   ├── providers.tsx             # Client-side providers (AuthProvider)
 │   ├── globals.css               # Tailwind v4 theme variables
+│   ├── not-found.tsx             # Custom 404 page
 │   ├── login/                    # Standalone login page (no AppShell)
 │   └── (dashboard)/              # Route group — all pages wrapped in AppShell
 │       ├── layout.tsx            # Dashboard layout (AppShell)
@@ -121,6 +123,7 @@ src/
 │   ├── use-usage.ts              # API usage stats
 │   ├── use-users.ts              # User management
 │   ├── use-research-transition.ts   # Research workflow state machine
+│   ├── use-global-toast.ts       # Global toast context hook
 │   ├── use-theme.tsx             # Theme/density preferences
 │   └── use-toast.tsx             # Toast notifications
 ├── lib/                          # Utilities and services

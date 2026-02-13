@@ -6,6 +6,7 @@ import {
   CreateResearchSchema,
   UpdateResearchSchema,
   QueryResearchSchema,
+  DocumentIdSchema,
 } from '../schemas';
 
 export const researchRouter = Router();
@@ -103,7 +104,7 @@ researchRouter.get(
   requirePermission('read', 'read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const doc = await db().collection('research').doc(id).get();
       if (!doc.exists) {
         res.status(404).json({ error: 'Research not found' });
@@ -160,7 +161,7 @@ researchRouter.patch(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const data = UpdateResearchSchema.parse(req.body);
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const ref = db().collection('research').doc(id);
       const doc = await ref.get();
 
@@ -184,7 +185,7 @@ researchRouter.delete(
   requirePermission('admin'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const ref = db().collection('research').doc(id);
       const doc = await ref.get();
 

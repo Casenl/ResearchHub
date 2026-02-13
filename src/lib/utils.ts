@@ -27,7 +27,10 @@ export function generateId(): string {
  * Example: "2025-06-15T10:30:00Z" -> "15 Jun 2025"
  */
 export function formatDate(date: string): string {
-  return format(new Date(date), "dd MMM yyyy");
+  if (!date) return "—";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "—";
+  return format(d, "dd MMM yyyy");
 }
 
 /**
@@ -35,7 +38,10 @@ export function formatDate(date: string): string {
  * Example: "3 days ago", "in 2 hours"
  */
 export function getRelativeTime(date: string): string {
-  return formatDistanceToNow(new Date(date), { addSuffix: true });
+  if (!date) return "";
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return "";
+  return formatDistanceToNow(d, { addSuffix: true });
 }
 
 /**

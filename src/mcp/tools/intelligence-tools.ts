@@ -7,9 +7,9 @@ export function registerIntelligenceTools(server: McpServer): void {
     'get_competitors',
     'Get competitors for a region, optionally filtered by domain and sector',
     {
-      region: z.string().describe('Market region code (e.g. "NL", "DE")'),
-      domain: z.string().optional().describe('Domain code filter'),
-      sector: z.string().optional().describe('Sector code filter'),
+      region: z.string().min(1).max(100).describe('Market region code (e.g. "NL", "DE")'),
+      domain: z.string().max(100).optional().describe('Domain code filter'),
+      sector: z.string().max(100).optional().describe('Sector code filter'),
     },
     async (input) => {
       try {
@@ -52,7 +52,7 @@ export function registerIntelligenceTools(server: McpServer): void {
     'get_landscape',
     'Full region x domain competitive matrix for a given region',
     {
-      region: z.string().describe('Market region code (e.g. "NL", "DE")'),
+      region: z.string().min(1).max(100).describe('Market region code (e.g. "NL", "DE")'),
     },
     async (input) => {
       try {
@@ -71,7 +71,7 @@ export function registerIntelligenceTools(server: McpServer): void {
     'get_region_context',
     'Market context summary for a region: research count, domains, trust, latest updates',
     {
-      region: z.string().describe('Market region code (e.g. "NL", "DE")'),
+      region: z.string().min(1).max(100).describe('Market region code (e.g. "NL", "DE")'),
     },
     async (input) => {
       try {

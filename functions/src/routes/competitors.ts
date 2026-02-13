@@ -9,6 +9,7 @@ import {
   AddPositionSchema,
   UpdatePositionSchema,
   AddEventSchema,
+  DocumentIdSchema,
 } from '../schemas';
 
 export const competitorsRouter = Router();
@@ -100,7 +101,7 @@ competitorsRouter.get(
   requirePermission('read', 'read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const doc = await db().collection(COLLECTION).doc(id).get();
       if (!doc.exists) {
         res.status(404).json({ error: 'Competitor not found' });
@@ -120,7 +121,7 @@ competitorsRouter.put(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const data = UpdateCompetitorSchema.parse(req.body);
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const ref = db().collection(COLLECTION).doc(id);
       const doc = await ref.get();
 
@@ -145,7 +146,7 @@ competitorsRouter.post(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const data = AddPositionSchema.parse(req.body);
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const identity = req.apiKey!.agent_identity;
       const ref = db().collection(COLLECTION).doc(id);
       const doc = await ref.get();
@@ -188,7 +189,7 @@ competitorsRouter.put(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const data = UpdatePositionSchema.parse(req.body);
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const posId = req.params.positionId as string;
       const identity = req.apiKey!.agent_identity;
       const ref = db().collection(COLLECTION).doc(id);
@@ -235,7 +236,7 @@ competitorsRouter.post(
   async (req: AuthenticatedRequest, res: Response) => {
     try {
       const data = AddEventSchema.parse(req.body);
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const identity = req.apiKey!.agent_identity;
       const ref = db().collection(COLLECTION).doc(id);
       const doc = await ref.get();
@@ -280,7 +281,7 @@ competitorsRouter.get(
   requirePermission('read', 'read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const id = req.params.id as string;
+      const id = DocumentIdSchema.parse(req.params.id);
       const doc = await db().collection(COLLECTION).doc(id).get();
 
       if (!doc.exists) {

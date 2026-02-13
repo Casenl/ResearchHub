@@ -7,8 +7,8 @@ export function registerUtilityTools(server: McpServer): void {
     'get_research_brief',
     'Token-efficient markdown summary for a region, optionally filtered by domain',
     {
-      region: z.string().describe('Market region code (e.g. "NL", "DE")'),
-      domain: z.string().optional().describe('Domain code filter'),
+      region: z.string().min(1).max(100).describe('Market region code (e.g. "NL", "DE")'),
+      domain: z.string().max(100).optional().describe('Domain code filter'),
     },
     async (input) => {
       try {
