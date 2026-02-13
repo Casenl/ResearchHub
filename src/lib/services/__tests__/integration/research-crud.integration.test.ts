@@ -82,7 +82,7 @@ describe('research-crud-service (integration)', () => {
 
     expect(result).not.toBeNull();
     expect(result!.id).toBe(state.researchId);
-    expect(result!.title).toContain(TEST_PREFIX);
+    expect(result!.title).toContain('_mcptest_');
   });
 
   it('updates the seeded research', async () => {
