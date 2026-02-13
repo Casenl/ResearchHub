@@ -18,6 +18,7 @@ interface BasicInfoSectionProps {
   onDescriptionChange: (value: string) => void;
   category: ContextDocumentCategory | "";
   onCategoryChange: (value: ContextDocumentCategory) => void;
+  errors?: Record<string, string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -31,6 +32,7 @@ export function BasicInfoSection({
   onDescriptionChange,
   category,
   onCategoryChange,
+  errors = {},
 }: BasicInfoSectionProps): React.JSX.Element {
   return (
     <Card>
@@ -51,7 +53,9 @@ export function BasicInfoSection({
             value={title}
             onChange={(e) => onTitleChange(e.target.value)}
             required
+            className={errors.title ? "border-red-500" : ""}
           />
+          {errors.title && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.title}</p>}
         </div>
 
         <div>
@@ -98,6 +102,7 @@ export function BasicInfoSection({
               </option>
             ))}
           </select>
+          {errors.category && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{errors.category}</p>}
         </div>
       </CardContent>
     </Card>

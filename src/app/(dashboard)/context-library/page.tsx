@@ -7,6 +7,7 @@ import { Upload, FolderOpen, Loader2 } from "lucide-react";
 import { isExpired, isExpiringSoon } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorBanner } from "@/components/shared/error-banner";
 import { useContextDocuments } from "@/hooks/use-context-documents";
 
 import { DocumentFilterBar } from "./_components/document-filter-bar";
@@ -20,7 +21,7 @@ import type { ValidityFilter } from "./_components/document-filter-bar";
 // ---------------------------------------------------------------------------
 
 export default function ContextLibraryPage(): React.JSX.Element {
-  const { data: documents, isLoading } = useContextDocuments();
+  const { data: documents, isLoading, error } = useContextDocuments();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategories, setSelectedCategories] = useState<
     ContextDocumentCategory[]
@@ -122,6 +123,9 @@ export default function ContextLibraryPage(): React.JSX.Element {
 
   return (
     <div className="space-y-6">
+      {/* Error state */}
+      {error && <ErrorBanner message="Failed to load context documents. Please try again." />}
+
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { COMPETITOR_TYPE_LABELS } from "@/lib/constants";
 import { useMarkets } from "@/hooks/use-taxonomy";
 import { useCreateCompetitor } from "@/hooks/use-competitors";
+import { useGlobalToast } from "@/hooks/use-global-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,8 +25,10 @@ export default function NewCompetitorPage(): React.JSX.Element {
   const router = useRouter();
   const { createCompetitor, isCreating } = useCreateCompetitor();
   const { data: markets } = useMarkets();
+  const { showToast } = useGlobalToast();
 
   // Form state
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [website, setWebsite] = useState("");
@@ -38,12 +41,12 @@ export default function NewCompetitorPage(): React.JSX.Element {
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
-    if (!name.trim()) {
-      alert("Please enter a competitor name.");
-      return;
-    }
-    if (!type) {
-      alert("Please select a competitor type.");
+    const errors: Record<string, string> = {};
+    if (!name.trim()) errors.name = "Company name is required.";
+    if (!type) errors.type = "Please select a competitor type.";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
 
@@ -53,7 +56,7 @@ export default function NewCompetitorPage(): React.JSX.Element {
         description: description.trim(),
         website: website.trim(),
         logo_url: null,
-        type,
+        type: type as CompetitorType,
         headquarters_market_id: hqMarketId,
         employee_range: employeeRange,
         revenue_range: revenueRange,
@@ -63,9 +66,11 @@ export default function NewCompetitorPage(): React.JSX.Element {
         tag_ids: [],
         created_by: "",
       });
+      showToast("Competitor created", "success");
       router.push(`/competitors/${id}`);
     } catch (error) {
       console.error("Failed to create competitor:", error);
+      showToast("Failed to create competitor", "error");
     }
   };
 
@@ -104,9 +109,11 @@ export default function NewCompetitorPage(): React.JSX.Element {
               </label>
               <Input
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => { setName(e.target.value); setFormErrors((prev) => { const { name: _, ...rest } = prev; return rest; }); }}
                 placeholder="e.g. Computacenter"
+                className={formErrors.name ? "border-red-500" : ""}
               />
+              {formErrors.name && <p className="text-xs text-red-600 dark:text-red-400">{formErrors.name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -146,7 +153,7 @@ export default function NewCompetitorPage(): React.JSX.Element {
                   <button
                     key={key}
                     type="button"
-                    onClick={() => setType(key)}
+                    onClick={() => { setType(key); setFormErrors((prev) => { const { type: _, ...rest } = prev; return rest; }); }}
                     className={cn(
                       "inline-flex items-center rounded-full px-3 py-1.5 text-xs font-medium transition-colors",
                       type === key
@@ -158,6 +165,7 @@ export default function NewCompetitorPage(): React.JSX.Element {
                   </button>
                 ))}
               </div>
+              {formErrors.type && <p className="text-xs text-red-600 dark:text-red-400">{formErrors.type}</p>}
             </div>
           </CardContent>
         </Card>

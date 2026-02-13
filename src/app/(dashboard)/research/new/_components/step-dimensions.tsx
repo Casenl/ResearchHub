@@ -21,6 +21,7 @@ export function StepDimensions({
   form,
   onUpdate,
   onToggleArrayItem,
+  errors = {},
 }: WizardStepProps): React.JSX.Element {
   const { data: MARKETS } = useMarkets();
   const { data: DOMAINS } = useDomains();
@@ -52,6 +53,7 @@ export function StepDimensions({
             selectedIds={form.selectedMarketIds}
             onToggle={(id) => onToggleArrayItem?.("selectedMarketIds", id)}
           />
+          {errors.markets && <p className="text-xs text-red-600 dark:text-red-400">{errors.markets}</p>}
           {selectedMarkets.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-2">
               {selectedMarkets.map((m) => (
@@ -77,6 +79,7 @@ export function StepDimensions({
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Select the technology domains to investigate.
           </p>
+          {errors.domains && <p className="text-xs text-red-600 dark:text-red-400">{errors.domains}</p>}
           <div className="grid grid-cols-2 gap-3">
             {DOMAINS.map((domain) => {
               const Icon = DOMAIN_ICONS[domain.id] ?? Shield;

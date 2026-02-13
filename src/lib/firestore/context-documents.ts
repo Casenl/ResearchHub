@@ -12,6 +12,7 @@ import {
   serverTimestamp,
   query,
   orderBy,
+  limit,
   type Unsubscribe,
 } from "firebase/firestore";
 import { getFirestoreDb } from "@/lib/firebase";
@@ -33,7 +34,7 @@ export function subscribeContextDocuments(
   const ref = collection(db, COLLECTION).withConverter(
     contextDocumentConverter
   );
-  const q = query(ref, orderBy("updated_at", "desc"));
+  const q = query(ref, orderBy("updated_at", "desc"), limit(200));
 
   return onSnapshot(
     q,

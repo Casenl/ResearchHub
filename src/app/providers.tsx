@@ -2,11 +2,14 @@
 
 import { AuthProvider } from "@/hooks/use-auth";
 import { ThemeProvider } from "@/hooks/use-theme";
+import { ToastProvider } from "@/components/shared/toast-provider";
 
 export function Providers({ children }: { children: React.ReactNode }): React.JSX.Element {
   return (
     <ThemeProvider>
-      <AuthProvider>{children}</AuthProvider>
+      <ToastProvider>
+        <AuthProvider>{children}</AuthProvider>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

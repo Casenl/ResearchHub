@@ -19,6 +19,7 @@ import type { WizardStepProps } from "./wizard-types";
 export function StepDefine({
   form,
   onUpdate,
+  errors = {},
 }: WizardStepProps): React.JSX.Element {
   return (
     <Card>
@@ -135,12 +136,14 @@ export function StepDefine({
 
         {/* Title */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground">Title</label>
+          <label className="text-sm font-medium text-foreground">Title *</label>
           <Input
             placeholder="e.g. Netherlands Security Market Analysis Q1 2026"
             value={form.title}
             onChange={(e) => onUpdate({ title: e.target.value })}
+            className={errors.title ? "border-red-500" : ""}
           />
+          {errors.title && <p className="text-xs text-red-600 dark:text-red-400">{errors.title}</p>}
         </div>
 
         {/* Description */}

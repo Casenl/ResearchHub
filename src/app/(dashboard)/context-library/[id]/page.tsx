@@ -1,15 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { FileText, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   useContextDocumentById,
   useDeleteContextDocument,
 } from "@/hooks/use-context-documents";
+import { useGlobalToast } from "@/hooks/use-global-toast";
 
 import { BackToLibraryLink } from "../_components/back-to-library-link";
 import { DocumentHeader } from "../_components/document-header";
@@ -27,6 +29,9 @@ export default function ContextDocumentDetailPage(): React.JSX.Element {
 
   const { data: document, isLoading } = useContextDocumentById(id);
   const { deleteContextDocument } = useDeleteContextDocument();
+  const { showToast } = useGlobalToast();
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   if (isLoading) {
     return (
@@ -58,18 +63,21 @@ export default function ContextDocumentDetailPage(): React.JSX.Element {
     );
   }
 
-  const handleDelete = async (): Promise<void> => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete "${document.title}"? This action cannot be undone.`
-      )
-    ) {
-      try {
-        await deleteContextDocument(id);
-        router.push("/context-library");
-      } catch (error) {
-        console.error("Failed to delete context document:", error);
-      }
+  const handleDelete = (): void => {
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async (): Promise<void> => {
+    setIsDeleting(true);
+    try {
+      await deleteContextDocument(id);
+      showToast("Document deleted", "success");
+      router.push("/context-library");
+    } catch (error) {
+      console.error("Failed to delete context document:", error);
+      showToast("Failed to delete document", "error");
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
     }
   };
 
@@ -83,6 +91,17 @@ export default function ContextDocumentDetailPage(): React.JSX.Element {
         <DocumentContent document={document} />
         <DocumentSidebar document={document} />
       </div>
+
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Delete Document"
+        description={`Are you sure you want to delete "${document.title}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        isLoading={isDeleting}
+        onConfirm={confirmDelete}
+      />
     </div>
   );
 }

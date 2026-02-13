@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FileText, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ErrorBanner } from "@/components/shared/error-banner";
 import { useResearchList } from "@/hooks/use-research";
 
 import { useResearchFilters } from "./_components/use-research-filters";
@@ -17,7 +18,7 @@ import { ResearchEmptyState } from "./_components/research-empty-state";
 // ---------------------------------------------------------------------------
 
 export default function ResearchLibraryPage(): React.JSX.Element {
-  const { data: research, isLoading } = useResearchList();
+  const { data: research, isLoading, error } = useResearchList();
   const {
     searchQuery,
     selectedStatuses,
@@ -51,6 +52,9 @@ export default function ResearchLibraryPage(): React.JSX.Element {
 
   return (
     <div className="space-y-6">
+      {/* Error state */}
+      {error && <ErrorBanner message="Failed to load research items. Please try again." />}
+
       {/* Page header */}
       <div className="flex items-end justify-between">
         <div>

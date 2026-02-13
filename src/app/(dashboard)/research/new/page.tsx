@@ -9,6 +9,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCreateResearch } from "@/hooks/use-research";
 import { useAuth } from "@/hooks/use-auth";
+import { useGlobalToast } from "@/hooks/use-global-toast";
 import { useMarkets, useDomains, useSectors } from "@/hooks/use-taxonomy";
 
 import { StepIndicator } from "./_components/step-indicator";
@@ -55,11 +56,13 @@ export default function NewResearchPage(): React.JSX.Element {
   const router = useRouter();
   const { user } = useAuth();
   const { createResearch } = useCreateResearch();
+  const { showToast } = useGlobalToast();
   const { data: allMarkets } = useMarkets();
   const { data: allDomains } = useDomains();
   const { data: allSectors } = useSectors();
   const [currentStep, setCurrentStep] = useState(1);
   const [form, setForm] = useState<WizardFormState>(initialFormState);
+  const [stepErrors, setStepErrors] = useState<Record<string, string>>({});
 
   // ---------------------------------------------------------------------------
   // Form helpers
@@ -90,6 +93,25 @@ export default function NewResearchPage(): React.JSX.Element {
   // ---------------------------------------------------------------------------
 
   const goNext = (): void => {
+    if (currentStep === 1) {
+      const errors: Record<string, string> = {};
+      if (!form.title.trim()) errors.title = "Title is required.";
+      if (Object.keys(errors).length > 0) {
+        setStepErrors(errors);
+        return;
+      }
+      setStepErrors({});
+    }
+    if (currentStep === 2) {
+      const errors: Record<string, string> = {};
+      if (form.selectedMarketIds.length === 0) errors.markets = "Select at least one market.";
+      if (form.selectedDomainIds.length === 0) errors.domains = "Select at least one domain.";
+      if (Object.keys(errors).length > 0) {
+        setStepErrors(errors);
+        return;
+      }
+      setStepErrors({});
+    }
     if (currentStep < TOTAL_STEPS) setCurrentStep((s) => s + 1);
   };
 
@@ -142,8 +164,9 @@ export default function NewResearchPage(): React.JSX.Element {
     } catch (error) {
       console.error("Failed to create research:", error);
       updateForm({ isGenerating: false });
+      showToast("Failed to create research project", "error");
     }
-  }, [updateForm, createResearch, form, user, router, allMarkets, allDomains, allSectors]);
+  }, [updateForm, createResearch, form, user, router, allMarkets, allDomains, allSectors, showToast]);
 
   // ---------------------------------------------------------------------------
   // Render
@@ -168,13 +191,14 @@ export default function NewResearchPage(): React.JSX.Element {
       {/* Step Content */}
       <div className="mb-8">
         {currentStep === 1 && (
-          <StepDefine form={form} onUpdate={updateForm} />
+          <StepDefine form={form} onUpdate={updateForm} errors={stepErrors} />
         )}
         {currentStep === 2 && (
           <StepDimensions
             form={form}
             onUpdate={updateForm}
             onToggleArrayItem={toggleArrayItem}
+            errors={stepErrors}
           />
         )}
         {currentStep === 3 && (

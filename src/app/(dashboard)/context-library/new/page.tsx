@@ -7,6 +7,7 @@ import { Upload, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useCreateContextDocument } from "@/hooks/use-context-documents";
+import { useGlobalToast } from "@/hooks/use-global-toast";
 
 import { BackToLibraryLink } from "../_components/back-to-library-link";
 import { BasicInfoSection } from "../_components/basic-info-section";
@@ -15,7 +16,7 @@ import { DimensionsSection } from "../_components/dimensions-section";
 import { ValidityPeriodSection } from "../_components/validity-period-section";
 import { TagsSection } from "../_components/tags-section";
 
-import type { ContextDocumentCategory } from "@/types";
+import type { ContextDocumentCategory, FileType } from "@/types";
 import type { UploadMode } from "../_components/file-source-section";
 
 // ---------------------------------------------------------------------------
@@ -25,8 +26,10 @@ import type { UploadMode } from "../_components/file-source-section";
 export default function UploadContextDocumentPage(): React.JSX.Element {
   const router = useRouter();
   const { createContextDocument, isCreating } = useCreateContextDocument();
+  const { showToast } = useGlobalToast();
 
   // Form state
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState<ContextDocumentCategory | "">("");
@@ -67,23 +70,29 @@ export default function UploadContextDocumentPage(): React.JSX.Element {
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault();
 
-    if (!title.trim()) {
-      alert("Please enter a document title.");
+    const errors: Record<string, string> = {};
+    if (!title.trim()) errors.title = "Document title is required.";
+    if (!category) errors.category = "Please select a category.";
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
       return;
     }
 
-    if (!category) {
-      alert("Please select a category.");
-      return;
-    }
+    // Derive file type from URL extension, fallback to "pdf"
+    const FILE_TYPE_MAP: Record<string, FileType> = { pdf: "pdf", docx: "docx", md: "md" };
+    const ext = externalUrl ? (externalUrl.split(".").pop()?.toLowerCase() ?? "") : "";
+    const derivedFileType: FileType = externalUrl
+      ? (FILE_TYPE_MAP[ext] ?? "url")
+      : "pdf";
 
     try {
       await createContextDocument({
         title: title.trim(),
         description: description.trim(),
-        category,
+        category: category as ContextDocumentCategory,
         file_url: externalUrl || "",
-        file_type: "pdf",
+        file_type: derivedFileType,
         domain_ids: selectedDomains,
         market_ids: selectedMarkets,
         sector_ids: selectedSectors,
@@ -93,9 +102,11 @@ export default function UploadContextDocumentPage(): React.JSX.Element {
         version: 1,
         tag_ids: tags,
       });
+      showToast("Document uploaded", "success");
       router.push("/context-library");
     } catch (error) {
       console.error("Failed to create context document:", error);
+      showToast("Failed to upload document", "error");
     }
   };
 
@@ -118,11 +129,12 @@ export default function UploadContextDocumentPage(): React.JSX.Element {
       <form onSubmit={handleSubmit} className="space-y-6">
         <BasicInfoSection
           title={title}
-          onTitleChange={setTitle}
+          onTitleChange={(v) => { setTitle(v); setFormErrors((prev) => { const { title: _, ...rest } = prev; return rest; }); }}
           description={description}
           onDescriptionChange={setDescription}
           category={category}
-          onCategoryChange={setCategory}
+          onCategoryChange={(v) => { setCategory(v); setFormErrors((prev) => { const { category: _, ...rest } = prev; return rest; }); }}
+          errors={formErrors}
         />
 
         <FileSourceSection

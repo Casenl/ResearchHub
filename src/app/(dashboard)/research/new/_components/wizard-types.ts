@@ -65,6 +65,7 @@ export interface WizardStepProps {
   form: WizardFormState;
   onUpdate: (updates: Partial<WizardFormState>) => void;
   onToggleArrayItem?: (field: ArrayToggleField, id: string) => void;
+  errors?: Record<string, string>;
 }
 
 /** Local type matching the actual runtime shape from @/data/sectors. */

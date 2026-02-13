@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { DimensionTags } from "@/components/shared/dimension-tags";
 import { DashboardStats } from "@/components/shared/dashboard-stats";
+import { ErrorBanner } from "@/components/shared/error-banner";
 import { useResearchList } from "@/hooks/use-research";
 import { useUsers } from "@/hooks/use-users";
 
@@ -38,7 +39,7 @@ const OUTPUT_FORMAT_DISPLAY: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 export default function DashboardPage(): React.JSX.Element {
-  const { data: research } = useResearchList();
+  const { data: research, error } = useResearchList();
   const { data: users } = useUsers();
 
   const recentPublished = useMemo(
@@ -56,6 +57,9 @@ export default function DashboardPage(): React.JSX.Element {
 
   return (
     <div className="space-y-8">
+      {/* Error state */}
+      {error && <ErrorBanner message="Failed to load dashboard data. Please try again." />}
+
       {/* Page header */}
       <div className="flex items-end justify-between">
         <div>

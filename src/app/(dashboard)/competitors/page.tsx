@@ -6,6 +6,7 @@ import { Plus, Swords, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorBanner } from "@/components/shared/error-banner";
 import { useCompetitors } from "@/hooks/use-competitors";
 
 import { CompetitorFilterBar } from "./_components/competitor-filter-bar";
@@ -18,7 +19,7 @@ import type { CompetitorType } from "@/types";
 // ---------------------------------------------------------------------------
 
 export default function CompetitorsPage(): React.JSX.Element {
-  const { data: competitors, isLoading } = useCompetitors();
+  const { data: competitors, isLoading, error } = useCompetitors();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<CompetitorType[]>([]);
   const [selectedDomains, setSelectedDomains] = useState<string[]>([]);
@@ -93,6 +94,9 @@ export default function CompetitorsPage(): React.JSX.Element {
 
   return (
     <div className="space-y-6">
+      {/* Error state */}
+      {error && <ErrorBanner message="Failed to load competitors. Please try again." />}
+
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>
