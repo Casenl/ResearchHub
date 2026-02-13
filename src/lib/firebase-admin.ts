@@ -23,8 +23,8 @@ export function getAdminApp(): AdminApp {
     } else {
       const keyPath = process.env.FIREBASE_ADMIN_SDK_PATH;
       if (keyPath) {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const resolvedPath = path.resolve(process.cwd(), keyPath);
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const serviceAccount = require(resolvedPath);
         _adminApp = initializeApp({
           credential: cert(serviceAccount),
