@@ -41,7 +41,7 @@ export const CreateResearchSchema = z.object({
 export const UpdateResearchSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   description: z.string().max(5000).optional(),
-  status: ResearchStatusSchema.optional(),
+  // status intentionally excluded — use workflow transitions, not direct updates
   findings: z.string().optional(),
   synthesis: z.string().optional(),
   assumptions: z.array(z.string()).optional(),

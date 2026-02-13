@@ -55,8 +55,12 @@ export async function uploadResearchFile(params: {
     await file.save(params.file_buffer, {
       metadata: { contentType: params.file_type },
     });
-    await file.makePublic();
-    const downloadUrl = `https://storage.googleapis.com/${bucket.name}/${storagePath}`;
+
+    // Generate signed URL instead of making file public
+    const [downloadUrl] = await file.getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
 
     // Create Firestore record
     const attachment: Omit<FileAttachment, 'id'> = {

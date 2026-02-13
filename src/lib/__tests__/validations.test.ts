@@ -95,9 +95,13 @@ describe('UpdateResearchSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('rejects invalid status value', () => {
-    const result = UpdateResearchSchema.safeParse({ status: 'deleted' });
-    expect(result.success).toBe(false);
+  it('strips status field (status changes go through workflow transitions)', () => {
+    const result = UpdateResearchSchema.safeParse({ status: 'published', title: 'Test' });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data).not.toHaveProperty('status');
+      expect(result.data.title).toBe('Test');
+    }
   });
 });
 

@@ -25,6 +25,7 @@ const mockBucket = {
       uploadedFiles.push({ path, data, metadata: options?.metadata });
     },
     makePublic: async () => {},
+    getSignedUrl: async () => [`https://storage.googleapis.com/test-bucket/${path}?signed=true`],
   }),
 };
 

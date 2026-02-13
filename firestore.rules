@@ -13,6 +13,11 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
     }
 
+    function isResearcherOrAdmin() {
+      return isAuthenticated()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'researcher'];
+    }
+
     function isOwner(userId) {
       return isAuthenticated() && request.auth.uid == userId;
     }
@@ -21,7 +26,7 @@ service cloud.firestore {
 
     match /research/{researchId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      allow create: if isResearcherOrAdmin();
       allow update: if isAuthenticated()
         && (resource.data.author_id == request.auth.uid || isAdmin());
       allow delete: if isAdmin();
@@ -29,7 +34,7 @@ service cloud.firestore {
       // Notebooks sub-collection
       match /notebooks/{notebookId} {
         allow read: if isAuthenticated();
-        allow write: if isAuthenticated();
+        allow write: if isResearcherOrAdmin();
       }
     }
 
@@ -37,8 +42,8 @@ service cloud.firestore {
 
     match /context-documents/{docId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
-      allow update: if isAuthenticated();
+      allow create: if isResearcherOrAdmin();
+      allow update: if isResearcherOrAdmin();
       allow delete: if isAdmin();
     }
 
@@ -52,7 +57,7 @@ service cloud.firestore {
 
     match /file-attachments/{attachmentId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated();
+      allow create: if isResearcherOrAdmin();
       allow update, delete: if isAdmin();
     }
 
@@ -78,6 +83,15 @@ service cloud.firestore {
       allow create: if isOwner(userId);
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if false;
+    }
+
+    // ============ Competitors ============
+
+    match /competitors/{competitorId} {
+      allow read: if isAuthenticated();
+      allow create: if isResearcherOrAdmin();
+      allow update: if isResearcherOrAdmin();
+      allow delete: if isAdmin();
     }
 
     // ============ Admin Collections ============

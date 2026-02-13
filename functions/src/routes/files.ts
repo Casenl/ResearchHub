@@ -3,8 +3,12 @@ import { ZodError } from 'zod';
 import { AuthenticatedRequest, requirePermission } from '../middleware/auth';
 import { UploadFileSchema, MAX_FILE_SIZE_BYTES } from '../schemas';
 import { db, storage } from '../lib/admin';
+import { writeLimiter } from '../middleware/rate-limit';
 
 export const filesRouter = Router();
+
+/** Signed URL expiration: 7 days (in milliseconds). */
+const SIGNED_URL_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** Check file content matches declared MIME type via magic bytes. */
 function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
@@ -17,9 +21,10 @@ function validateMagicBytes(buffer: Buffer, mimeType: string): boolean {
   return sig.every((byte, i) => buffer.length > i && buffer[i] === byte);
 }
 
-// POST /:id/files — Upload a file attachment
+// POST /:id/files — Upload a file attachment (stricter rate limit)
 filesRouter.post(
   '/:id/files',
+  writeLimiter,
   requirePermission('read_write', 'admin'),
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
@@ -47,8 +52,12 @@ filesRouter.post(
       const bucket = storage().bucket();
       const file = bucket.file(storagePath);
       await file.save(buffer, { metadata: { contentType: parsed.file_type } });
-      await file.makePublic();
-      const downloadUrl = `https://storage.googleapis.com/${bucket.name}/${storagePath}`;
+
+      // Generate signed URL instead of making file public
+      const [downloadUrl] = await file.getSignedUrl({
+        action: 'read',
+        expires: Date.now() + SIGNED_URL_EXPIRY_MS,
+      });
 
       // Create Firestore record
       const attachment = {
