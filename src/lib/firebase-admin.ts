@@ -3,6 +3,7 @@
  * Only import from Cloud Functions, MCP server, or scripts. Never from client components.
  */
 
+import path from 'path';
 import type { App as AdminApp } from 'firebase-admin/app';
 import type { Firestore as AdminFirestore } from 'firebase-admin/firestore';
 import type { Storage as AdminStorage } from 'firebase-admin/storage';
@@ -15,21 +16,22 @@ let _adminStorage: AdminStorage | undefined;
 export function getAdminApp(): AdminApp {
   if (!_adminApp) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const admin = require('firebase-admin');
-    const apps = admin.getApps();
+    const { getApps, initializeApp, cert } = require('firebase-admin/app');
+    const apps = getApps();
     if (apps.length > 0) {
       _adminApp = apps[0];
     } else {
       const keyPath = process.env.FIREBASE_ADMIN_SDK_PATH;
       if (keyPath) {
         // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const serviceAccount = require(keyPath);
-        _adminApp = admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount),
+        const resolvedPath = path.resolve(process.cwd(), keyPath);
+        const serviceAccount = require(resolvedPath);
+        _adminApp = initializeApp({
+          credential: cert(serviceAccount),
           storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET ?? '',
         });
       } else {
-        _adminApp = admin.initializeApp();
+        _adminApp = initializeApp();
       }
     }
   }

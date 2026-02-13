@@ -1,6 +1,9 @@
 import { getAdminFirestore } from '@/lib/firebase-admin';
 import { CreateResearchSchema, UpdateResearchSchema } from '@/lib/validations';
 import { createAuditLog } from './audit-service';
+import { MARKETS } from '@/data/markets';
+import { DOMAINS } from '@/data/domains';
+import { SECTORS } from '@/data/sectors';
 import type { Research } from '@/types';
 
 type ResearchWithId = Research & { id: string };
@@ -33,9 +36,15 @@ export async function createResearch(
     author_id: actorId,
     reviewer_id: null,
     dimensions: {
-      markets: [],
-      domains: [],
-      sectors: [],
+      markets: validated.dimensions.market_ids
+        .map(id => MARKETS.find(m => m.id === id))
+        .filter((m): m is NonNullable<typeof m> => m != null),
+      domains: validated.dimensions.domain_ids
+        .map(id => DOMAINS.find(d => d.id === id))
+        .filter((d): d is NonNullable<typeof d> => d != null),
+      sectors: validated.dimensions.sector_ids
+        .map(id => SECTORS.find(s => s.id === id))
+        .filter((s): s is NonNullable<typeof s> => s != null),
     },
     tags: [],
     context_documents: [],

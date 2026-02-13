@@ -60,17 +60,31 @@ export function registerSourceTools(server: McpServer): void {
 
   server.tool(
     'upload_file',
-    'Upload a file to a research entry',
+    'Upload a file to a research entry. Provide either source_url (preferred for large files) or file_data (base64).',
     {
       research_id: z.string(),
       file_name: z.string(),
       file_type: z.string(),
-      file_data: z.string().describe('Base64-encoded file content'),
+      file_data: z.string().describe('Base64-encoded file content').optional(),
+      source_url: z.string().url().describe('URL to download file from (alternative to file_data)').optional(),
       source_id: z.string().optional(),
     },
     async (input) => {
       try {
-        const fileBuffer = Buffer.from(input.file_data, 'base64');
+        let fileBuffer: Buffer;
+
+        if (input.source_url) {
+          const response = await fetch(input.source_url, { redirect: 'follow' });
+          if (!response.ok) {
+            return errorResponse(`Download failed: HTTP ${response.status} from ${input.source_url}`);
+          }
+          fileBuffer = Buffer.from(await response.arrayBuffer());
+        } else if (input.file_data) {
+          fileBuffer = Buffer.from(input.file_data, 'base64');
+        } else {
+          return errorResponse('Provide either source_url or file_data');
+        }
+
         const attachment = await uploadResearchFile({
           research_id: input.research_id,
           file_name: input.file_name,

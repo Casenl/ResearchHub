@@ -42,9 +42,20 @@ export async function addSource(
       const notebooks = data.notebooks ?? [];
       const nbIndex = notebooks.findIndex((nb: { id: string }) => nb.id === notebookId);
 
-      if (nbIndex === -1) throw new Error(`Notebook ${notebookId} not found in research ${researchId}`);
-
-      notebooks[nbIndex].sources = [...(notebooks[nbIndex].sources ?? []), source];
+      if (nbIndex === -1) {
+        // Auto-create the notebook with the source
+        notebooks.push({
+          id: notebookId,
+          type: 'market_regulation',
+          research_tool: validated.discovered_by,
+          discovery_prompt: '',
+          analysis_prompts: [],
+          sources: [source],
+          findings: '',
+        });
+      } else {
+        notebooks[nbIndex].sources = [...(notebooks[nbIndex].sources ?? []), source];
+      }
       await researchRef.update({ notebooks, updated_at: new Date().toISOString() });
     } else {
       // Sub-collection approach
