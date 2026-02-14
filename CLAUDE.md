@@ -30,7 +30,8 @@ cd functions
 npm test              # Run unit tests (mocked Firestore/Storage)
 npm run test:integration  # Run integration tests (hits staging)
 
-# Deployment
+# Deployment (automated via CD — see Branch Strategy)
+# Manual deploy commands (for one-off or debugging):
 npm run deploy:staging:rules   # Deploy Firestore + Storage rules to staging
 firebase deploy --only hosting # Deploy Next.js app to Firebase Hosting
 cd functions
@@ -300,7 +301,7 @@ Credentials are stored in `.env.local` (not committed).
 | `./marketintelligence-hub-firebase-adminsdk-fbsvc-6dc224a6ce.json` | Production | Firebase MCP server (`.mcp.json`) |
 | `./marketintelligence-hub-staging-sa-key.json` | Staging | Integration tests |
 
-Both files are listed in `.gitignore` and must **never** be committed. For CI, the staging key is stored as GitHub secret `STAGING_SA_KEY_BASE64` (base64-encoded).
+Both files are listed in `.gitignore` and must **never** be committed. For CI/CD, keys are stored as GitHub secrets: `STAGING_SA_KEY_BASE64` (integration tests + staging deploy) and `PROD_SA_KEY_BASE64` (production deploy). Both are base64-encoded.
 
 ### Cloud Functions Environment
 
@@ -467,7 +468,7 @@ Follow the global post-push workflow in `~/.claude/docs/ci-cd.md`. Project-speci
 |---------|-----------|------------|
 | Integration tests skipped | Branch not in CI gate | Integration tests run on `main`, `staging`, and PRs. Other branches are skipped. |
 | CD workflow not triggered | CI failed or wrong branch | CD uses `workflow_run` — only triggers when CI **succeeds** on `staging` or `main`. Check CI status first. |
-| CD deploy auth failure | Missing or expired SA key secret | Verify `STAGING_SA_KEY_BASE64` / `PROD_SA_KEY_BASE64` GitHub secrets are set and the SA has `Firebase Admin` + `Cloud Functions Developer` + `Service Account User` roles. |
+| CD deploy auth failure | Missing or expired SA key secret | Verify `STAGING_SA_KEY_BASE64` / `PROD_SA_KEY_BASE64` GitHub secrets are set and the SA has `roles/firebase.admin` + `roles/serviceusage.serviceUsageConsumer` + scoped `roles/iam.serviceAccountUser` (see CD IAM Setup). |
 | `auth/argument-error` on Google sign-in | `initializeAuth()` called without `popupRedirectResolver` | Always pass `browserPopupRedirectResolver` when using `initializeAuth()`. See `docs/code-patterns.md` for details. Validated by `firebase-config.test.ts` unit tests. |
 | 404 on production for a route that works locally | Page file created locally but never committed to git | `routes.test.ts` verifies all expected routes have a `page.tsx` on disk. Fails in CI when uncommitted. **When adding a new route, add it to `EXPECTED_ROUTES` in `src/lib/__tests__/routes.test.ts`.** |
 | ESLint warning on push | Unused import/variable or missing dark variant | CI lint step runs with `--max-warnings 0`. Fix locally before pushing. |
