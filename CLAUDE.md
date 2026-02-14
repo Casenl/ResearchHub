@@ -1,7 +1,5 @@
 # CLAUDE.md
 
-<!-- Last verified: CD pipeline test 2026-02-14 -->
-
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
@@ -404,6 +402,7 @@ gcloud iam service-accounts add-iam-policy-binding <PROJECT_ID>@appspot.gservice
 | Role | Member (service agent) | Purpose |
 |------|----------------------|---------|
 | `roles/iam.serviceAccountTokenCreator` | `service-<PROJECT_NUMBER>@gcp-sa-pubsub.iam.gserviceaccount.com` | Pub/Sub token creation |
+| `roles/iam.serviceAccountTokenCreator` | `<PROJECT_NUMBER>-compute@developer.gserviceaccount.com` | `getSignedUrl()` in Cloud Functions v2 (signBlob) |
 | `roles/run.invoker` | `<PROJECT_NUMBER>-compute@developer.gserviceaccount.com` | Cloud Run invocation |
 | `roles/eventarc.eventReceiver` | `<PROJECT_NUMBER>-compute@developer.gserviceaccount.com` | Eventarc triggers |
 
@@ -431,6 +430,7 @@ gcloud projects add-iam-policy-binding marketintelligence-hub --member="serviceA
 
 # 3. Service agent bindings (may already exist if functions were deployed manually)
 gcloud projects add-iam-policy-binding marketintelligence-hub --member=serviceAccount:service-35359237101@gcp-sa-pubsub.iam.gserviceaccount.com --role=roles/iam.serviceAccountTokenCreator
+gcloud projects add-iam-policy-binding marketintelligence-hub --member=serviceAccount:35359237101-compute@developer.gserviceaccount.com --role=roles/iam.serviceAccountTokenCreator
 gcloud projects add-iam-policy-binding marketintelligence-hub --member=serviceAccount:35359237101-compute@developer.gserviceaccount.com --role=roles/run.invoker
 gcloud projects add-iam-policy-binding marketintelligence-hub --member=serviceAccount:35359237101-compute@developer.gserviceaccount.com --role=roles/eventarc.eventReceiver
 
@@ -472,6 +472,8 @@ Follow the global post-push workflow in `~/.claude/docs/ci-cd.md`. Project-speci
 | 404 on production for a route that works locally | Page file created locally but never committed to git | `routes.test.ts` verifies all expected routes have a `page.tsx` on disk. Fails in CI when uncommitted. **When adding a new route, add it to `EXPECTED_ROUTES` in `src/lib/__tests__/routes.test.ts`.** |
 | ESLint warning on push | Unused import/variable or missing dark variant | CI lint step runs with `--max-warnings 0`. Fix locally before pushing. |
 | `Invalid time value` on research detail | MCP or API inserted empty/invalid date string (e.g. `publication_date: ""`) | All date fields use ISO validation in Zod schemas (`z.string().date()` / `z.string().datetime()`). Frontend `formatDate()` and `getRelativeTime()` return fallback for invalid input. When adding new date fields, always validate at the schema layer. |
+| CD deploy: `Permission denied while using the Eventarc Service Agent` | First 2nd Gen function deploy on a project; service agent permissions not yet propagated | Re-run the workflow after a few minutes. Verify `roles/eventarc.serviceAgent` exists for `service-<PROJECT_NUMBER>@gcp-sa-eventarc.iam.gserviceaccount.com`. |
+| File upload 500s after CD deploy | Cloud Functions v2 uses Compute Engine default SA which lacks `signBlob` | Grant `roles/iam.serviceAccountTokenCreator` to `<PROJECT_NUMBER>-compute@developer.gserviceaccount.com` on the project (required for `getSignedUrl()`). |
 
 ## Maintenance
 
