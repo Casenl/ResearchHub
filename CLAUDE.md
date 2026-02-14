@@ -325,6 +325,20 @@ To test against staging locally:
 
 Files: `.env.staging.local` (staging config, not committed), `.env.local.prod.bak` (backup, not committed).
 
+## Branch Strategy
+
+```
+feature/xyz  -->  PR to staging  -->  PR to main
+                  (auto-deploy       (auto-deploy
+                   to staging)        to production)
+```
+
+| Branch | Environment | Firebase project |
+|--------|-------------|-----------------|
+| `main` | Production | `marketintelligence-hub` |
+| `staging` | Staging | `marketintelligence-hub-staging` |
+| Feature branches | N/A | No deploy |
+
 ## CI Pipeline
 
 GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR:
@@ -338,7 +352,23 @@ GitHub Actions workflow (`.github/workflows/ci.yml`) runs on every push and PR:
 | `functions-integration` | Cloud Functions integration tests (staging) | `functions-tests`, `functions-build` |
 | `mcp-integration` | MCP service layer integration tests (staging) | `unit-tests` |
 
-The integration jobs only run on `main` and PRs. They require the `STAGING_SA_KEY_BASE64` GitHub secret.
+The integration jobs only run on `main`, `staging`, and PRs. They require the `STAGING_SA_KEY_BASE64` GitHub secret.
+
+## CD Pipeline
+
+Auto-deploy workflows trigger after CI passes via `workflow_run`:
+
+| Workflow | File | Trigger | Target |
+|----------|------|---------|--------|
+| CD — Deploy to Staging | `deploy-staging.yml` | CI passes on `staging` | `marketintelligence-hub-staging` |
+| CD — Deploy to Production | `deploy-production.yml` | CI passes on `main` | `marketintelligence-hub` |
+
+Both workflows deploy: Firestore rules, Storage rules, and Cloud Functions. They authenticate using `GOOGLE_APPLICATION_CREDENTIALS` with a base64-decoded service account key.
+
+| Secret | Project | Required by |
+|--------|---------|-------------|
+| `STAGING_SA_KEY_BASE64` | Staging | CI integration tests + CD staging deploy |
+| `PROD_SA_KEY_BASE64` | Production | CD production deploy |
 
 ## MCP Servers
 
@@ -367,7 +397,9 @@ Follow the global post-push workflow in `~/.claude/docs/ci-cd.md`. Project-speci
 
 | Pattern | Root cause | Prevention |
 |---------|-----------|------------|
-| Integration tests skipped | Branch not in CI gate | Integration tests run on `main`, PRs, and the current feature branch (`if:` condition in CI). Other branches are skipped. |
+| Integration tests skipped | Branch not in CI gate | Integration tests run on `main`, `staging`, and PRs. Other branches are skipped. |
+| CD workflow not triggered | CI failed or wrong branch | CD uses `workflow_run` — only triggers when CI **succeeds** on `staging` or `main`. Check CI status first. |
+| CD deploy auth failure | Missing or expired SA key secret | Verify `STAGING_SA_KEY_BASE64` / `PROD_SA_KEY_BASE64` GitHub secrets are set and the SA has `Firebase Admin` + `Cloud Functions Developer` + `Service Account User` roles. |
 | `auth/argument-error` on Google sign-in | `initializeAuth()` called without `popupRedirectResolver` | Always pass `browserPopupRedirectResolver` when using `initializeAuth()`. See `docs/code-patterns.md` for details. Validated by `firebase-config.test.ts` unit tests. |
 | 404 on production for a route that works locally | Page file created locally but never committed to git | `routes.test.ts` verifies all expected routes have a `page.tsx` on disk. Fails in CI when uncommitted. **When adding a new route, add it to `EXPECTED_ROUTES` in `src/lib/__tests__/routes.test.ts`.** |
 | ESLint warning on push | Unused import/variable or missing dark variant | CI lint step runs with `--max-warnings 0`. Fix locally before pushing. |
@@ -385,7 +417,9 @@ When to update these docs:
 | New Firestore collection | `docs/api-reference.md` collection paths |
 | Test infrastructure changed | `docs/testing.md` |
 | CI job added/changed | CI Pipeline table in this file |
+| CD workflow added/changed | CD Pipeline table + Branch Strategy in this file |
+| Branch strategy changed | Branch Strategy section in this file + `~/.claude/docs/git-workflow.md` |
 | New Firebase pattern or gotcha | `docs/code-patterns.md` |
-| CI failure caused by preventable mistake | Known CI Failure Patterns table above |
+| CI/CD failure caused by preventable mistake | Known CI Failure Patterns table above |
 
 The global Self-Improving Guidelines (`~/.claude/CLAUDE.md`) also apply: when fixing a bug reveals a documentation gap, propose the specific update.

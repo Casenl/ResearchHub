@@ -161,7 +161,7 @@ jobs:
     name: Functions Integration Tests
     runs-on: ubuntu-latest
     needs: [functions-tests, functions-build]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude/itq-market-intelligence-hub-T88by' || github.event_name == 'pull_request'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.event_name == 'pull_request'
     timeout-minutes: 5
 
     steps:
@@ -195,7 +195,7 @@ jobs:
     name: MCP Integration Tests
     runs-on: ubuntu-latest
     needs: [unit-tests]
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/claude/itq-market-intelligence-hub-T88by' || github.event_name == 'pull_request'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/staging' || github.event_name == 'pull_request'
     timeout-minutes: 5
 
     steps:
