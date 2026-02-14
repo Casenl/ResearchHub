@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+<!-- Last verified: CD pipeline test 2026-02-14 -->
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
