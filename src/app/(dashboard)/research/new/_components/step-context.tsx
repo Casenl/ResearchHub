@@ -1,10 +1,11 @@
 import React from "react";
-import { Check, Calendar } from "lucide-react";
+import { Check, Calendar, Scale } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useLegislationByDimensions } from "@/hooks/use-legislation";
 
 import {
   MOCK_CONTEXT_DOCUMENTS,
@@ -22,21 +23,67 @@ export function StepContext({
   onUpdate,
   onToggleArrayItem,
 }: WizardStepProps): React.JSX.Element {
+  const { data: suggestedLegislation } = useLegislationByDimensions(
+    form.selectedMarketIds,
+    form.selectedSectorIds
+  );
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Context & Schedule</CardTitle>
       </CardHeader>
       <CardContent className="space-y-8">
+        {/* Suggested Legislation */}
+        {suggestedLegislation.length > 0 && (
+          <div className="rounded-lg border border-blue-200 bg-blue-50/50 p-4 dark:border-blue-800 dark:bg-blue-950/30">
+            <div className="mb-2 flex items-center gap-2 text-sm font-medium text-blue-800 dark:text-blue-200">
+              <Scale className="h-4 w-4" />
+              Relevant Legislation
+            </div>
+            <p className="mb-3 text-xs text-blue-700 dark:text-blue-300">
+              Based on your selected markets and sectors, the following
+              legislation may be relevant to this research.
+            </p>
+            <div className="space-y-1.5">
+              {suggestedLegislation.map((leg) => (
+                <div
+                  key={leg.id}
+                  className="flex items-center justify-between rounded-md bg-background/80 px-3 py-2 text-sm"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium text-foreground">
+                      {leg.name}
+                    </span>
+                    <Badge variant="outline" className="text-xs capitalize">
+                      {leg.scope}
+                    </Badge>
+                  </div>
+                  {leg.url && (
+                    <a
+                      href={leg.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                    >
+                      View
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Context Library Documents */}
         <div className="space-y-3">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="text-sm font-medium text-foreground">
             Context Library Documents
           </label>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-muted-foreground">
             Select documents to provide context for this research.
           </p>
-          <div className="space-y-2 rounded-md border border-gray-200 dark:border-gray-700 p-3">
+          <div className="space-y-2 rounded-md border border-border p-3">
             {MOCK_CONTEXT_DOCUMENTS.map((doc) => {
               const isSelected = form.selectedContextDocIds.includes(doc.id);
               return (
@@ -48,7 +95,7 @@ export function StepContext({
                   }
                   className={cn(
                     "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-left transition-colors",
-                    isSelected ? "bg-blue-50 dark:bg-blue-950" : "hover:bg-gray-50 dark:hover:bg-gray-800"
+                    isSelected ? "bg-blue-50 dark:bg-blue-950" : "hover:bg-accent"
                   )}
                 >
                   <div
@@ -56,7 +103,7 @@ export function StepContext({
                       "flex h-5 w-5 shrink-0 items-center justify-center rounded border-2 transition-colors",
                       isSelected
                         ? "border-blue-600 bg-blue-600 dark:border-blue-500 dark:bg-blue-500"
-                        : "border-gray-300 dark:border-gray-600"
+                        : "border-input"
                     )}
                   >
                     {isSelected && (
@@ -64,7 +111,7 @@ export function StepContext({
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <span className="block text-sm font-medium text-gray-900 dark:text-gray-100">
+                    <span className="block text-sm font-medium text-foreground">
                       {doc.title}
                     </span>
                   </div>
@@ -79,7 +126,7 @@ export function StepContext({
 
         {/* Refresh Schedule */}
         <div className="space-y-3">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label className="text-sm font-medium text-foreground">
             Refresh Schedule
           </label>
           <div className="flex gap-3">
@@ -98,7 +145,7 @@ export function StepContext({
                   "flex items-center gap-2 rounded-md border px-4 py-2.5 text-sm font-medium transition-colors",
                   form.refreshSchedule === opt.value
                     ? "border-blue-600 bg-blue-50 text-blue-800 dark:border-blue-500 dark:bg-blue-950 dark:text-blue-200"
-                    : "border-gray-200 text-gray-600 hover:border-gray-300 dark:border-gray-700 dark:text-gray-400 dark:hover:border-gray-600"
+                    : "border-border text-muted-foreground hover:border-foreground/30"
                 )}
               >
                 <Calendar
@@ -106,7 +153,7 @@ export function StepContext({
                     "h-4 w-4",
                     form.refreshSchedule === opt.value
                       ? "text-blue-600 dark:text-blue-400"
-                      : "text-gray-400 dark:text-gray-500"
+                      : "text-muted-foreground"
                   )}
                 />
                 {opt.label}
@@ -117,7 +164,7 @@ export function StepContext({
 
         {/* Deadline */}
         <div className="space-y-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Deadline</label>
+          <label className="text-sm font-medium text-foreground">Deadline</label>
           <Input
             type="date"
             value={form.deadline}
@@ -128,7 +175,7 @@ export function StepContext({
         {/* Requester */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label className="text-sm font-medium text-foreground">
               Requester Name
             </label>
             <Input
@@ -137,7 +184,7 @@ export function StepContext({
             />
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
+            <label className="text-sm font-medium text-foreground">Role</label>
             <Input
               value={form.requesterRole}
               onChange={(e) => onUpdate({ requesterRole: e.target.value })}

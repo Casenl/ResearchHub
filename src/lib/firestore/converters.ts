@@ -15,6 +15,7 @@ import type {
   Research,
   ContextDocument,
   Competitor,
+  Legislation,
   User,
   PromptTemplate,
   AIToolProfile,
@@ -172,6 +173,29 @@ export const competitorConverter: FirestoreDataConverter<Competitor> =
     positions: data.positions ?? [],
     events: data.events ?? [],
     tag_ids: data.tag_ids ?? [],
+    created_by: data.created_by ?? "",
+    created_at: timestampToISO(data.created_at),
+    updated_at: timestampToISO(data.updated_at),
+  }));
+
+// -----------------------------------------------------------------------------
+// Legislation converter
+// -----------------------------------------------------------------------------
+
+export const legislationConverter: FirestoreDataConverter<Legislation> =
+  createConverter<Legislation>((id, data) => ({
+    id,
+    name: data.name ?? "",
+    description: data.description ?? "",
+    market_ids: data.market_ids ?? [],
+    sector_ids: data.sector_ids ?? [],
+    scope: data.scope ?? "national",
+    effective_date: data.effective_date ?? "",
+    enforcement_authority: data.enforcement_authority ?? "",
+    compliance_deadline: data.compliance_deadline ?? null,
+    context_document_id: data.context_document_id ?? null,
+    url: data.url ?? null,
+    tags: data.tags ?? [],
     created_by: data.created_by ?? "",
     created_at: timestampToISO(data.created_at),
     updated_at: timestampToISO(data.updated_at),

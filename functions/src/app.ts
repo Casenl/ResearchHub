@@ -8,6 +8,7 @@ import { sourcesRouter } from './routes/sources';
 import { filesRouter } from './routes/files';
 import { intelligenceRouter } from './routes/intelligence';
 import { competitorsRouter } from './routes/competitors';
+import { legislationRouter } from './routes/legislation';
 import { authKeysRouter } from './routes/auth-keys';
 
 const app = express();
@@ -58,6 +59,7 @@ app.use('/research', sourcesRouter);
 app.use('/research', filesRouter);
 app.use('/intelligence', intelligenceRouter);
 app.use('/competitors', competitorsRouter);
+app.use('/legislation', legislationRouter);
 app.use('/auth/keys', authKeysRouter);
 
 export { app };

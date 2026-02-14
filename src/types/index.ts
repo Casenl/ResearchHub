@@ -40,6 +40,8 @@ export type ContextDocumentCategory =
 
 export type FileType = 'pdf' | 'docx' | 'md' | 'url';
 
+export type LegislationScope = 'national' | 'eu' | 'international';
+
 export type CompetitorType = 'msp' | 'vendor_partner' | 'both';
 
 export type CompetitorEventType =
@@ -93,7 +95,8 @@ export type ActivityTargetType =
   | 'prompt_template'
   | 'ai_tool_profile'
   | 'user'
-  | 'taxonomy';
+  | 'taxonomy'
+  | 'legislation';
 
 export type ActivityCategory = 'research' | 'admin' | 'auth' | 'system' | 'api';
 
@@ -363,6 +366,35 @@ export interface Competitor {
   tag_ids: string[];
   created_by: string;
   created_at: string;
+  updated_at: string;
+}
+
+// -----------------------------------------------------------------------------
+// Legislation
+// -----------------------------------------------------------------------------
+
+/** A legislation or regulatory entry cross-referencing markets and sectors. */
+export interface Legislation {
+  id: string;
+  name: string;
+  description: string;
+  market_ids: string[];
+  sector_ids: string[];
+  scope: LegislationScope;
+  /** ISO 8601 date string. */
+  effective_date: string;
+  enforcement_authority: string;
+  /** ISO 8601 date string (null if no deadline). */
+  compliance_deadline: string | null;
+  /** Link to a Context Library document. */
+  context_document_id: string | null;
+  /** Official source URL. */
+  url: string | null;
+  tags: string[];
+  created_by: string;
+  /** ISO 8601 date-time string. */
+  created_at: string;
+  /** ISO 8601 date-time string. */
   updated_at: string;
 }
 

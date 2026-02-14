@@ -213,6 +213,40 @@ export const AddEventSchema = z.object({
 });
 
 // =============================================================================
+// Legislation schemas
+// =============================================================================
+
+const LegislationScopeSchema = z.enum(['national', 'eu', 'international']);
+
+export const CreateLegislationSchema = z.object({
+  name: z.string().min(1).max(300),
+  description: z.string().max(5000).default(''),
+  market_ids: z.array(z.string().max(100)).min(1).max(50),
+  sector_ids: z.array(z.string().max(100)).min(1).max(50),
+  scope: LegislationScopeSchema,
+  effective_date: z.union([z.string().date(), z.string().datetime()]),
+  enforcement_authority: z.string().max(300).default(''),
+  compliance_deadline: z.union([z.string().date(), z.string().datetime()]).nullable().default(null),
+  context_document_id: z.string().max(100).nullable().default(null),
+  url: z.string().url().or(z.literal('')).nullable().default(null),
+  tags: z.array(z.string().max(100)).max(50).default([]),
+});
+
+export const UpdateLegislationSchema = z.object({
+  name: z.string().min(1).max(300).optional(),
+  description: z.string().max(5000).optional(),
+  market_ids: z.array(z.string().max(100)).min(1).max(50).optional(),
+  sector_ids: z.array(z.string().max(100)).min(1).max(50).optional(),
+  scope: LegislationScopeSchema.optional(),
+  effective_date: z.union([z.string().date(), z.string().datetime()]).optional(),
+  enforcement_authority: z.string().max(300).optional(),
+  compliance_deadline: z.union([z.string().date(), z.string().datetime()]).nullable().optional(),
+  context_document_id: z.string().max(100).nullable().optional(),
+  url: z.string().url().or(z.literal('')).nullable().optional(),
+  tags: z.array(z.string().max(100)).max(50).optional(),
+});
+
+// =============================================================================
 // Inferred types
 // =============================================================================
 
@@ -228,3 +262,5 @@ export type CreateCompetitorInput = z.infer<typeof CreateCompetitorSchema>;
 export type UpdateCompetitorInput = z.infer<typeof UpdateCompetitorSchema>;
 export type AddPositionInput = z.infer<typeof AddPositionSchema>;
 export type AddEventInput = z.infer<typeof AddEventSchema>;
+export type CreateLegislationInput = z.infer<typeof CreateLegislationSchema>;
+export type UpdateLegislationInput = z.infer<typeof UpdateLegislationSchema>;

@@ -22,6 +22,7 @@ import {
   BarChart3,
   KeyRound,
   ClipboardCheck,
+  Scale,
   Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -67,6 +68,7 @@ const navigation: NavSection[] = [
     adminOnly: true,
     items: [
       { label: "Context Rules", href: "/admin/context-rules", icon: ShieldCheck },
+      { label: "Legislation", href: "/admin/legislation", icon: Scale },
       { label: "Users", href: "/admin/users", icon: Users },
       { label: "API Keys", href: "/admin/api-keys", icon: KeyRound },
     ],

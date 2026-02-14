@@ -7,6 +7,9 @@ import {
   CreateSourceSchema,
   ValidateSourceSchema,
   UploadFileSchema,
+  CreateLegislationSchema,
+  UpdateLegislationSchema,
+  QueryLegislationSchema,
 } from '@/lib/validations';
 
 // -----------------------------------------------------------------------------
@@ -405,6 +408,158 @@ describe('Input bounds', () => {
     const result = QueryResearchSchema.safeParse({
       region: 'x'.repeat(101),
     });
+    expect(result.success).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// CreateLegislationSchema
+// -----------------------------------------------------------------------------
+
+describe('CreateLegislationSchema', () => {
+  const validPayload = {
+    name: 'NEN 7510',
+    market_ids: ['market-nl'],
+    sector_ids: ['sector-hc'],
+    scope: 'national' as const,
+    effective_date: '2017-12-01',
+  };
+
+  it('accepts valid payload with required fields', () => {
+    const result = CreateLegislationSchema.safeParse(validPayload);
+    expect(result.success).toBe(true);
+  });
+
+  it('applies default values', () => {
+    const result = CreateLegislationSchema.parse(validPayload);
+    expect(result.description).toBe('');
+    expect(result.enforcement_authority).toBe('');
+    expect(result.compliance_deadline).toBeNull();
+    expect(result.context_document_id).toBeNull();
+    expect(result.url).toBeNull();
+    expect(result.tags).toEqual([]);
+  });
+
+  it('rejects empty name', () => {
+    const result = CreateLegislationSchema.safeParse({
+      ...validPayload,
+      name: '',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects name over 300 characters', () => {
+    const result = CreateLegislationSchema.safeParse({
+      ...validPayload,
+      name: 'a'.repeat(301),
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects invalid scope', () => {
+    const result = CreateLegislationSchema.safeParse({
+      ...validPayload,
+      scope: 'local',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty market_ids', () => {
+    const result = CreateLegislationSchema.safeParse({
+      ...validPayload,
+      market_ids: [],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects empty sector_ids', () => {
+    const result = CreateLegislationSchema.safeParse({
+      ...validPayload,
+      sector_ids: [],
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects invalid date', () => {
+    const result = CreateLegislationSchema.safeParse({
+      ...validPayload,
+      effective_date: 'not-a-date',
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts valid compliance_deadline date', () => {
+    const result = CreateLegislationSchema.safeParse({
+      ...validPayload,
+      compliance_deadline: '2025-06-01',
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts valid URL', () => {
+    const result = CreateLegislationSchema.safeParse({
+      ...validPayload,
+      url: 'https://example.com/legislation',
+    });
+    expect(result.success).toBe(true);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// UpdateLegislationSchema
+// -----------------------------------------------------------------------------
+
+describe('UpdateLegislationSchema', () => {
+  it('accepts partial update with just name', () => {
+    const result = UpdateLegislationSchema.safeParse({ name: 'Updated Name' });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts empty object (all fields optional)', () => {
+    const result = UpdateLegislationSchema.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects empty string name', () => {
+    const result = UpdateLegislationSchema.safeParse({ name: '' });
+    expect(result.success).toBe(false);
+  });
+});
+
+// -----------------------------------------------------------------------------
+// QueryLegislationSchema
+// -----------------------------------------------------------------------------
+
+describe('QueryLegislationSchema', () => {
+  it('accepts empty object and applies defaults', () => {
+    const result = QueryLegislationSchema.parse({});
+    expect(result.limit).toBe(50);
+    expect(result.offset).toBe(0);
+  });
+
+  it('accepts all filters', () => {
+    const result = QueryLegislationSchema.safeParse({
+      market_id: 'market-nl',
+      sector_id: 'sector-hc',
+      scope: 'national',
+      limit: 25,
+      offset: 10,
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('rejects negative offset', () => {
+    const result = QueryLegislationSchema.safeParse({ offset: -1 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects limit greater than 100', () => {
+    const result = QueryLegislationSchema.safeParse({ limit: 101 });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects invalid scope', () => {
+    const result = QueryLegislationSchema.safeParse({ scope: 'state' });
     expect(result.success).toBe(false);
   });
 });

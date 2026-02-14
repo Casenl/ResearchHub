@@ -120,6 +120,7 @@ src/
 │   ├── use-auth.tsx              # Firebase Auth provider + hook
 │   ├── use-research.ts           # Research CRUD operations
 │   ├── use-competitors.ts        # Competitor CRUD operations
+│   ├── use-legislation.ts        # Legislation CRUD + dimension query
 │   ├── use-context-documents.ts  # Context document operations
 │   ├── use-taxonomy.ts           # Taxonomy data access
 │   ├── use-firestore-collection.ts  # Generic collection hook
@@ -144,12 +145,14 @@ src/
 │   │   ├── index.ts              # Barrel export
 │   │   ├── research-schemas.ts   # Create/Update/Query research schemas
 │   │   ├── source-schemas.ts     # Create/Validate source schemas
-│   │   └── file-schemas.ts       # Upload file schema + MIME/size limits
+│   │   ├── file-schemas.ts       # Upload file schema + MIME/size limits
+│   │   └── legislation-schemas.ts # Create/Update/Query legislation schemas
 │   ├── services/                 # MCP service layer (used by MCP server)
 │   │   ├── research-crud-service.ts      # Research CRUD with dimension resolution
 │   │   ├── source-service.ts             # Source add/validate with notebook auto-create
 │   │   ├── file-service.ts              # File upload with magic byte validation
 │   │   ├── intelligence-query-service.ts # Query, landscape, brief generation
+│   │   ├── legislation-service.ts       # Legislation CRUD + query
 │   │   ├── audit-service.ts             # Audit log + API access logging
 │   │   └── auth-service.ts             # API key authentication
 │   └── firestore/                # Firestore service layer (used by frontend hooks)
@@ -158,6 +161,7 @@ src/
 │       ├── research.ts           # Research CRUD
 │       ├── taxonomy.ts           # Taxonomy reads
 │       ├── competitors.ts        # Competitor CRUD
+│       ├── legislation.ts        # Legislation CRUD + dimension queries
 │       ├── context-documents.ts  # Context document CRUD
 │       ├── users.ts              # User profile operations
 │       ├── admin.ts              # Admin data (api-keys, prompts, rules)
@@ -165,8 +169,8 @@ src/
 │       ├── usage.ts              # API usage aggregation
 │       └── settings.ts           # User/system settings
 ├── mcp/                          # ResearchHub MCP server (stdio)
-│   ├── server.ts                 # MCP entry point (15 tools, 4 resources)
-│   ├── tools/                    # Tool handlers (research, source, intelligence, utility)
+│   ├── server.ts                 # MCP entry point (18 tools, 4 resources)
+│   ├── tools/                    # Tool handlers (research, source, intelligence, utility, legislation)
 │   └── resources/                # Resource handlers (taxonomy)
 ├── types/
 │   └── index.ts                  # All TypeScript types and union types
@@ -180,6 +184,7 @@ src/
     ├── prompt-templates.ts      # Prompt template seeds
     ├── mock-research.ts          # Mock research data (MVP)
     ├── mock-competitors.ts      # Mock competitor data (MVP)
+    ├── mock-legislation.ts      # Mock legislation data (MVP)
     ├── mock-context-documents.ts # Mock context documents (MVP)
     ├── mock-activity.ts         # Mock audit log entries (MVP)
     └── mock-usage.ts            # Mock API usage data (MVP)
@@ -206,6 +211,7 @@ functions/
 │       ├── files.ts          # File upload to Storage + Firestore metadata
 │       ├── intelligence.ts   # Landscape, summary endpoints
 │       ├── competitors.ts   # Competitor CRUD, positions, events
+│       ├── legislation.ts   # Legislation CRUD
 │       └── auth-keys.ts      # API key lifecycle (create/list/revoke)
 ├── __tests__/                # Unit tests (mocked) + integration tests (staging)
 ├── vitest.config.ts          # Unit test config (excludes integration/)
@@ -231,7 +237,8 @@ functions/
 - `functions/src/triggers/sync-role-claims.ts` — Firestore trigger syncing user role to Auth custom claims
 - `src/lib/services/index.ts` — Barrel export for all MCP service modules
 - `src/lib/validations/index.ts` — Barrel export for Zod schemas (shared by MCP + Cloud Functions)
-- `src/mcp/server.ts` — ResearchHub MCP server entry point (15 tools, 4 resources)
+- `src/lib/services/legislation-service.ts` — Legislation CRUD + query service (used by MCP server)
+- `src/mcp/server.ts` — ResearchHub MCP server entry point (18 tools, 4 resources)
 
 ### Route Groups
 
@@ -258,6 +265,7 @@ functions/
 | `/admin/activity` | Audit log viewer | Yes (admin) |
 | `/admin/usage` | API usage analytics | Yes (admin) |
 | `/admin/coverage` | Research coverage dashboard | Yes (admin) |
+| `/admin/legislation` | Legislation registry | Yes (admin) |
 | `/admin/settings` | System-wide settings | Yes (admin) |
 
 ## Environment Variables

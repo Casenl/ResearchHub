@@ -38,6 +38,7 @@ const EXPECTED_ROUTES: Record<string, string> = {
   "/admin/usage": "(dashboard)/admin/usage/page.tsx",
   "/admin/coverage": "(dashboard)/admin/coverage/page.tsx",
   "/admin/settings": "(dashboard)/admin/settings/page.tsx",
+  "/admin/legislation": "(dashboard)/admin/legislation/page.tsx",
 };
 
 describe("Route pages exist", () => {

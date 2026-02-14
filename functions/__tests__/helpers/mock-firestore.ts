@@ -76,6 +76,11 @@ class MockDocRef {
       Object.assign(existing, updates);
     }
   }
+
+  async delete() {
+    const col = getCollection(this.collectionName);
+    col.delete(this.id);
+  }
 }
 
 class MockQuery {

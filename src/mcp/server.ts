@@ -4,6 +4,7 @@ import { registerResearchTools } from './tools/research-tools';
 import { registerIntelligenceTools } from './tools/intelligence-tools';
 import { registerSourceTools } from './tools/source-tools';
 import { registerUtilityTools } from './tools/utility-tools';
+import { registerLegislationTools } from './tools/legislation-tools';
 import { registerTaxonomyResources } from './resources/taxonomy-resources';
 
 const server = new McpServer({
@@ -16,6 +17,7 @@ registerResearchTools(server);
 registerIntelligenceTools(server);
 registerSourceTools(server);
 registerUtilityTools(server);
+registerLegislationTools(server);
 registerTaxonomyResources(server);
 
 // Connect via stdio transport

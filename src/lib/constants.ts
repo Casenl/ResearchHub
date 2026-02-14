@@ -265,6 +265,7 @@ export const ACTIVITY_TARGET_TYPE_LABELS: Record<ActivityTargetType, string> = {
   ai_tool_profile: "AI Tool",
   user: "User",
   taxonomy: "Taxonomy",
+  legislation: "Legislation",
 };
 
 // ---------------------------------------------------------------------------

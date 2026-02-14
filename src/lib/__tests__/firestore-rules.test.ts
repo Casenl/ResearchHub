@@ -18,6 +18,7 @@ const EXPECTED_COLLECTIONS = [
   "research",
   "context-documents",
   "competitors",
+  "legislation",
   "api-keys",
   "file-attachments",
   "audit_logs",

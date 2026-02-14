@@ -27,6 +27,11 @@ All endpoints (except `/health`) require `Authorization: Bearer <api-key>` heade
 | PUT | `/competitors/:id/positions/:posId` | read_write, admin | Update position |
 | POST | `/competitors/:id/events` | read_write, admin | Add timeline event |
 | GET | `/competitors/:id/events` | read+ | List events (reverse-chronological) |
+| GET | `/legislation` | read+ | List all legislation |
+| POST | `/legislation` | read_write, admin | Create legislation entry |
+| GET | `/legislation/:id` | read+ | Get single legislation |
+| PUT | `/legislation/:id` | read_write, admin | Update legislation |
+| DELETE | `/legislation/:id` | admin | Delete legislation |
 | GET | `/intelligence/competitors` | read+ | Competitor analysis by region |
 | GET | `/intelligence/landscape` | read+ | Domain landscape by region |
 | GET | `/intelligence/summary` | read+ | Research brief (narrative/structured) |
@@ -40,6 +45,7 @@ Defined in `src/types/index.ts`. The three core dimension types (Market, Domain,
 
 - **Research** — the primary artifact; contains notebooks, sources, synthesis, assumptions, version lineage
 - **Competitor** — a tracked competitor with embedded positions (per market x domain) and timeline events
+- **Legislation** — regulatory entry cross-referencing markets and sectors with scope, dates, and authority
 - **ContextDocument** — ITQ internal docs or curated external sources used as research input
 - **Notebook** — a research lens (market_regulation, competitive, business_model, local_sector)
 - **Source** — a reference with quality tier (1-8) and discovery tool attribution
@@ -50,6 +56,7 @@ Defined in `src/types/index.ts`. The three core dimension types (Market, Domain,
 research/{researchId}                    — Research documents
 research/{researchId}/notebooks/{nbId}   — Notebook sub-collection
 competitors/{competitorId}               — Competitor profiles (embedded positions[] + events[])
+legislation/{legislationId}              — Legislation registry (markets, sectors, scope)
 context-documents/{docId}                — Context Library documents
 taxonomy/markets                         — Market taxonomy
 taxonomy/domains                         — Domain taxonomy
