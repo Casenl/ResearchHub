@@ -1,5 +1,7 @@
 # CLAUDE.md
 
+<!-- Last verified: CD pipeline test 2026-02-14 -->
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
@@ -369,6 +371,72 @@ Both workflows deploy: Firestore rules, Storage rules, and Cloud Functions. They
 |--------|---------|-------------|
 | `STAGING_SA_KEY_BASE64` | Staging | CI integration tests + CD staging deploy |
 | `PROD_SA_KEY_BASE64` | Production | CD production deploy |
+
+### CD IAM Setup
+
+Each Firebase project's `firebase-adminsdk` service account needs specific roles and the project needs certain APIs enabled for CD to work. The staging project (`marketintelligence-hub-staging`) is fully configured. To set up production or recreate staging, apply the following.
+
+**1. Roles on the deploy SA** (`firebase-adminsdk-fbsvc@<project>.iam.gserviceaccount.com`):
+
+| Role | Scope | Purpose |
+|------|-------|---------|
+| `roles/firebase.admin` | Project | Deploy rules, functions, check extensions |
+| `roles/serviceusage.serviceUsageConsumer` | Project | Firebase CLI checks API enablement |
+
+**2. Scoped Service Account User grants** (allows deploy SA to "act as" runtime SAs):
+
+```bash
+# Act as Compute Engine default SA (Cloud Functions v2 runs on Cloud Run)
+gcloud iam service-accounts add-iam-policy-binding <PROJECT_NUMBER>-compute@developer.gserviceaccount.com \
+  --project=<PROJECT_ID> \
+  --member="serviceAccount:firebase-adminsdk-fbsvc@<PROJECT_ID>.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser"
+
+# Act as App Engine default SA (legacy Functions v1 requirement)
+gcloud iam service-accounts add-iam-policy-binding <PROJECT_ID>@appspot.gserviceaccount.com \
+  --project=<PROJECT_ID> \
+  --member="serviceAccount:firebase-adminsdk-fbsvc@<PROJECT_ID>.iam.gserviceaccount.com" \
+  --role="roles/iam.serviceAccountUser"
+```
+
+**3. GCP service agent bindings** (Cloud Functions v2 eventing infrastructure):
+
+| Role | Member (service agent) | Purpose |
+|------|----------------------|---------|
+| `roles/iam.serviceAccountTokenCreator` | `service-<PROJECT_NUMBER>@gcp-sa-pubsub.iam.gserviceaccount.com` | Pub/Sub token creation |
+| `roles/run.invoker` | `<PROJECT_NUMBER>-compute@developer.gserviceaccount.com` | Cloud Run invocation |
+| `roles/eventarc.eventReceiver` | `<PROJECT_NUMBER>-compute@developer.gserviceaccount.com` | Eventarc triggers |
+
+**4. APIs to enable**:
+
+```bash
+gcloud services enable cloudbilling.googleapis.com --project=<PROJECT_ID>
+```
+
+**Project numbers reference**:
+
+| Project | ID | Number |
+|---------|-----|--------|
+| Staging | `marketintelligence-hub-staging` | `151657337153` |
+| Production | `marketintelligence-hub` | `35359237101` |
+
+**Production setup commands** (run once, in PowerShell):
+
+```powershell
+# 1. Firebase Admin role
+gcloud projects add-iam-policy-binding marketintelligence-hub --member="serviceAccount:firebase-adminsdk-fbsvc@marketintelligence-hub.iam.gserviceaccount.com" --role="roles/firebase.admin"
+
+# 2. Service Account User on Compute SA (already done)
+# gcloud iam service-accounts add-iam-policy-binding 35359237101-compute@developer.gserviceaccount.com --project=marketintelligence-hub --member="serviceAccount:firebase-adminsdk-fbsvc@marketintelligence-hub.iam.gserviceaccount.com" --role="roles/iam.serviceAccountUser"
+
+# 3. Service agent bindings (may already exist if functions were deployed manually)
+gcloud projects add-iam-policy-binding marketintelligence-hub --member=serviceAccount:service-35359237101@gcp-sa-pubsub.iam.gserviceaccount.com --role=roles/iam.serviceAccountTokenCreator
+gcloud projects add-iam-policy-binding marketintelligence-hub --member=serviceAccount:35359237101-compute@developer.gserviceaccount.com --role=roles/run.invoker
+gcloud projects add-iam-policy-binding marketintelligence-hub --member=serviceAccount:35359237101-compute@developer.gserviceaccount.com --role=roles/eventarc.eventReceiver
+
+# 4. Enable Cloud Billing API
+gcloud services enable cloudbilling.googleapis.com --project=marketintelligence-hub
+```
 
 ## MCP Servers
 
